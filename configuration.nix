@@ -7,7 +7,12 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
+      ./hosts/qemu-scratchpad/hardware-configuration.nix
+      "${builtins.fetchTarball {
+        url = "https://github.com/nix-community/disko/archive/master.tar.gz";
+        sha256 = "0y4yyvbjpkdw5rva4zzwg4xzclnfk47kvc6dd8fc5qr5wpxd8nf4";
+      }}/module.nix"
+      ./disko.nix
     ];
 
   # Use the systemd-boot EFI boot loader.
