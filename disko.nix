@@ -10,7 +10,6 @@
             ESP = {
               size = "1G";
               type = "EF00";
-              device = "/dev/disk/by-label/boot";
               content = {
                 type = "filesystem";
                 format = "vfat";
@@ -20,7 +19,6 @@
             };
             swap = {
               size = "8GB";
-              device = "/dev/disk/by-label/swap";
               content = {
                 type = "swap";
                 discardPolicy = "both";
@@ -29,7 +27,6 @@
             };
             root = {
               size = "100%";
-              device = "/dev/disk/by-label/nixos";
               content = {
                 type = "filesystem";
                 format = "ext4";
