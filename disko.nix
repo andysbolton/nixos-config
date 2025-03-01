@@ -10,7 +10,7 @@
             boot = {
               size = "1M";
               type = "EF02"; # for grub MBR
-            }
+            };
             ESP = {
               size = "1G";
               type = "EF00";
@@ -22,7 +22,7 @@
               };
             };
             swap = {
-              size = "8GB";
+              size = "8G";
               content = {
                 type = "swap";
                 discardPolicy = "both";
