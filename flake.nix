@@ -15,7 +15,7 @@
         # Import the previous configuration.nix we used,
         # so the old configuration file still takes effect
         ./configuration.nix
-	disko.nixosModules.disko
+	inputs.disko.nixosModules.disko
       ];
     };
   };
