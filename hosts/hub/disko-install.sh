@@ -1,12 +1,12 @@
 #/usr/bin/env bash
 
-curr_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
-nixos-generate-config --no-filesystems --show-hardware-config > "$curr_dir/hardware-configuration.nix"
+nixos-generate-config --no-filesystems --show-hardware-config > "$script_dir/hardware-configuration.nix"
 
 nix --experimental-features "nix-command flakes" \
-    run "github:nix-community/disko/latest#disko-install" -- \
+    run "github:nix-community/disko#disko-install" -- \
     --write-efi-boot-entries \
-    --flake ~/nixos-config#hub \
+    --flake "$script_dir/../.."#hub \
     --disk main /dev/nvme0n1 \
     --show-trace
