@@ -17,7 +17,7 @@
 
   networking.hostName = "hub"; # Define your hostname.
   # Pick only one of the below networking options.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
   # networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
 
   # Set your time zone.
@@ -114,22 +114,22 @@
   services.gnome.gnome-keyring.enable = true;
 
   # enable Sway window manager
-  programs.sway = {
-    enable = true;
-    wrapperFeatures.gtk = true;
-  };
+  #programs.sway = {
+  #  enable = true;
+  #  wrapperFeatures.gtk = true;
+  #};
 
   programs.fish.enable = true;
 
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd sway";
-        user = "greeter";
-      };
-    };
-  };
+  #services.greetd = {
+  #  enable = true;
+  #  settings = {
+  #    default_session = {
+  #      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd sway";
+  #      user = "greeter";
+  #    };
+  #  };
+  #};
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
