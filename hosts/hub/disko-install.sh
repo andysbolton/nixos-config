@@ -12,5 +12,5 @@ nix --experimental-features "nix-command flakes" \
     --show-trace
 
 mount /dev/disk/by-partlabel/disk-main-root /mnt
-
 nixos-enter --command "echo \"Add new password for user 'andy'\" && passwd andy"
+mount /dev/disk/by-partlabel/disk-main-root
