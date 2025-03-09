@@ -2,11 +2,8 @@
 
 curr_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
+nix --experimental-features "nix-command flakes" run github:nix-community/disko/latest -- --mode destroy,format,mount "$curr_dir/hub/disko.nix"
+
 nixos-generate-config --no-filesystems --show-hardware-config > "$curr_dir/hardware-configuration.nix"
 
-sudo nix --experimental-features "nix-command flakes" \
-    run 'github:nix-community/disko/latest#disko-install' -- \
-    --write-efi-boot-entries \
-    --mode mount \
-    --flake ~/nixos-config#hub \
-    --disk main /dev/nvme0n1
+nixos-install --no-root-password --flake ~/nixos-config#hub
