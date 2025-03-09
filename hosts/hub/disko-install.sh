@@ -10,3 +10,7 @@ nix --experimental-features "nix-command flakes" \
     --flake "$script_dir/../.."#hub \
     --disk main /dev/nvme0n1 \
     --show-trace
+
+mount /dev/disk/by-partlabel/disk-main-root /mnt
+
+nixos-enter --command "echo \"Add new password for user 'andy'\" && passwd andy"
