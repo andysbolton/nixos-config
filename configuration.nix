@@ -1,14 +1,11 @@
-# Edit this configuration file to define what should be installed on
-# your system. Help is available in the configuration.nix(5) man page, on
-# https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 {
   imports =
-    [ # Include the results of the hardware scan.
+    [
       ./hosts/hub/hardware-configuration.nix
       ./hosts/hub/disko.nix
+      inputs.sops-nix.nixosModules.sops
     ];
 
   # Use the systemd-boot EFI boot loader.
@@ -18,10 +15,16 @@
   #boot.loader.grub.efiSupport = true;
   #boot.loader.grub.efiInstallAsRemovable = true;
 
-  networking.hostName = "hub"; # Define your hostname.
-  # Pick only one of the below networking options.
-  networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  # networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.hostName = "hub";
+  networking.wireless = {
+    userControlled.enable = true;
+    enable = true;
+    secretsFile = config.sops.secrets."wireless.conf".path;
+    extraConfig = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=wheel";
+    networks = {
+      "BBBP_5G".pskRaw = "ext:psk";
+    };
+  };
 
   # Set your time zone.
   time.timeZone = "America/Mountain";
@@ -83,7 +86,8 @@
     grim # screenshot functionality
     mako # notification system developed by swaywm maintainer
     neovim
-    pkgs._1password
+    pkgs._1password-cli
+    pkgs.age
     pkgs.asdf-vm
     pkgs.bat
     pkgs.btop
@@ -93,6 +97,7 @@
     pkgs.gcc
     pkgs.gh
     pkgs.gnumake
+    pkgs.sops
     pkgs.spice-vdagent
     pkgs.starship
     pkgs.unzip
@@ -117,14 +122,14 @@
   services.gnome.gnome-keyring.enable = true;
 
   # enable Sway window manager
-  #programs.sway = {
+  # programs.sway = {
   #  enable = true;
   #  wrapperFeatures.gtk = true;
-  #};
+  # };
 
   programs.fish.enable = true;
 
-  #services.greetd = {
+  # services.greetd = {
   #  enable = true;
   #  settings = {
   #    default_session = {
@@ -132,7 +137,7 @@
   #      user = "greeter";
   #    };
   #  };
-  #};
+  # };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -152,6 +157,11 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
+
+  sops.defaultSopsFile = ./secrets/sops.yaml;
+  sops.defaultSopsFormat = "yaml";
+  sops.age.keyFile = "/home/andy/.config/sops/age/keys.txt";
+  sops.secrets."wireless.conf" = { };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
