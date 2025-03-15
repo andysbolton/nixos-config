@@ -83,8 +83,6 @@
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     git
-    grim # screenshot functionality
-    mako # notification system developed by swaywm maintainer
     neovim
     pkgs._1password-cli
     pkgs.age
@@ -102,9 +100,7 @@
     pkgs.starship
     pkgs.unzip
     pkgs.wezterm
-    slurp # screenshot functionality
     wget
-    wl-clipboard # wl-copy and wl-paste for copy/paste from stdin / stdout
   ];
 
   fonts.fontDir.enable = true;
@@ -120,12 +116,6 @@
   # Enable the gnome-keyring secrets vault.
   # Will be exposed through DBus to programs willing to store secrets.
   services.gnome.gnome-keyring.enable = true;
-
-  # enable Sway window manager
-  # programs.sway = {
-  #  enable = true;
-  #  wrapperFeatures.gtk = true;
-  # };
 
   programs.fish.enable = true;
 
