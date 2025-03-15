@@ -71,6 +71,7 @@
     shell = pkgs.fish;
     packages = with pkgs; [
       firefox
+      mangohud
       tree
     ];
   };
@@ -91,10 +92,12 @@
     pkgs.btop
     pkgs.chezmoi
     pkgs.delta
+    pkgs.egl-wayland
     pkgs.fish
     pkgs.gcc
     pkgs.gh
     pkgs.gnumake
+    pkgs.kitty
     pkgs.sops
     pkgs.spice-vdagent
     pkgs.starship
@@ -148,10 +151,58 @@
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
-  sops.defaultSopsFile = ./secrets/sops.yaml;
-  sops.defaultSopsFormat = "yaml";
-  sops.age.keyFile = "/home/andy/.config/sops/age/keys.txt";
-  sops.secrets."wireless.conf" = { };
+  sops = {
+    defaultSopsFile = ./secrets/sops.yaml;
+    defaultSopsFormat = "yaml";
+    age.keyFile = "/home/andy/.config/sops/age/keys.txt";
+    secrets."wireless.conf" = { };
+  };
+
+   # Enable OpenGL
+  hardware.graphics = {
+    enable = true;
+  };
+
+  # Load nvidia driver for Xorg and Wayland
+  services.xserver.videoDrivers = ["nvidia"];
+
+  hardware.nvidia = {
+
+    # Modesetting is required.
+    modesetting.enable = true;
+
+    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
+    # Enable this if you have graphical corruption issues or application crashes after waking
+    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
+    # of just the bare essentials.
+    powerManagement.enable = false;
+
+    # Fine-grained power management. Turns off GPU when not in use.
+    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+    powerManagement.finegrained = false;
+
+    # Use the NVidia open source kernel module (not to be confused with the
+    # independent third-party "nouveau" open source driver).
+    # Support is limited to the Turing and later architectures. Full list of
+    # supported GPUs is at:
+    # https://github.com/NVIDIA/open-gpu-kernel-modules#compatible-gpus
+    # Only available from driver 515.43.04+
+    open = true;
+
+    # Enable the Nvidia settings menu,
+	# accessible via `nvidia-settings`.
+    nvidiaSettings = true;
+
+    # Optionally, you may need to select the appropriate driver version for your specific GPU.
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+  };
+
+   programs.hyprland = {
+    # Install the packages from nixpkgs
+    enable = true;
+    # Whether to enable XWayland
+    xwayland.enable = true;
+  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
