@@ -26,43 +26,19 @@
     };
   };
 
-  # Set your time zone.
   time.timeZone = "America/Mountain";
 
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
-
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-
-  # Configure keymap in X11
-  # services.xserver.xkb.layout = "us";
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
+  i18n.defaultLocale = "en_US.UTF-8";
+  console = {
+    font = "Lat2-Terminus16";
+    keyMap = "us";
+  };
 
   # Enable sound.
-  # hardware.pulseaudio.enable = true;
-  # OR
-  # services.pipewire = {
-  #   enable = true;
-  #   pulse.enable = true;
-  # };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.libinput.enable = true;
-
-  services.spice-vdagentd.enable = true;
+  services.pipewire = {
+    enable = true;
+    pulse.enable = true;
+  };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.andy = {
@@ -70,9 +46,16 @@
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.fish;
     packages = with pkgs; [
+      dotnet-sdk
       firefox
+      lua
       mangohud
+      go
+      nodejs_22
       tree
+      solaar
+      sunshine
+      moonlight-qt
     ];
   };
 
@@ -85,24 +68,25 @@
   environment.systemPackages = with pkgs; [
     git
     neovim
-    pkgs._1password-cli
-    pkgs.age
-    pkgs.asdf-vm
-    pkgs.bat
-    pkgs.btop
-    pkgs.chezmoi
-    pkgs.delta
-    pkgs.egl-wayland
-    pkgs.fish
-    pkgs.gcc
-    pkgs.gh
-    pkgs.gnumake
-    pkgs.kitty
-    pkgs.sops
-    pkgs.spice-vdagent
-    pkgs.starship
-    pkgs.unzip
-    pkgs.wezterm
+    _1password-cli
+    _1password-gui
+    age
+    bat
+    btop
+    chezmoi
+    delta
+    egl-wayland
+    fish
+    gcc
+    gh
+    gnumake
+    kitty
+    river
+    python314
+    sops
+    starship
+    unzip
+    wezterm
     wget
   ];
 
@@ -111,10 +95,6 @@
    (nerdfonts.override { fonts = [ "CascadiaCode" ]; })
    cascadia-code
   ];
-
-  # fonts.packages = [
-  #   pkgs.nerd-fonts.caskaydia-cove
-  # ];
 
   # Enable the gnome-keyring secrets vault.
   # Will be exposed through DBus to programs willing to store secrets.
@@ -132,16 +112,6 @@
   #  };
   # };
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
-
-  # List services that you want to enable:
-
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
@@ -156,6 +126,11 @@
     defaultSopsFormat = "yaml";
     age.keyFile = "/home/andy/.config/sops/age/keys.txt";
     secrets."wireless.conf" = { };
+  };
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
   };
 
    # Enable OpenGL
@@ -190,7 +165,7 @@
     open = true;
 
     # Enable the Nvidia settings menu,
-	# accessible via `nvidia-settings`.
+    # accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
@@ -227,5 +202,4 @@
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
   system.stateVersion = "24.11"; # Did you read the comment?
-
 }
