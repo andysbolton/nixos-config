@@ -46,12 +46,15 @@
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.fish;
     packages = with pkgs; [
-      dotnet-sdk
+      asdf-vm
+      # dotnet-sdk
+      # fuzzel
       firefox
       lua
       mangohud
       go
       nodejs_22
+      tofi
       tree
       solaar
       sunshine
@@ -63,11 +66,7 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
-    git
-    neovim
     _1password-cli
     _1password-gui
     age
@@ -76,13 +75,15 @@
     chezmoi
     delta
     egl-wayland
+    fd
     fish
     gcc
     gh
+    git
     gnumake
-    kitty
-    river
     python314
+    ripgrep
+    river
     sops
     starship
     unzip
@@ -92,8 +93,8 @@
 
   fonts.fontDir.enable = true;
   fonts.packages = with pkgs; [
-   (nerdfonts.override { fonts = [ "CascadiaCode" ]; })
-   cascadia-code
+    (nerdfonts.override { fonts = [ "CascadiaCode" ]; })
+    cascadia-code
   ];
 
   # Enable the gnome-keyring secrets vault.
@@ -101,6 +102,31 @@
   services.gnome.gnome-keyring.enable = true;
 
   programs.fish.enable = true;
+  # programs.bash = {
+  #   interactiveShellInit = ''
+  #     if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
+  #     then
+  #       shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
+  #       exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
+  #     fi
+  #   '';
+  # };
+
+  programs.river = {
+    enable = true;
+  };
+
+  programs.waybar = {
+    enable = true;
+  };
+
+  programs.neovim = {
+    enable = true;
+    # extraPackages = with pkgs; [
+    #   gcc
+    #   gnumake
+    # ];
+  };
 
   # services.greetd = {
   #  enable = true;
@@ -114,6 +140,7 @@
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+  services.dbus.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -133,13 +160,13 @@
     powerOnBoot = true;
   };
 
-   # Enable OpenGL
+  # Enable OpenGL
   hardware.graphics = {
     enable = true;
   };
 
   # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = ["nvidia"];
+  services.xserver.videoDrivers = [ "nvidia" ];
 
   hardware.nvidia = {
 
@@ -170,13 +197,6 @@
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-  };
-
-   programs.hyprland = {
-    # Install the packages from nixpkgs
-    enable = true;
-    # Whether to enable XWayland
-    xwayland.enable = true;
   };
 
   # Copy the NixOS configuration file and link it from the resulting system
