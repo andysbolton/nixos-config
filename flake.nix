@@ -17,7 +17,7 @@
       specialArgs = { inherit inputs; };
       modules = [
         ./hosts/hub/configuration.nix
-        ./system
+        ./modules
         disko.nixosModules.disko
       ];
     };

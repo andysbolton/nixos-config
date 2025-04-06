@@ -1,5 +1,5 @@
 { inputs, ... }: {
   imports = [
-    ./modules
+    ./steam.nix
   ];
 }
