@@ -3,8 +3,8 @@
 {
   imports =
     [
-      ./hosts/hub/hardware-configuration.nix
-      ./hosts/hub/disko.nix
+      ./hardware-configuration.nix
+      ./disko.nix
       inputs.sops-nix.nixosModules.sops
     ];
 
@@ -26,7 +26,7 @@
     };
   };
 
-  time.timeZone = "America/Mountain";
+  time.timeZone = "America/Denver";
 
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
@@ -54,8 +54,8 @@
       mangohud
       go
       nodejs_22
-      tofi
       tree
+      tofi
       solaar
       sunshine
       moonlight-qt
@@ -81,6 +81,7 @@
     gh
     git
     gnumake
+    killall
     python314
     ripgrep
     river
@@ -149,7 +150,7 @@
   # networking.firewall.enable = false;
 
   sops = {
-    defaultSopsFile = ./secrets/sops.yaml;
+    defaultSopsFile = ../../secrets/sops.yaml;
     defaultSopsFormat = "yaml";
     age.keyFile = "/home/andy/.config/sops/age/keys.txt";
     secrets."wireless.conf" = { };
