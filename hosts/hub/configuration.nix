@@ -73,9 +73,11 @@
     btop
     chezmoi
     delta
+    dunst
     egl-wayland
     fd
     fish
+    fzf
     gcc
     gh
     git
@@ -86,9 +88,13 @@
     river
     sops
     starship
+    swayidle
+    swaylock
     unzip
     wezterm
     wget
+    wl-clipboard
+    wlopm
   ];
 
   fonts.fontDir.enable = true;
