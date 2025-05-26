@@ -82,10 +82,15 @@
     gh
     git
     gnumake
+    jq
     killall
+    lm_sensors
+    mozlz4a
+    overskride
     python314
     ripgrep
     river
+    rofi
     sops
     starship
     swayidle
@@ -158,6 +163,8 @@
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
   services.dbus.enable = true;
+
+  services.blueman.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
