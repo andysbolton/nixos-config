@@ -56,6 +56,7 @@
       tree
       tofi
       solaar
+      stylua
       sunshine
       moonlight-qt
     ];
