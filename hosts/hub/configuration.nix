@@ -83,6 +83,7 @@
     gh
     git
     gnumake
+    httpie
     jq
     killall
     lm_sensors
@@ -96,11 +97,13 @@
     starship
     swayidle
     swaylock
+    trash-cli
     unzip
     wezterm
     wget
     wl-clipboard
     wlopm
+    zoxide
   ];
 
   fonts.fontDir.enable = true;
