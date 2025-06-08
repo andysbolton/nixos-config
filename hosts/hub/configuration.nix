@@ -86,6 +86,7 @@
     httpie
     jq
     killall
+    lsd
     lm_sensors
     mozlz4a
     overskride
