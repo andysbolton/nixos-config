@@ -74,6 +74,7 @@
     btop
     chezmoi
     delta
+    discord
     dunst
     egl-wayland
     fd
