@@ -74,6 +74,7 @@
     btop
     chezmoi
     delta
+    # deskflow
     discord
     dunst
     egl-wayland
@@ -84,6 +85,7 @@
     gh
     git
     gnumake
+    heroic
     httpie
     jq
     killall
@@ -110,8 +112,7 @@
 
   fonts.fontDir.enable = true;
   fonts.packages = with pkgs; [
-    (nerdfonts.override { fonts = [ "CascadiaCode" ]; })
-    cascadia-code
+    nerd-fonts.caskaydia-cove
   ];
 
   # Enable the gnome-keyring secrets vault.
