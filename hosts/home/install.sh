@@ -6,4 +6,4 @@ nix --experimental-features "nix-command flakes" run "github:nix-community/disko
 
 nixos-generate-config --no-filesystems --show-hardware-config >"$script_dir/hardware-configuration.nix"
 
-nixos-install --no-root-password --flake "$script_dir/../.."#hub
+nixos-install --no-root-password --flake "$script_dir/../.."#home

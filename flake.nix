@@ -11,11 +11,11 @@
   };
 
   outputs = { self, nixpkgs, disko, sops-nix, ... }@inputs: {
-    nixosConfigurations.hub = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.home = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
       modules = [
-        ./hosts/hub/configuration.nix
+        ./hosts/home/configuration.nix
         ./modules
         disko.nixosModules.disko
       ];

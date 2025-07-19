@@ -14,7 +14,7 @@
   #boot.loader.grub.efiSupport = true;
   #boot.loader.grub.efiInstallAsRemovable = true;
 
-  networking.hostName = "hub";
+  networking.hostName = "home";
   networking.wireless = {
     userControlled.enable = true;
     enable = true;
@@ -74,7 +74,6 @@
     btop
     chezmoi
     delta
-    # deskflow
     discord
     dunst
     egl-wayland
@@ -89,8 +88,9 @@
     httpie
     jq
     killall
-    lsd
+    lan-mouse
     lm_sensors
+    lsd
     mozlz4a
     overskride
     python314
@@ -107,6 +107,7 @@
     wget
     wl-clipboard
     wlopm
+    xorg.xdpyinfo # check resolution
     zoxide
   ];
 
@@ -175,7 +176,7 @@
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedUDPPorts = [ 4242 ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
 
@@ -188,6 +189,15 @@
 
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = [ "nvidia" ];
+
+  xdg.portal = {
+    enable = true;
+    wlr.enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-wlr
+      pkgs.xdg-desktop-portal-gtk
+    ];
+  };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you

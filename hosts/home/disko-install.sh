@@ -7,7 +7,7 @@ nixos-generate-config --no-filesystems --show-hardware-config >"$script_dir/hard
 nix --experimental-features "nix-command flakes" \
     run "github:nix-community/disko#disko-install" -- \
     --write-efi-boot-entries \
-    --flake "$script_dir/../.."#hub \
+    --flake "$script_dir/../.."#home \
     --disk main /dev/nvme0n1 \
     --show-trace
 
