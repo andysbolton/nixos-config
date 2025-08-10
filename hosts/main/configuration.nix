@@ -91,7 +91,6 @@
     lan-mouse
     lm_sensors
     lsd
-    lua52Packages.tiktoken_core
     lynx
     mozlz4a
     overskride
@@ -143,12 +142,11 @@
     enable = true;
   };
 
-  programs.neovim = {
-    enable = true;
-    # extraPackages = with pkgs; [
-    #   gcc
-    #   gnumake
-    # ];
+  home-manager = {
+    extraSpecialArgs = { inherit inputs; };
+    users = {
+      "andy" = ../../home-manager/home.nix;
+    };
   };
 
   systemd.services.greetd.serviceConfig = {

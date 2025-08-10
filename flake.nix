@@ -8,16 +8,21 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix.url = "github:Mic92/sops-nix";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, nixpkgs, disko, sops-nix, ... }@inputs: {
-    nixosConfigurations.home = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.main = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit inputs; };
       modules = [
-        ./hosts/home/configuration.nix
+        ./hosts/main/configuration.nix
         ./modules
         disko.nixosModules.disko
+        inputs.home-manager.nixosModules.default
       ];
     };
   };
