@@ -91,6 +91,7 @@
     lan-mouse
     lm_sensors
     lsd
+    lynx
     mozlz4a
     overskride
     pavucontrol
