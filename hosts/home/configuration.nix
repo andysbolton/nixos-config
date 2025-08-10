@@ -10,9 +10,11 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-  #boot.loader.grub.enable = true;
-  #boot.loader.grub.efiSupport = true;
-  #boot.loader.grub.efiInstallAsRemovable = true;
+
+  boot.kernelPackages = pkgs.linuxPackages_zen;
+  boot.extraModulePackages = with config.boot.kernelPackages; [ nct6687d ];
+  boot.kernelModules = [ "nct6687" ];
+  boot.kernelParams = [ "acpi_enforce_resources=lax" ];
 
   networking.hostName = "home";
   networking.wireless = {
@@ -39,15 +41,12 @@
     pulse.enable = true;
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.andy = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" ];
     shell = pkgs.fish;
     packages = with pkgs; [
       asdf-vm
-      # dotnet-sdk
-      # fuzzel
       firefox
       lua
       mangohud
@@ -78,6 +77,7 @@
     dunst
     egl-wayland
     fd
+    file
     fish
     fzf
     gcc
@@ -93,6 +93,7 @@
     lsd
     mozlz4a
     overskride
+    procs
     python314
     ripgrep
     river
