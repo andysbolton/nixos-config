@@ -91,6 +91,7 @@
     lan-mouse
     lm_sensors
     lsd
+    lua54Packages.tiktoken_core
     lynx
     mozlz4a
     overskride
