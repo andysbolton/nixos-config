@@ -12,7 +12,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.kernelPackages = pkgs.linuxPackages_zen;
-  boot.extraModulePackages = with config.boot.kernelPackages; [ nct6687d ];
+  boot.extraModulePackages = [ pkgs.linuxPackages_zen.nct6687d ];
   boot.kernelModules = [ "nct6687" ];
   boot.kernelParams = [ "acpi_enforce_resources=lax" ];
 
@@ -93,6 +93,7 @@
     lsd
     mozlz4a
     overskride
+    pavucontrol
     procs
     python314
     ripgrep
