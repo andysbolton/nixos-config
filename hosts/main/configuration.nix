@@ -46,7 +46,6 @@
     extraGroups = [ "wheel" ];
     shell = pkgs.fish;
     packages = with pkgs; [
-      asdf-vm
       firefox
       lua
       mangohud
