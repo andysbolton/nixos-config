@@ -77,8 +77,10 @@
   programs.neovim = {
     enable = true;
     extraLuaPackages = ps: [
-      ps.lua-lsp
       ps.tiktoken_core
+    ];
+    extraPackages = [
+      pkgs.cargo
     ];
   };
 }

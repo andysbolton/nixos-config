@@ -91,6 +91,7 @@
     lan-mouse
     lm_sensors
     lsd
+    lua-language-server
     lynx
     mozlz4a
     overskride
