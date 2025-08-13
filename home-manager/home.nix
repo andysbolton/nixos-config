@@ -81,6 +81,7 @@
     ];
     extraPackages = [
       pkgs.cargo
+      pkgs.dotnet-runtime
     ];
   };
 }

@@ -47,14 +47,12 @@
     shell = pkgs.fish;
     packages = with pkgs; [
       firefox
-      lua
       mangohud
       go
       nodejs_22
       tree
       tofi
       solaar
-      stylua
       sunshine
       moonlight-qt
     ];
@@ -64,6 +62,8 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  # Note for future:
+  # is asdf still installed even though I removed it from systemPackages?
   environment.systemPackages = with pkgs; [
     _1password-cli
     _1password-gui
