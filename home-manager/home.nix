@@ -81,7 +81,7 @@
     ];
     extraPackages = [
       pkgs.cargo
-      pkgs.dotnet-runtime
+      pkgs.dotnet-sdk
       pkgs.fennel-ls
       pkgs.fnlfmt
       pkgs.lua-language-server
