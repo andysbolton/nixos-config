@@ -82,6 +82,10 @@
     extraPackages = [
       pkgs.cargo
       pkgs.dotnet-runtime
+      pkgs.fennel-ls
+      pkgs.fnlfmt
+      pkgs.lua-language-server
+      pkgs.stylua
     ];
   };
 }
