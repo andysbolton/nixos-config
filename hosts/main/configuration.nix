@@ -1,11 +1,9 @@
-{ config, lib, pkgs, inputs, ... }:
-{
-  imports =
-    [
-      ./hardware-configuration.nix
-      ./disko.nix
-      inputs.sops-nix.nixosModules.sops
-    ];
+{ config, lib, pkgs, inputs, ... }: {
+  imports = [
+    ./hardware-configuration.nix
+    ./disko.nix
+    inputs.sops-nix.nixosModules.sops
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -22,9 +20,7 @@
     enable = true;
     secretsFile = config.sops.secrets."wireless.conf".path;
     extraConfig = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=wheel";
-    networks = {
-      "BBBP_5G".pskRaw = "ext:psk";
-    };
+    networks = { "BBBP_5G".pskRaw = "ext:psk"; };
   };
 
   time.timeZone = "America/Denver";
@@ -49,7 +45,6 @@
       firefox
       mangohud
       go
-      nodejs_22
       tree
       tofi
       solaar
@@ -114,9 +109,7 @@
   ];
 
   fonts.fontDir.enable = true;
-  fonts.packages = with pkgs; [
-    nerd-fonts.caskaydia-cove
-  ];
+  fonts.packages = with pkgs; [ nerd-fonts.caskaydia-cove ];
 
   # Enable the gnome-keyring secrets vault.
   # Will be exposed through DBus to programs willing to store secrets.
@@ -133,19 +126,13 @@
   #   '';
   # };
 
-  programs.river = {
-    enable = true;
-  };
+  programs.river = { enable = true; };
 
-  programs.waybar = {
-    enable = true;
-  };
+  programs.waybar = { enable = true; };
 
   home-manager = {
     extraSpecialArgs = { inherit inputs; };
-    users = {
-      "andy" = ../../home-manager/home.nix;
-    };
+    users = { "andy" = ../../home-manager/home.nix; };
   };
 
   systemd.services.greetd.serviceConfig = {
@@ -163,7 +150,8 @@
     enable = true;
     settings = {
       default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd \"dbus-run-session river\"";
+        command = ''
+          ${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd "dbus-run-session river"'';
         user = "greeter";
       };
     };
@@ -194,10 +182,7 @@
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    extraPortals = [
-      pkgs.xdg-desktop-portal-wlr
-      pkgs.xdg-desktop-portal-gtk
-    ];
+    extraPortals = [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
   };
 
   # Copy the NixOS configuration file and link it from the resulting system
