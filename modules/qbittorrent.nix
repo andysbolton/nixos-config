@@ -13,4 +13,5 @@
       };
     };
   };
+  services.radarr = { enable = true; };
 }
