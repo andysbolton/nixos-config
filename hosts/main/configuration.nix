@@ -42,18 +42,19 @@
     extraGroups = [ "wheel" ];
     shell = pkgs.fish;
     packages = with pkgs; [
-      firefox
-      lf
-      mangohud
       go
-      grim
-      imv
-      tree
-      tofi
-      slurp
+      grim # screenshot tool
+      imv # command-line image viewer
+      lf # terminal file manager
+      mangohud
+      moonlight-qt
+      mpv # command-line media player
+      slurp # select region of screen
       solaar
       sunshine
-      moonlight-qt
+      swappy # screenshot annotation tool
+      tofi
+      tree
     ];
   };
 
@@ -71,12 +72,16 @@
     bat
     btop
     chezmoi
+    chromium
     delta
+    dig
     discord
     dunst
     egl-wayland
     fd
     file
+    firefox
+    firejail
     fish
     fzf
     gcc
@@ -88,8 +93,10 @@
     jq
     killall
     lan-mouse
+    libnatpmp
     lm_sensors
     lsd
+    lxqt.lxqt-policykit
     lynx
     mozlz4a
     overskride
@@ -103,6 +110,7 @@
     starship
     swayidle
     swaylock
+    xfce.thunar
     trash-cli
     unzip
     wezterm
@@ -156,30 +164,30 @@
     settings = {
       default_session = {
         command = ''
-          ${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd "dbus-run-session river"'';
+          ${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd "dbus-run-session river"
+        '';
         user = "greeter";
       };
     };
   };
 
-  # Enable the OpenSSH daemon.
   services.openssh.enable = true;
+
   services.dbus.enable = true;
 
   services.blueman.enable = true;
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
   networking.firewall.allowedUDPPorts = [ 4242 ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  # networking.firewall.allowedTCPPorts = [ ];
 
   sops = {
     defaultSopsFile = ../../secrets/sops.yaml;
     defaultSopsFormat = "yaml";
     age.keyFile = "/home/andy/.config/sops/age/keys.txt";
     secrets."wireless.conf" = { };
+    secrets."proton-vpn.conf" = { };
   };
+  security.polkit.enable = true;
 
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = [ "nvidia" ];
