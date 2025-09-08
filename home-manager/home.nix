@@ -66,19 +66,18 @@
   #
   #  /etc/profiles/per-user/andy/etc/profile.d/hm-session-vars.sh
   #
-  home.sessionVariables = {
-    EDITOR = "nvim";
-  };
+  home.sessionVariables = { EDITOR = "nvim"; };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
   programs.neovim = {
     enable = true;
-    extraLuaPackages = ps: [
-      # may not need anymore
-      # ps.tiktoken_core
-    ];
+    extraLuaPackages = ps:
+      [
+        # may not need anymore
+        # ps.tiktoken_core
+      ];
     extraPackages = [
       pkgs.cargo
       pkgs.dotnet-sdk
