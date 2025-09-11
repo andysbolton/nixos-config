@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 let
   netns = "vpn";
   ip = "10.2.0.2/32";
@@ -38,7 +38,7 @@ in {
       NetworkNamespacePath = "/run/netns/${netns}";
       # I'm still not fully sure why this is necessary given all
       # other network requests in the vpn network namespace work fine,
-      # but without it qbittorrens fails to resolve hosts.
+      # but without it qbittorrent fails to resolve hosts.
       BindReadOnlyPaths =
         [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
     };
