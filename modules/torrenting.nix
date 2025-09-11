@@ -36,9 +36,6 @@ in {
     bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
     serviceConfig = {
       NetworkNamespacePath = "/run/netns/${netns}";
-      # I'm still not fully sure why this is necessary given all
-      # other network requests in the vpn network namespace work fine,
-      # but without it qbittorrent fails to resolve hosts.
       BindReadOnlyPaths =
         [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
     };
