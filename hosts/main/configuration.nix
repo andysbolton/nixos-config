@@ -128,8 +128,6 @@
   # Will be exposed through DBus to programs willing to store secrets.
   services.gnome.gnome-keyring.enable = true;
 
-  programs.river = { enable = true; };
-
   stylix.enable = true;
   stylix.autoEnable = true;
   # stylix.base16Scheme =

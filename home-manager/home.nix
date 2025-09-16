@@ -139,7 +139,6 @@
 
   stylix.targets.firefox.profileNames = [ "home" ];
   stylix.targets.firefox.colorTheme.enable = true;
-  # stylix.targets.firefox.firefoxGnomeTheme.enable = true;
 
   services.dunst = {
     enable = true;
@@ -186,7 +185,14 @@
 
   programs.waybar = {
     enable = true;
-    programs.waybar.systemd.enable = true;
-    # settings = builtins.fromJSON (builtins.readFile ./waybar/config.jsonc);
+    systemd = {
+      enable = true;
+      target = "river-session.target";
+    };
+  };
+
+  wayland.windowManager.river = {
+    enable = true;
+    extraConfig = builtins.readFile ./river/init;
   };
 }
