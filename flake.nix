@@ -7,23 +7,43 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    sops-nix.url = "github:Mic92/sops-nix";
-    home-manager = {
-      url = "github:nix-community/home-manager";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    home-manager = {
+      url = "github:nix-community/home-manager/release-25.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    stylix = {
+      url = "github:nix-community/stylix/release-25.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # firefox-addons = {
+    #   url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # nur.url = "github:nix-community/nur";
   };
 
-  outputs = { self, nixpkgs, disko, sops-nix, ... }@inputs: {
-    nixosConfigurations.main = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      specialArgs = { inherit inputs; };
-      modules = [
-        ./hosts/main/configuration.nix
-        ./modules
-        disko.nixosModules.disko
-        inputs.home-manager.nixosModules.default
-      ];
+  outputs =
+    { self, nixpkgs, home-manager, stylix, disko, sops-nix, ... }@inputs: {
+      nixosConfigurations.main = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./hosts/main/configuration.nix
+          ./modules
+          disko.nixosModules.disko
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users = { "andy" = ./home-manager/home.nix; };
+            # home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+          stylix.nixosModules.stylix
+        ];
+      };
     };
-  };
 }

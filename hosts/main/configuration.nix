@@ -51,12 +51,15 @@
       mpv # command-line media player
       slurp # select region of screen
       solaar
+      starship
       sunshine
       swappy # screenshot annotation tool
       tofi
       tree
     ];
   };
+
+  programs.fish.enable = true;
 
   nixpkgs.config.allowUnfree = true;
 
@@ -80,9 +83,7 @@
     egl-wayland
     fd
     file
-    firefox
-    firejail
-    fish
+    # firejail
     fzf
     gcc
     gh
@@ -99,15 +100,14 @@
     lxqt.lxqt-policykit
     lynx
     mozlz4a
+    nh
     overskride
     pavucontrol
     procs
     python314
     ripgrep
-    river
     rofi
     sops
-    starship
     swayidle
     swaylock
     xfce.thunar
@@ -128,25 +128,15 @@
   # Will be exposed through DBus to programs willing to store secrets.
   services.gnome.gnome-keyring.enable = true;
 
-  programs.fish.enable = true;
-  # programs.bash = {
-  #   interactiveShellInit = ''
-  #     if [[ $(${pkgs.procps}/bin/ps --no-header --pid=$PPID --format=comm) != "fish" && -z ''${BASH_EXECUTION_STRING} ]]
-  #     then
-  #       shopt -q login_shell && LOGIN_OPTION='--login' || LOGIN_OPTION=""
-  #       exec ${pkgs.fish}/bin/fish $LOGIN_OPTION
-  #     fi
-  #   '';
-  # };
-
   programs.river = { enable = true; };
 
-  programs.waybar = { enable = true; };
-
-  home-manager = {
-    extraSpecialArgs = { inherit inputs; };
-    users = { "andy" = ../../home-manager/home.nix; };
-  };
+  stylix.enable = true;
+  stylix.autoEnable = true;
+  # stylix.base16Scheme =
+  #   "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+  stylix.base16Scheme =
+    "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+  stylix.targets.fish.enable = false;
 
   systemd.services.greetd.serviceConfig = {
     Type = "idle";
@@ -172,13 +162,10 @@
   };
 
   services.openssh.enable = true;
-
   services.dbus.enable = true;
-
   services.blueman.enable = true;
 
   networking.firewall.allowedUDPPorts = [ 4242 ];
-  # networking.firewall.allowedTCPPorts = [ ];
 
   sops = {
     defaultSopsFile = ../../secrets/sops.yaml;

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should
@@ -17,6 +17,7 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = [
+    pkgs.firejail
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # pkgs.hello
@@ -71,13 +72,11 @@
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
+  stylix.targets.neovim.enable = false;
+  stylix.targets.waybar.enable = false;
+
   programs.neovim = {
     enable = true;
-    extraLuaPackages = ps:
-      [
-        # may not need anymore
-        # ps.tiktoken_core
-      ];
     extraPackages = [
       pkgs.cargo
       pkgs.dotnet-sdk
@@ -87,5 +86,107 @@
       pkgs.lua-language-server
       pkgs.stylua
     ];
+  };
+
+  programs.firefox = {
+    enable = true;
+
+    profiles = {
+      home = {
+        name = "home";
+        isDefault = true;
+        extensions = { force = true; };
+        # I'm having trouble using nur.repos.rycee.firefox-addons and installing unfree extensions.
+        # extensions = {
+        #   force = true;
+        #   packages = with inputs.firefox-addons.packages."x86_64-linux"; [
+        #     grammarly
+        #     onepassword-password-manager
+        #     privacy-badger
+        #     refined-github
+        #     ublock-origin
+        #     vimium
+        #   ];
+        # };
+      };
+    };
+
+    policies = {
+      AppAutoUpdate = false;
+      Cookies = { Behavior = "reject-tracker-and-partition-foreign"; };
+      DisablePocket = true;
+      DisableSystemAddonUpdate = true;
+      DisableTelemetry = true;
+      EnableTrackingProtection = {
+        Value = true;
+        Locked = true;
+        Cryptominig = true;
+        Fingerpriting = true;
+        EmailTracking = true;
+      };
+      FirefoxSuggest = {
+        SponsoredSuggestions = false;
+        ImproveSuggest = false;
+      };
+      Homepage = { StartPage = "none"; };
+      ManualAppUpdateOnly = true;
+      NetworkPrediction = false;
+      PopupBlocking = { Default = true; };
+      PostQuantumKeyAgreementEnabled = true;
+      SkipTermsOfUse = true;
+    };
+  };
+
+  stylix.targets.firefox.profileNames = [ "home" ];
+  stylix.targets.firefox.colorTheme.enable = true;
+  # stylix.targets.firefox.firefoxGnomeTheme.enable = true;
+
+  services.dunst = {
+    enable = true;
+    settings = {
+      global = {
+        monitor = 0;
+        follow = "mouse";
+
+        width = 800;
+        height = 300;
+        origin = "bottom-center";
+
+        gap_size = 0;
+        sort = "yes";
+
+        font = lib.mkForce "Roboto 14";
+        line_height = 0;
+
+        markup = "full";
+        format = ''
+          <b>%s</b>
+          %a
+
+          %b'';
+        alignment = "left";
+        vertical_alignment = "right";
+        show_age_threshold = 60;
+
+        show_indicators = "yes";
+
+        enable_recursive_icon_lookup = true;
+        icon_position = "left";
+        min_icon_size = 32;
+        max_icon_size = 128;
+      };
+
+      urgency_low = { timeout = 5; };
+
+      urgency_normal = { timeout = 10; };
+
+      urgency_critical = { timeout = 0; };
+    };
+  };
+
+  programs.waybar = {
+    enable = true;
+    programs.waybar.systemd.enable = true;
+    # settings = builtins.fromJSON (builtins.readFile ./waybar/config.jsonc);
   };
 }

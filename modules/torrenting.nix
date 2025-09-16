@@ -95,19 +95,19 @@ in {
 
   environment.etc."netns/${netns}/resolv.conf".text = "nameserver ${dns}";
 
-  programs.firejail = {
-    enable = true;
-    wrappedBinaries = {
-      firefox = {
-        executable = "${pkgs.firefox}/bin/firefox";
-        extraArgs = [
-          "--netns=${netns}"
-          # https://github.com/netblue30/firejail/issues/6843
-          # Running with no profile to remove grapical corruption without disabling hardware acceleration.
-          # Let's revisit this later.
-          "--profile=noprofile"
-        ];
-      };
-    };
-  };
+  # programs.firejail = {
+  #   enable = true;
+  #   wrappedBinaries = {
+  #     firefox = {
+  #       executable = "${pkgs.firefox}/bin/firefox";
+  #       extraArgs = [
+  #         "--netns=${netns}"
+  #         # https://github.com/netblue30/firejail/issues/6843
+  #         # Running with no profile to remove grapical corruption without disabling hardware acceleration.
+  #         # Let's revisit this later.
+  #         "--profile=noprofile"
+  #       ];
+  #     };
+  #   };
+  # };
 }
