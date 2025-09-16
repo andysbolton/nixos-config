@@ -187,7 +187,7 @@
 
   programs.waybar = {
     enable = true;
-    settings = builtins.fromJSON (builtins.readFile ./waybar/config.jsonc);
+    settings = builtins.fromJSON (builtins.readFile ./waybar/config.json);
     style = ./waybar/style.css;
     # This is failing at the moment with 'ConditionEnvironment=WAYLAND_DISPLAY was not met'. I'm going
     # to revisit it later, but for now I will start waybar from river's init script.
@@ -199,10 +199,13 @@
 
   wayland.windowManager.river = {
     enable = true;
-    systemd = {
-      enable = true;
-      variables = [ "--all" ];
-    };
+    systemd = { enable = true; };
     extraConfig = builtins.readFile ./river/init;
+  };
+
+  programs.rofi = {
+    enable = true;
+    font = lib.mkForce "CaskaydiaCove Nerd Font 14";
+    theme = { "*" = { padding = config.lib.formats.rasi.mkLiteral "3px"; }; };
   };
 }

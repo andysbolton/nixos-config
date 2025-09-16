@@ -54,7 +54,6 @@
       starship
       sunshine
       swappy # screenshot annotation tool
-      tofi
       tree
     ];
   };
@@ -106,7 +105,6 @@
     procs
     python314
     ripgrep
-    rofi
     sops
     swayidle
     swaylock
@@ -130,8 +128,6 @@
 
   stylix.enable = true;
   stylix.autoEnable = true;
-  # stylix.base16Scheme =
-  #   "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
   stylix.base16Scheme =
     "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
   stylix.targets.fish.enable = false;
