@@ -1,0 +1,72 @@
+@define-color background rgb(31, 35, 53);
+@define-color light rgb(242, 229, 203);
+@define-color button rgba(60, 56, 54, 0.4);
+@define-color selected rgb(242, 229, 203);
+
+* {
+  /* `otf-font-awesome` is required to be installed for icons */
+  font-family: "Bars", "CaskaydiaCove Nerd Font";
+  font-size: 16px;
+}
+
+window#waybar {
+  background: @background;
+  transition-property: background-color;
+  transition-duration: 0.5s;
+  color: @light;
+  border-bottom: 3px solid rgba(100, 114, 125, 0.5);
+}
+
+#window {
+  padding: 0 10px;
+  color: #242424;
+  background: #a9b1d6;
+  border-radius: 3px;
+  border-bottom: 0;
+  margin: 2px;
+}
+
+#tags button {
+  color: @light;
+}
+
+#tags button.focused,
+#tags button.focues:hover {
+  background-color: @selected;
+  color: @background;
+  border-radius: 0;
+  border-bottom: 3px solid rgba(100, 114, 125, 0.5);
+}
+
+#cpu,
+#disk,
+#memory,
+#temperature,
+#custom-gpu-utilization,
+#custom-gpu-temperature {
+  padding-left: 12px;
+  padding-right: 12px;
+  border-left: 2px solid rgba(100, 114, 125, 1);
+}
+
+#pulseaudio {
+  padding-left: 12px;
+  border-left: 2px solid rgba(100, 114, 125, 1);
+}
+
+#pulseaudio-slider {
+  padding: 0 12px 0;
+  min-width: 80px;
+}
+
+#pulseaudio-slider trough {
+  background-color: @light;
+  border-radius: 5px;
+  min-height: 10px;
+}
+
+#pulseaudio-slider highlight {
+  background-color: rgba(100, 114, 125, 0.5);
+  border-radius: 5px;
+  min-height: 10px;
+}

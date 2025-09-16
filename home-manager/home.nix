@@ -183,16 +183,26 @@
     };
   };
 
+  # wayland.systemd.target = "river-session.target";
+
   programs.waybar = {
     enable = true;
-    systemd = {
-      enable = true;
-      target = "river-session.target";
-    };
+    settings = builtins.fromJSON (builtins.readFile ./waybar/config.jsonc);
+    style = ./waybar/style.css;
+    # This is failing at the moment with 'ConditionEnvironment=WAYLAND_DISPLAY was not met'. I'm going
+    # to revisit it later, but for now I will start waybar from river's init script.
+    # systemd = {
+    #   enable = true;
+    #   target = "river-session.target";
+    # };
   };
 
   wayland.windowManager.river = {
     enable = true;
+    systemd = {
+      enable = true;
+      variables = [ "--all" ];
+    };
     extraConfig = builtins.readFile ./river/init;
   };
 }

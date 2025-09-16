@@ -80,7 +80,7 @@
     dig
     discord
     dunst
-    egl-wayland
+    # egl-wayland
     fd
     file
     # firejail

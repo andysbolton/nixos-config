@@ -181,8 +181,7 @@ riverctl rule-add -app-id "bar" csd
 riverctl default-layout "$layout_generator"
 $layout_generator -view-padding 6 -outer-padding 6 &
 
-# riverctl spawn waybar
-# riverctl spawn "dunst --startup_notification"
+riverctl spawn waybar
 
 # TODO: Find a more NixOS-like way to do this.
 # Reminder: this is so xdg-portal-desktop-wlr.service and xdg-portal-desktop.service will work.
