@@ -98,9 +98,7 @@
     lsd
     lxqt.lxqt-policykit
     lynx
-    mozlz4a
     nh
-    overskride
     pavucontrol
     procs
     python314
@@ -176,7 +174,8 @@
   xdg.portal = {
     enable = true;
     wlr.enable = true;
-    extraPortals = [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
+    configPackages =
+      [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
   };
 
   # Copy the NixOS configuration file and link it from the resulting system
