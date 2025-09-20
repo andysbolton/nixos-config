@@ -82,7 +82,6 @@
     # egl-wayland
     fd
     file
-    # firejail
     fzf
     gcc
     gh
