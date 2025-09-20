@@ -42,16 +42,17 @@
       };
       media1 = {
         type = "disk";
-        device = "/dev/sda";
+        device = "/dev/sda1";
         content = {
           type = "gpt";
           partitions = {
-            data = {
+            media = {
               size = "100%";
               content = {
                 type = "filesystem";
                 format = "xfs";
                 mountpoint = "/mnt/media";
+                mountOptions = [ "defaults" "pquota" ];
               };
             };
           };
