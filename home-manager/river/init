@@ -4,7 +4,8 @@ layout_generator=rivertile
 
 riverctl map normal Super Return spawn wezterm
 riverctl map normal Alt+Shift F spawn "firefox"
-riverctl map normal Super T spawn "rofi -show run"
+riverctl map normal Alt+Shift+Control F spawn "firefox-vpn"
+riverctl map normal Super+Alt T spawn "rofi -show run"
 
 # Close window
 riverctl map normal Alt+Shift Q close
@@ -191,8 +192,7 @@ riverctl spawn waybar
 # dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river
 # systemctl --user restart xdg-desktop-portal
 
-swayidle -w timeout 1170 "dunstify --urgency=normal 'Locking session in 30 seconds'" \
-    timeout 1200 "swaylock-desktop-image.sh" \
+swayidle -w timeout 1740 "dunstify --urgency=normal 'Locking session in 1 minute'" \
     timeout 1800 "wlopm --off '*'" resume "wlopm --on '*'" &
 
 riverctl spawn wezterm-gui
@@ -201,4 +201,3 @@ riverctl spawn blueman-manager
 riverctl spawn discord
 riverctl spawn steam
 riverctl spawn lxqt-policykit-agent
-riverctl spawn firefox

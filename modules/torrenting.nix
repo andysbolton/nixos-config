@@ -48,6 +48,17 @@ in {
     serviceConfig = { NetworkNamespacePath = "/run/netns/${netns}"; };
   };
 
+  services.jackett.enable = true;
+  systemd.services.jackett = {
+    after = [ "netns@${netns}.service" "wg-proton.service" ];
+    bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
+    serviceConfig = {
+      NetworkNamespacePath = "/run/netns/${netns}";
+      BindReadOnlyPaths =
+        [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
+    };
+  };
+
   # Create the network namespace service
   systemd.services."netns@" = {
     description = "%I network namespace";
@@ -79,14 +90,15 @@ in {
           ${iproute2}/bin/ip netns exec ${netns} \
             ${wireguard-tools}/bin/wg setconf wg0 ${wgConfPath}
           # Bring up loopback, as this will allow accessing the qbittorrent web UI on localhost
-          # (assuming qbittorent and the browser are both in the same netns)
-          ${iproute2}/bin/ip --netns ${netns} link set lo up
+          # (assuming the localhost application and the browser are both in the same netns)
+          # ${iproute2}/bin/ip --netns ${netns} link set lo up
           ${iproute2}/bin/ip --netns ${netns} link set wg0 up
           ${iproute2}/bin/ip --netns ${netns} route add default dev wg0
         '';
       ExecStop = with pkgs;
         writers.writeBash "wg-down" ''
           ${iproute2}/bin/ip --netns ${netns} route del default dev wg0
+          ${iproute2}/bin/ip --netns ${netns} link del wg0
           ${iproute2}/bin/ip link del wg0
         '';
     };

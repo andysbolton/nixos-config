@@ -3,6 +3,7 @@
     ./hardware-configuration.nix
     ./disko.nix
     inputs.sops-nix.nixosModules.sops
+    inputs.wayland-pipewire-idle-inhibit.nixosModules.default
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -72,13 +73,11 @@
     _1password-gui
     age
     bat
-    btop
     chezmoi
     chromium
     delta
     dig
     discord
-    dunst
     # egl-wayland
     fd
     file
@@ -175,6 +174,18 @@
     wlr.enable = true;
     configPackages =
       [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
+  };
+
+  services.wayland-pipewire-idle-inhibit = {
+    enable = true;
+    systemdTarget = "river-session.target";
+    settings = {
+      verbosity = "INFO";
+      # media_minimum_duration = 10;
+      idle_inhibitor = "wayland";
+      sink_whitelist = [ ];
+      node_blacklist = [ ];
+    };
   };
 
   # Copy the NixOS configuration file and link it from the resulting system

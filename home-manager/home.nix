@@ -1,6 +1,13 @@
 { config, lib, pkgs, inputs, ... }:
-
-{
+let
+  # https://github.com/davatorium/rofi/issues/584#issuecomment-384555551
+  askPass = (pkgs.writeShellScriptBin "ask-pass" ''
+    rofi -dmenu \
+        -password \
+        -no-fixed-num-lines \
+        -p "$(printf "$1" | sed s/://)"
+  '');
+in {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "andy";
@@ -16,7 +23,7 @@
 
   # The home.packages option allows you to install Nix packages into your
   # environment.
-  home.packages = [
+  home.packages = with pkgs; [
     # # Adds the 'hello' command to your environment. It prints a friendly
     # # "Hello, world!" when run.
     # pkgs.hello
@@ -30,9 +37,10 @@
     # # You can also create simple shell scripts directly inside your
     # # configuration. For example, this adds a command 'my-hello' to your
     # # environment:
-    # (pkgs.writeShellScriptBin "my-hello" ''
-    #   echo "Hello, ${config.home.username}!"
-    # '')
+    askPass
+    (pkgs.writeShellScriptBin "firefox-vpn" ''
+      SUDO_ASKPASS=${askPass}/bin/ask-pass sudo -A ip netns exec vpn sudo -u $(whoami) ${pkgs.firefox}/bin/firefox "$@"
+    '')
   ];
 
   # Home Manager is pretty good at managing dotfiles. The primary way to manage
@@ -182,8 +190,6 @@
     };
   };
 
-  # wayland.systemd.target = "river-session.target";
-
   programs.waybar = {
     enable = true;
     settings = builtins.fromJSON (builtins.readFile ./waybar/config.json);
@@ -204,7 +210,10 @@
 
   programs.rofi = {
     enable = true;
+    package = pkgs.rofi-wayland;
     font = lib.mkForce "CaskaydiaCove Nerd Font 14";
     theme = { "*" = { padding = config.lib.formats.rasi.mkLiteral "3px"; }; };
   };
+
+  programs.btop.enable = true;
 }
