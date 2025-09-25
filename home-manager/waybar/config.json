@@ -2,8 +2,9 @@
   {
     "layer": "top",
     "modules-left": ["river/tags", "river/window"],
-    "modules-center": ["systemd-failed-units", "clock"],
+    "modules-center": ["clock"],
     "modules-right": [
+      "systemd-failed-units",
       "pulseaudio",
       "pulseaudio/slider",
       "disk",

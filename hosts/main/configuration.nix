@@ -102,7 +102,6 @@
     python314
     ripgrep
     sops
-    swayidle
     swaylock
     xfce.thunar
     trash-cli
@@ -144,7 +143,7 @@
     settings = {
       default_session = {
         command = ''
-          ${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd "dbus-run-session river"
+          ${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd "river"
         '';
         user = "greeter";
       };
@@ -181,7 +180,7 @@
     systemdTarget = "river-session.target";
     settings = {
       verbosity = "INFO";
-      # media_minimum_duration = 10;
+      media_minimum_duration = 10;
       idle_inhibitor = "wayland";
       sink_whitelist = [ ];
       node_blacklist = [ ];

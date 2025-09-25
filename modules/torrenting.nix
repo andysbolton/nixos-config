@@ -31,6 +31,8 @@ in {
     };
   };
 
+  services.plex.enable = true;
+
   systemd.services.qbittorrent = {
     after = [ "netns@${netns}.service" "wg-proton.service" ];
     bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
@@ -48,14 +50,14 @@ in {
     serviceConfig = { NetworkNamespacePath = "/run/netns/${netns}"; };
   };
 
-  services.jackett.enable = true;
-  systemd.services.jackett = {
+  services.prowlarr.enable = true;
+  systemd.services.prowlarr = {
     after = [ "netns@${netns}.service" "wg-proton.service" ];
     bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
     serviceConfig = {
       NetworkNamespacePath = "/run/netns/${netns}";
-      BindReadOnlyPaths =
-        [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
+      # BindReadOnlyPaths =
+      #   [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
     };
   };
 
@@ -89,9 +91,9 @@ in {
           ${iproute2}/bin/ip --netns ${netns} address add ${ip} dev wg0
           ${iproute2}/bin/ip netns exec ${netns} \
             ${wireguard-tools}/bin/wg setconf wg0 ${wgConfPath}
-          # Bring up loopback, as this will allow accessing the qbittorrent web UI on localhost
+          # Bring up loopback, as this will allow accessing the localhost application UI
           # (assuming the localhost application and the browser are both in the same netns)
-          # ${iproute2}/bin/ip --netns ${netns} link set lo up
+          ${iproute2}/bin/ip --netns ${netns} link set lo up
           ${iproute2}/bin/ip --netns ${netns} link set wg0 up
           ${iproute2}/bin/ip --netns ${netns} route add default dev wg0
         '';

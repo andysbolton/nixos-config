@@ -74,7 +74,10 @@ in {
   #
   #  /etc/profiles/per-user/andy/etc/profile.d/hm-session-vars.sh
   #
-  home.sessionVariables = { EDITOR = "nvim"; };
+  home.sessionVariables = {
+    EDITOR = "nvim";
+    MOZ_ENABLE_WAYLAND = "1";
+  };
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
@@ -196,10 +199,10 @@ in {
     style = ./waybar/style.css;
     # This is failing at the moment with 'ConditionEnvironment=WAYLAND_DISPLAY was not met'. I'm going
     # to revisit it later, but for now I will start waybar from river's init script.
-    # systemd = {
-    #   enable = true;
-    #   target = "river-session.target";
-    # };
+    systemd = {
+      enable = true;
+      target = "river-session.target";
+    };
   };
 
   wayland.windowManager.river = {
@@ -216,4 +219,23 @@ in {
   };
 
   programs.btop.enable = true;
+
+  # swayidle -w timeout 1740 "dunstify --urgency=normal 'Locking session in 1 minute'" \
+  #     timeout 1800 "wlopm --off '*'" resume "wlopm --on '*'" &
+  services.swayidle = {
+    enable = true;
+    systemdTarget = "river-session.target";
+    timeouts = [
+      {
+        timeout = 1740;
+        command =
+          "${pkgs.dunst}/bin/dunstify --urgency=normal 'Locking session in 1 minute'";
+      }
+      {
+        timeout = 1800;
+        command = "${pkgs.wlopm}/bin/wlopm --off '*'";
+        resumeCommand = "${pkgs.wlopm}/bin/wlopm --on '*'";
+      }
+    ];
+  };
 }

@@ -182,8 +182,6 @@ riverctl rule-add -app-id "bar" csd
 riverctl default-layout "$layout_generator"
 $layout_generator -view-padding 6 -outer-padding 6 &
 
-riverctl spawn waybar
-
 # TODO: Find a more NixOS-like way to do this.
 # Reminder: this is so xdg-portal-desktop-wlr.service and xdg-portal-desktop.service will work.
 
@@ -191,9 +189,6 @@ riverctl spawn waybar
 # systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
 # dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river
 # systemctl --user restart xdg-desktop-portal
-
-swayidle -w timeout 1740 "dunstify --urgency=normal 'Locking session in 1 minute'" \
-    timeout 1800 "wlopm --off '*'" resume "wlopm --on '*'" &
 
 riverctl spawn wezterm-gui
 riverctl spawn blueman-applet
