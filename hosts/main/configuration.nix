@@ -103,7 +103,6 @@
     ripgrep
     sops
     swaylock
-    xfce.thunar
     trash-cli
     unzip
     wezterm
@@ -154,7 +153,15 @@
   services.dbus.enable = true;
   services.blueman.enable = true;
 
-  networking.firewall.allowedUDPPorts = [ 4242 ];
+  networking.firewall.allowedUDPPorts = [
+    4242 # lan-mouse
+    32400 # Plex Media Server
+  ];
+  networking.firewall.allowedTCPPorts = [
+    32400 # Plex Media Server
+  ];
+
+  services.udisks2.enable = true;
 
   sops = {
     defaultSopsFile = ../../secrets/sops.yaml;

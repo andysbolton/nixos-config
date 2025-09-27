@@ -8,6 +8,7 @@ let
         -p "$(printf "$1" | sed s/://)"
   '');
 in {
+  imports = [ ./modules/lan-mouse.nix ./modules/waybar/waybar.nix ];
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "andy";
@@ -24,9 +25,8 @@ in {
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages = with pkgs; [
-    # # Adds the 'hello' command to your environment. It prints a friendly
-    # # "Hello, world!" when run.
-    # pkgs.hello
+    rsync
+    xfce.thunar
 
     # # It is sometimes useful to fine-tune packages, for example, by applying
     # # overrides. You can do that directly here, just don't forget the
@@ -34,10 +34,6 @@ in {
     # # fonts?
     # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
 
-    # # You can also create simple shell scripts directly inside your
-    # # configuration. For example, this adds a command 'my-hello' to your
-    # # environment:
-    askPass
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       SUDO_ASKPASS=${askPass}/bin/ask-pass sudo -A ip netns exec vpn sudo -u $(whoami) ${pkgs.firefox}/bin/firefox "$@"
     '')
@@ -193,18 +189,6 @@ in {
     };
   };
 
-  programs.waybar = {
-    enable = true;
-    settings = builtins.fromJSON (builtins.readFile ./waybar/config.json);
-    style = ./waybar/style.css;
-    # This is failing at the moment with 'ConditionEnvironment=WAYLAND_DISPLAY was not met'. I'm going
-    # to revisit it later, but for now I will start waybar from river's init script.
-    systemd = {
-      enable = true;
-      target = "river-session.target";
-    };
-  };
-
   wayland.windowManager.river = {
     enable = true;
     systemd = { enable = true; };
@@ -238,4 +222,55 @@ in {
       }
     ];
   };
+
+  services.udiskie = {
+    enable = true;
+    settings = {
+      # workaround for
+      # https://github.com/nix-community/home-manager/issues/632
+      program_options = { file_manager = "${pkgs.xfce.thunar}/bin/thunar"; };
+    };
+  };
+
+  # programs.lan-mouse = {
+  #   enable = true;
+  #   systemd = true;
+  #   # package = inputs.lan-mouse.packages.${pkgs.stdenv.hostPlatform.system}.default
+  #   # Optional configuration in nix syntax, see config.toml for available options
+  #   settings = let
+  #     # we can't use any ${pkgs} proper path,
+  #     # because it also runs commands on the remote machine
+  #     shareClipboard = dest:
+  #       "wl-paste --no-newline | ssh ${dest} -i .ssh/id_home_nokey env WAYLAND_DISPLAY='wayland-1' wl-copy";
+  #   in {
+  #     release_bind = [ "KeyA" "KeyS" "KeyD" "KeyF" ];
+  #     port = 4242;
+  #     frontend = "cli";
+  #     # right = {
+  #     #   hostname = "crom";
+  #     #   activate_on_startup = true;
+  #     #   enter_hook = shareClipboard "crom";
+  #     #   ips = [ "192.168.1.2" ];
+  #     # };
+  #     left = {
+  #       hostname = "work";
+  #       activate_on_startup = true;
+  #       # enter_hook = shareClipboard "fw";
+  #       # ips = [ "192.168.1.3" ];
+  #     };
+  #   };
+  # };
+  #
+  # release_bind = [ "Key", "KeyS", "KeyD", "KeyF" ]
+  #
+  # port = 4242
+  # frontend = "cli"
+  #
+  # [left]
+  # hostname = "work"
+  # activate_on_startup = true
+  # ips = []
+
+  # systemd.user.services.lan-mouse.Service.Environment =
+  #   "PATH=$PATH:/run/current-system/sw/bin";
 }

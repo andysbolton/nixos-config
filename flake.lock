@@ -196,6 +196,27 @@
         "type": "github"
       }
     },
+    "lan-mouse": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1749745056,
+        "narHash": "sha256-olWqCB8v4WmRvId1IsY/yDwxDSwWW3tHdNkyRkEssbM=",
+        "owner": "feschber",
+        "repo": "lan-mouse",
+        "rev": "e46fe60b3e24be83de38701faa99a4fbd9186f08",
+        "type": "github"
+      },
+      "original": {
+        "owner": "feschber",
+        "repo": "lan-mouse",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1754689972,
@@ -257,10 +278,32 @@
       "inputs": {
         "disko": "disko",
         "home-manager": "home-manager",
+        "lan-mouse": "lan-mouse",
         "nixpkgs": "nixpkgs",
         "sops-nix": "sops-nix",
         "stylix": "stylix",
         "wayland-pipewire-idle-inhibit": "wayland-pipewire-idle-inhibit"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "lan-mouse",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1740623427,
+        "narHash": "sha256-3SdPQrZoa4odlScFDUHd4CUPQ/R1gtH4Mq9u8CBiK8M=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "d342e8b5fd88421ff982f383c853f0fc78a847ab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
       }
     },
     "sops-nix": {

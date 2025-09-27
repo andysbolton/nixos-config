@@ -23,6 +23,10 @@
       url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    lan-mouse = {
+      url = "github:feschber/lan-mouse";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # firefox-addons = {
     #   url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -41,8 +45,8 @@
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
           {
-            home-manager.users = { "andy" = ./home-manager/home.nix; };
-            # home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.users.andy = ./home-manager/home.nix;
+            home-manager.extraSpecialArgs = { inherit inputs; };
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = false;
           }
