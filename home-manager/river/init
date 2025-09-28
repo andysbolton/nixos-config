@@ -5,7 +5,7 @@ layout_generator=rivertile
 riverctl map normal Super Return spawn wezterm
 riverctl map normal Alt+Shift F spawn "firefox"
 riverctl map normal Alt+Shift+Control F spawn "firefox-vpn"
-riverctl map normal Super+Alt T spawn "rofi -show run"
+riverctl map normal Super T spawn "rofi -show run"
 
 # Close window
 riverctl map normal Alt+Shift Q close
@@ -184,10 +184,10 @@ $layout_generator -view-padding 6 -outer-padding 6 &
 
 # TODO: Find a more NixOS-like way to do this.
 # Reminder: this is so xdg-portal-desktop-wlr.service and xdg-portal-desktop.service will work.
-export XDG_CURRENT_DESKTOP=river
-systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
-dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river
-systemctl --user restart xdg-desktop-portal
+# export XDG_CURRENT_DESKTOP=river
+# systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP
+# dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=river
+# systemctl --user restart xdg-desktop-portal
 
 riverctl spawn wezterm-gui
 riverctl spawn blueman-applet

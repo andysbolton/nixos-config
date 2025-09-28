@@ -90,7 +90,7 @@
     httpie
     jq
     killall
-    lan-mouse
+    # lan-mouse
     libnatpmp
     lm_sensors
     lsd

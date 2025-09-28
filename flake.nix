@@ -23,10 +23,7 @@
       url = "github:rafaelrc7/wayland-pipewire-idle-inhibit";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    lan-mouse = {
-      url = "github:feschber/lan-mouse";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    lan-mouse = { url = "github:feschber/lan-mouse/v0.10.0"; };
     # firefox-addons = {
     #   url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
     #   inputs.nixpkgs.follows = "nixpkgs";

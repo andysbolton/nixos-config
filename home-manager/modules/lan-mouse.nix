@@ -30,8 +30,6 @@
     };
   };
 
-  systemd.user.services.lan-mouse.Install.WantedBy = [ "river-session.target" ];
-
   # release_bind = [ "Key", "KeyS", "KeyD", "KeyF" ]
   #
   # port = 4242

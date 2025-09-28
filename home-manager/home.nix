@@ -8,7 +8,12 @@ let
         -p "$(printf "$1" | sed s/://)"
   '');
 in {
-  imports = [ ./modules/lan-mouse.nix ./modules/waybar/waybar.nix ];
+  imports = [
+    ./modules/dunst.nix
+    ./modules/firefox.nix
+    ./modules/lan-mouse.nix
+    ./modules/waybar/waybar.nix
+  ];
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "andy";
@@ -22,25 +27,16 @@ in {
   # release notes.
   home.stateVersion = "25.05"; # Please read the comment before changing.
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
   home.packages = with pkgs; [
     rsync
     xfce.thunar
-
-    # # It is sometimes useful to fine-tune packages, for example, by applying
-    # # overrides. You can do that directly here, just don't forget the
-    # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-    # # fonts?
-    # (pkgs.nerdfonts.override { fonts = [ "FantasqueSansMono" ]; })
-
     (pkgs.writeShellScriptBin "firefox-vpn" ''
-      SUDO_ASKPASS=${askPass}/bin/ask-pass sudo -A ip netns exec vpn sudo -u $(whoami) ${pkgs.firefox}/bin/firefox "$@"
+      SUDO_ASKPASS=${askPass}/bin/ask-pass \
+        sudo -A ip netns exec \
+          vpn sudo -u $(whoami) ${pkgs.firefox}/bin/firefox"$@"
     '')
   ];
 
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
   home.file = {
     # # Building this configuration will create a copy of 'dotfiles/screenrc' in
     # # the Nix store. Activating the configuration will then make '~/.screenrc' a
@@ -94,100 +90,8 @@ in {
     ];
   };
 
-  programs.firefox = {
-    enable = true;
-
-    profiles = {
-      home = {
-        name = "home";
-        isDefault = true;
-        extensions = { force = true; };
-        # I'm having trouble using nur.repos.rycee.firefox-addons and installing unfree extensions.
-        # extensions = {
-        #   force = true;
-        #   packages = with inputs.firefox-addons.packages."x86_64-linux"; [
-        #     grammarly
-        #     onepassword-password-manager
-        #     privacy-badger
-        #     refined-github
-        #     ublock-origin
-        #     vimium
-        #   ];
-        # };
-      };
-    };
-
-    policies = {
-      AppAutoUpdate = false;
-      Cookies = { Behavior = "reject-tracker-and-partition-foreign"; };
-      DisablePocket = true;
-      DisableSystemAddonUpdate = true;
-      DisableTelemetry = true;
-      EnableTrackingProtection = {
-        Value = true;
-        Locked = true;
-        Cryptominig = true;
-        Fingerpriting = true;
-        EmailTracking = true;
-      };
-      FirefoxSuggest = {
-        SponsoredSuggestions = false;
-        ImproveSuggest = false;
-      };
-      Homepage = { StartPage = "none"; };
-      ManualAppUpdateOnly = true;
-      NetworkPrediction = false;
-      PopupBlocking = { Default = true; };
-      PostQuantumKeyAgreementEnabled = true;
-      SkipTermsOfUse = true;
-    };
-  };
-
   stylix.targets.firefox.profileNames = [ "home" ];
   stylix.targets.firefox.colorTheme.enable = true;
-
-  services.dunst = {
-    enable = true;
-    settings = {
-      global = {
-        monitor = 0;
-        follow = "mouse";
-
-        width = 800;
-        height = 300;
-        origin = "bottom-center";
-
-        gap_size = 0;
-        sort = "yes";
-
-        font = lib.mkForce "Roboto 14";
-        line_height = 0;
-
-        markup = "full";
-        format = ''
-          <b>%s</b>
-          %a
-
-          %b'';
-        alignment = "left";
-        vertical_alignment = "right";
-        show_age_threshold = 60;
-
-        show_indicators = "yes";
-
-        enable_recursive_icon_lookup = true;
-        icon_position = "left";
-        min_icon_size = 32;
-        max_icon_size = 128;
-      };
-
-      urgency_low = { timeout = 5; };
-
-      urgency_normal = { timeout = 10; };
-
-      urgency_critical = { timeout = 0; };
-    };
-  };
 
   wayland.windowManager.river = {
     enable = true;
@@ -231,46 +135,4 @@ in {
       program_options = { file_manager = "${pkgs.xfce.thunar}/bin/thunar"; };
     };
   };
-
-  # programs.lan-mouse = {
-  #   enable = true;
-  #   systemd = true;
-  #   # package = inputs.lan-mouse.packages.${pkgs.stdenv.hostPlatform.system}.default
-  #   # Optional configuration in nix syntax, see config.toml for available options
-  #   settings = let
-  #     # we can't use any ${pkgs} proper path,
-  #     # because it also runs commands on the remote machine
-  #     shareClipboard = dest:
-  #       "wl-paste --no-newline | ssh ${dest} -i .ssh/id_home_nokey env WAYLAND_DISPLAY='wayland-1' wl-copy";
-  #   in {
-  #     release_bind = [ "KeyA" "KeyS" "KeyD" "KeyF" ];
-  #     port = 4242;
-  #     frontend = "cli";
-  #     # right = {
-  #     #   hostname = "crom";
-  #     #   activate_on_startup = true;
-  #     #   enter_hook = shareClipboard "crom";
-  #     #   ips = [ "192.168.1.2" ];
-  #     # };
-  #     left = {
-  #       hostname = "work";
-  #       activate_on_startup = true;
-  #       # enter_hook = shareClipboard "fw";
-  #       # ips = [ "192.168.1.3" ];
-  #     };
-  #   };
-  # };
-  #
-  # release_bind = [ "Key", "KeyS", "KeyD", "KeyF" ]
-  #
-  # port = 4242
-  # frontend = "cli"
-  #
-  # [left]
-  # hostname = "work"
-  # activate_on_startup = true
-  # ips = []
-
-  # systemd.user.services.lan-mouse.Service.Environment =
-  #   "PATH=$PATH:/run/current-system/sw/bin";
 }
