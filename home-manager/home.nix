@@ -28,8 +28,13 @@ in {
   home.stateVersion = "25.05"; # Please read the comment before changing.
 
   home.packages = with pkgs; [
+    lua
+    lua52Packages.fennel
     rsync
     xfce.thunar
+    roswell
+    rlwrap
+    (sbcl.withPackages (ps: [ ps.swank ]))
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       SUDO_ASKPASS=${askPass}/bin/ask-pass \
         sudo -A ip netns exec \
@@ -81,6 +86,7 @@ in {
     enable = true;
     extraPackages = [
       pkgs.cargo
+      pkgs.clang-tools
       pkgs.dotnet-sdk
       pkgs.fennel-ls
       pkgs.fnlfmt
@@ -108,8 +114,6 @@ in {
 
   programs.btop.enable = true;
 
-  # swayidle -w timeout 1740 "dunstify --urgency=normal 'Locking session in 1 minute'" \
-  #     timeout 1800 "wlopm --off '*'" resume "wlopm --on '*'" &
   services.swayidle = {
     enable = true;
     systemdTarget = "river-session.target";

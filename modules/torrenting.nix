@@ -11,6 +11,11 @@ in {
     webuiPort = qbittorrentWebuiPort;
     serverConfig = {
       LegalNotice.Accepted = true;
+
+      BitTorrent.Session.QueueingSystemEnabled = false;
+
+      Network.PortForwarding.Enabled = false;
+
       Preferences = {
         WebUI = {
           Username = "admin";
@@ -21,21 +26,27 @@ in {
         General.Locale = "en";
 
         Connection = {
-          PortRangeMin = 46130;
-          PortRangeMax = 46130;
           UPnP = false;
           RandomPort = false;
           Interface = "wg0";
+          PortRangeMin = "";
+          PortRangeMax = "";
         };
       };
     };
   };
 
-  services.plex.enable = true;
-
   systemd.services.qbittorrent = {
-    after = [ "netns@${netns}.service" "wg-proton.service" ];
-    bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
+    after = [
+      "netns@${netns}.service"
+      "wg-proton.service"
+      "proton-port-forwarding.service"
+    ];
+    bindsTo = [
+      "netns@${netns}.service"
+      "wg-proton.service"
+      "proton-port-forwarding.service"
+    ];
     serviceConfig = {
       NetworkNamespacePath = "/run/netns/${netns}";
       BindReadOnlyPaths =
@@ -43,22 +54,20 @@ in {
     };
   };
 
-  services.radarr = { enable = true; };
+  services.plex.enable = true;
+
+  services.radarr.enable = true;
   systemd.services.radarr = {
     after = [ "netns@${netns}.service" "wg-proton.service" ];
     bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
-    serviceConfig = { NetworkNamespacePath = "/run/netns/${netns}"; };
+    serviceConfig.NetworkNamespacePath = "/run/netns/${netns}";
   };
 
   services.prowlarr.enable = true;
   systemd.services.prowlarr = {
     after = [ "netns@${netns}.service" "wg-proton.service" ];
     bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
-    serviceConfig = {
-      NetworkNamespacePath = "/run/netns/${netns}";
-      # BindReadOnlyPaths =
-      #   [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
-    };
+    serviceConfig.NetworkNamespacePath = "/run/netns/${netns}";
   };
 
   # Create the network namespace service
@@ -103,6 +112,43 @@ in {
           ${iproute2}/bin/ip --netns ${netns} link del wg0
           ${iproute2}/bin/ip link del wg0
         '';
+    };
+  };
+
+  systemd.services."proton-port-forwarding" = {
+    enable = true;
+    description =
+      "Acquire incoming port from protonvpn natpmp and update qBittorrent.";
+    after = [ "wg-proton.service" ];
+    bindsTo = [ "wg-proton.service" ];
+    partOf = [ "qbittorrent.service" ];
+    serviceConfig = {
+      NetworkNamespacePath = "/run/netns/${netns}";
+      User = "root";
+      ExecStartPre = pkgs.writers.writeBash "aquire-and-set-port" ''
+        port=$(
+          (${pkgs.libnatpmp}/bin/natpmpc -a 1 0 udp 60 -g ${dns} && ${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g ${dns}) |
+            ${pkgs.busybox}/bin/grep -E "^Mapped public port ([0-9]+).*" |
+            ${pkgs.busybox}/bin/sed -E "s/^[^0-9]*([0-9]+).+/\1/" |
+            ${pkgs.busybox}/bin/uniq
+        )
+        ${pkgs.busybox}/bin/echo "Acquired port $port."
+        ${pkgs.busybox}/bin/echo "Editing /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf with forwarded port."
+        ${pkgs.busybox}/bin/sed -E -i \
+          -e "s/Session\\\Port=[0-9]*/Session\\\Port=$port/" \
+          -e "s/PortRangeMax=[0-9]*/PortRangeMax=$port/" \
+          -e "s/PortRangeMin=[0-9]*/PortRangeMin=$port/" \
+          /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
+      '';
+      ExecStart = pkgs.writers.writeBash "keep-port-open" ''
+        ${pkgs.busybox}/bin/echo "Starting port loop."
+        while true; do
+          (${pkgs.libnatpmp}/bin/natpmpc -a 1 0 udp 60 -g ${dns} && ${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g ${dns}) > /dev/null
+          ${pkgs.busybox}/bin/sleep 45
+        done
+      '';
+      Type = "simple";
+      Restart = "on-failure";
     };
   };
 
