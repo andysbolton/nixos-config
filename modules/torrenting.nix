@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, ... }:
 let
   netns = "vpn";
   ip = "10.2.0.2/32";
@@ -6,13 +6,21 @@ let
   wgConfPath = config.sops.secrets."proton-vpn.conf".path;
   qbittorrentWebuiPort = 4292;
 in {
+  users.groups.media = {};
+  users.users.plex.extraGroups = [ "media" ];
+  users.users.radarr.extraGroups = [ "media" ];
+  users.users.qbittorrent.extraGroups = [ "media" ];
+
   services.qbittorrent = {
     enable = true;
     webuiPort = qbittorrentWebuiPort;
     serverConfig = {
       LegalNotice.Accepted = true;
 
-      BitTorrent.Session.QueueingSystemEnabled = false;
+      BitTorrent.Session = {
+        QueueingSystemEnabled = false;
+        DefaultSavePath = "/mnt/media/Seeding";
+      };
 
       Network.PortForwarding.Enabled = false;
 

@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, ... }:
 let systemctl = "${pkgs.systemd}/bin/systemctl --user";
 in {
   programs.waybar = {

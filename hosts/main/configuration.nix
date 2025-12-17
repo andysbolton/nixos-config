@@ -65,8 +65,6 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Note for future:
-  # is asdf still installed even though I removed it from systemPackages?
   environment.systemPackages = with pkgs; [
     (retroarch.withCores (cores: with cores; [ genesis-plus-gx snes9x ]))
     _1password-cli
@@ -96,6 +94,7 @@
     lsd
     lxqt.lxqt-policykit
     lynx
+    fennel
     nh
     pavucontrol
     procs
