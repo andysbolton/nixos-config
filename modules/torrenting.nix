@@ -55,6 +55,11 @@ in {
       "wg-proton.service"
       "proton-port-forwarding.service"
     ];
+    partOf = [ 
+      "netns@${netns}.service"
+      "wg-proton.service"
+      "proton-port-forwarding.service"
+    ];
     serviceConfig = {
       NetworkNamespacePath = "/run/netns/${netns}";
       BindReadOnlyPaths =
@@ -68,6 +73,7 @@ in {
   systemd.services.radarr = {
     after = [ "netns@${netns}.service" "wg-proton.service" ];
     bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
+    partOf = [ "netns@${netns}.service" "wg-proton.service" ];
     serviceConfig.NetworkNamespacePath = "/run/netns/${netns}";
   };
 
@@ -75,6 +81,7 @@ in {
   systemd.services.prowlarr = {
     after = [ "netns@${netns}.service" "wg-proton.service" ];
     bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
+    partOf = [ "netns@${netns}.service" "wg-proton.service" ];
     serviceConfig.NetworkNamespacePath = "/run/netns/${netns}";
   };
 
@@ -82,6 +89,9 @@ in {
   systemd.services."netns@" = {
     description = "%I network namespace";
     before = [ "network.target" ];
+    # Adding partOf ensures that if wg-proton stops,
+    # this unit is considered for stopping as well
+    partOf = [ "wg-proton.service" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -92,8 +102,8 @@ in {
 
   systemd.services.wg-proton = {
     description = "wg network interface (proton)";
-    bindsTo = [ "netns@${netns}.service" ];
     requires = [ "network-online.target" ];
+    bindsTo = [ "netns@${netns}.service" ];
     after = [ "netns@${netns}.service" ];
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
