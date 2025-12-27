@@ -35,6 +35,10 @@ in {
     roswell
     rlwrap
     (sbcl.withPackages (ps: [ ps.swank ]))
+    tcpdump
+    traceroute
+    whois
+
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       SUDO_ASKPASS=${askPass}/bin/ask-pass \
         sudo -A ip netns exec \
