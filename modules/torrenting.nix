@@ -1,14 +1,15 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 let
   netns = "vpn";
   ip = "10.2.0.2/32";
   dns = "10.2.0.1";
   wgConfPath = config.sops.secrets."proton-vpn.conf".path;
   qbittorrentWebuiPort = 4292;
-  downloadPath = "/mnt/media/Downloads";
+  downloadPath = "/mnt/media/Seeding";
 in {
   users.groups.media = { };
   users.groups.unpackerr = { };
+  users.users.andy.extraGroups = [ "media" ];
   users.users.plex.extraGroups = [ "media" ];
   users.users.radarr.extraGroups = [ "media" ];
   users.users.qbittorrent.extraGroups = [ "media" ];
@@ -68,7 +69,10 @@ in {
       "proton-port-forwarding.service"
     ];
     serviceConfig = {
+      User = "qbittorrent";
+      Group = lib.mkForce "media";
       NetworkNamespacePath = "/run/netns/${netns}";
+      UMask = "0002";
       BindReadOnlyPaths =
         [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
     };
@@ -180,10 +184,10 @@ in {
 
   systemd.services.unpackerr = {
     description = "unpackerr service";
-    bindsTo = [ "wg-${netns}.service" ];
-    after = [ "network-online.target" "wg-${netns}.service" ];
+    bindsTo = [ "wg-proton.service" ];
+    after = [ "network-online.target" "wg-proton.service" ];
     wants = [ "network-online.target" ];
-    wantedBy = [ ];
+    wantedBy = [ "multi-user.target" ];
 
     # unitConfig = {
     #   ConditionDirectoryNotEmpty = requiredPaths;
@@ -191,13 +195,13 @@ in {
     environment = let
       # Global settings
       globalVars = {
-        UN_DEBUG = false;
+        UN_DEBUG = "false";
         UN_LOG_FILE = ""; # Log to stdout for container
         UN_LOG_FILES = "0"; # Disable log rotation (container stdout)
         UN_LOG_FILE_MB = "0";
         UN_START_DELAY = "1m";
         UN_RETRY_DELAY = "5m";
-        UN_MAX_RETRIES = 3;
+        UN_MAX_RETRIES = "3";
         UN_WEBSERVER_METRICS = "true";
         UN_WEBSERVER_LISTEN_ADDR = "0.0.0.0:1819";
         TZ = "America/Mountain";
@@ -217,7 +221,9 @@ in {
       # Radarr configuration
       radarrVars = {
         UN_RADARR_0_URL = "http://localhost:7878/";
-        UN_RADARR_0_PATHS_0 = "${downloadPath}/Seeding";
+        UN_RADARR_0_API_KEY =
+          "filepath:${config.sops.secrets."radarr_api_key".path}";
+        UN_RADARR_0_PATHS_0 = downloadPath;
         UN_RADARR_0_PROTOCOLS = "torrent";
       };
     in globalVars // radarrVars;
@@ -226,22 +232,10 @@ in {
       Type = "simple";
       User = "unpackerr";
       Group = "media";
+      TimeoutStopSec = "5min";
       NetworkNamespacePath = "/var/run/netns/${netns}";
-      # BindReadOnlyPaths = [
-      #   "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind"
-      #   # "/etc/netns/${netns}/nsswitch.conf:/etc/nsswitch.conf:norbind"
-      # ];
       ExecStart = "${pkgs.unpackerr}/bin/unpackerr";
     };
-
-    paths.unpackerr = {
-      wantedBy = [ "multi-user.target" ];
-
-      # pathConfig = {
-      #   DirectoryNotEmpty = requiredPaths;
-      # };
-    };
-
   };
 
   environment.etc."netns/${netns}/resolv.conf".text = "nameserver ${dns}";

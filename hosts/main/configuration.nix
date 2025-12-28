@@ -168,6 +168,11 @@
     age.keyFile = "/home/andy/.config/sops/age/keys.txt";
     secrets."wireless.conf" = { };
     secrets."proton-vpn.conf" = { };
+    secrets."radarr_api_key" = {
+      owner = "unpackerr";
+      group = "media";
+      mode = "0440";
+    };
   };
   security.polkit.enable = true;
 
