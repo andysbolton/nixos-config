@@ -3,7 +3,7 @@
     ./hardware-configuration.nix
     ./disko.nix
     inputs.sops-nix.nixosModules.sops
-    inputs.wayland-pipewire-idle-inhibit.nixosModules.default
+    # inputs.wayland-pipewire-idle-inhibit.nixosModules.default
   ];
 
   # Use the systemd-boot EFI boot loader.
@@ -125,17 +125,6 @@
     "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
   stylix.targets.fish.enable = false;
 
-  systemd.services.greetd.serviceConfig = {
-    Type = "idle";
-    StandardInput = "tty";
-    StandardOutput = "tty";
-    StandardError = "journal"; # Without this errors will spam on screen
-    # Without these bootlogs will spam on screen
-    TTYReset = true;
-    TTYVHangup = true;
-    TTYVTDisallocate = true;
-  };
-
   services.greetd = {
     enable = true;
     settings = {
@@ -146,6 +135,17 @@
         user = "greeter";
       };
     };
+  };
+
+  systemd.services.greetd.serviceConfig = {
+    Type = "idle";
+    StandardInput = "tty";
+    StandardOutput = "tty";
+    StandardError = "journal"; # Without this errors will spam on screen
+    # Without these bootlogs will spam on screen
+    TTYReset = true;
+    TTYVHangup = true;
+    TTYVTDisallocate = true;
   };
 
   services.openssh.enable = true;
@@ -186,17 +186,25 @@
       [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
   };
 
-  services.wayland-pipewire-idle-inhibit = {
+  modules.vpn = {
     enable = true;
-    systemdTarget = "river-session.target";
-    settings = {
-      verbosity = "INFO";
-      media_minimum_duration = 10;
-      idle_inhibitor = "wayland";
-      sink_whitelist = [ ];
-      node_blacklist = [ ];
-    };
+    dns = "10.2.0.1";
+    ip = "10.2.0.2/32";
+    netns = "vpn";
+    wgConfPath = config.sops.secrets."proton-vpn.conf".path;
   };
+
+  # services.wayland-pipewire-idle-inhibit = {
+  #   enable = true;
+  #   systemdTarget = "river-session.target";
+  #   settings = {
+  #     verbosity = "INFO";
+  #     media_minimum_duration = 10;
+  #     idle_inhibitor = "wayland";
+  #     sink_whitelist = [ ];
+  #     node_blacklist = [ ];
+  #   };
+  # };
 
   # Copy the NixOS configuration file and link it from the resulting system
   # (/run/current-system/configuration.nix). This is useful in case you
