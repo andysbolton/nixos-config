@@ -25,7 +25,7 @@ in {
           enable = lib.mkEnableOption "the ${name} service.";
           addUserToMediaGroup = lib.mkOption {
             type = lib.types.bool;
-            default = false;
+            default = true;
             description = "Add ${name} user to media group.";
           };
         };
