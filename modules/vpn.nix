@@ -1,25 +1,24 @@
-{ lib, pkgs, config, ... }:
-with lib; {
+{ lib, pkgs, config, ... }: {
   options.modules.vpn = {
-    enable = mkOption {
-      type = types.bool;
-      default = false;
-      description = "Enable the ProtonVPN WireGuard setup.";
-    };
-    dns = mkOption {
-      type = types.str;
+    enable = lib.mkEnableOption "the ProtonVPN WireGuard setup.";
+
+    dns = lib.mkOption {
+      type = lib.types.str;
       description = "DNS server IP address to use within the VPN.";
     };
-    ip = mkOption {
-      type = types.str;
+
+    ip = lib.mkOption {
+      type = lib.types.str;
       description = "IP address to assign to the WireGuard interface.";
     };
-    netns = mkOption {
-      type = types.str;
+
+    netns = lib.mkOption {
+      type = lib.types.str;
       description = "Name of the network namespace to use with the VPN.";
     };
-    wgConfPath = mkOption {
-      type = types.path;
+
+    wgConfPath = lib.mkOption {
+      type = lib.types.path;
       description = "Path to the WireGuard configuration file.";
     };
   };

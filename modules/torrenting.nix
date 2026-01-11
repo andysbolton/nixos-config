@@ -9,8 +9,6 @@ in {
   users.groups.unpackerr = { };
   users.users.andy.extraGroups = [ "media" ];
   users.users.plex.extraGroups = [ "media" ];
-  users.users.radarr.extraGroups = [ "media" ];
-  users.users.sonarr.extraGroups = [ "media" ];
   users.users.qbittorrent.extraGroups = [ "media" ];
   users.users.unpackerr = {
     isSystemUser = true;
@@ -78,30 +76,6 @@ in {
   };
 
   services.plex.enable = true;
-
-  # services.radarr.enable = true;
-  # systemd.services.radarr = {
-  #   after = [ "netns@${netns}.service" "wg-proton.service" ];
-  #   bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
-  #   partOf = [ "netns@${netns}.service" "wg-proton.service" ];
-  #   serviceConfig.NetworkNamespacePath = "/run/netns/${netns}";
-  # };
-
-  services.sonarr.enable = true;
-  systemd.services.sonarr = {
-    after = [ "netns@${netns}.service" "wg-proton.service" ];
-    bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
-    partOf = [ "netns@${netns}.service" "wg-proton.service" ];
-    serviceConfig.NetworkNamespacePath = "/run/netns/${netns}";
-  };
-
-  services.prowlarr.enable = true;
-  systemd.services.prowlarr = {
-    after = [ "netns@${netns}.service" "wg-proton.service" ];
-    bindsTo = [ "netns@${netns}.service" "wg-proton.service" ];
-    partOf = [ "netns@${netns}.service" "wg-proton.service" ];
-    serviceConfig.NetworkNamespacePath = "/run/netns/${netns}";
-  };
 
   systemd.services.unpackerr = {
     description = "unpackerr service";

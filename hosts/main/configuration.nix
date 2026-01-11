@@ -186,6 +186,15 @@
       [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
   };
 
+  modules.arrs = {
+    radarr.enable = true;
+    sonarr.enable = true;
+    prowlarr = {
+      enable = true;
+      addUserToMediaGroup = false;
+    };
+  };
+
   modules.vpn = {
     enable = true;
     dns = "10.2.0.1";
