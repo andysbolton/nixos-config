@@ -35,14 +35,50 @@ in {
     roswell
     rlwrap
     (sbcl.withPackages (ps: [ ps.swank ]))
+    slskd
     tcpdump
     traceroute
     whois
-
+    # (pkgs.writeShellScriptBin "firefox-vpn" ''
+    #   SUDO_ASKPASS=${askPass}/bin/ask-pass \
+    #     sudo -A ip netns exec vpn \
+    #       sudo -u $(whoami) \
+    #         sh -c "XDG_RUNTIME_DIR=/run/user/$(id -u) \
+    #                PULSE_SERVER=unix:/run/user/$(id -u)/pulse/native \
+    #                ${pkgs.firefox}/bin/firefox"
+    # '')
+    # (pkgs.writeShellScriptBin "firefox-vpn" ''
+    #   USER_ID=$(id -u)
+    #
+    #   SUDO_ASKPASS=${askPass}/bin/ask-pass \
+    #     sudo -A ip netns exec vpn \
+    #       sudo -u $(whoami) \
+    #         env \
+    #           XDG_RUNTIME_DIR=/run/user/$USER_ID \
+    #           PULSE_SERVER=unix:/run/user/$USER_ID/pulse/native \
+    #           DISPLAY="$DISPLAY" \
+    #           WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
+    #           ${pkgs.dbus}/bin/dbus-run-session \
+    #             ${pkgs.firefox}/bin/firefox -no-remote "$@"
+    # '')
     (pkgs.writeShellScriptBin "firefox-vpn" ''
+      USER_ID=$(id -u)
+      # Need to share this so that sound will work correctly.
+      XDG_RUNTIME_DIR=/run/user/$USER_ID
+
       SUDO_ASKPASS=${askPass}/bin/ask-pass \
-        sudo -A ip netns exec \
-          vpn sudo -u $(whoami) ${pkgs.firefox}/bin/firefox"$@"
+        sudo -A ip netns exec vpn \
+          sudo -u $(whoami) \
+            ${pkgs.bubblewrap}/bin/bwrap \
+              --dev-bind / / \
+              --unshare-ipc \
+              ${pkgs.dbus}/bin/dbus-run-session \
+                env \
+                  XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR \
+                  PULSE_SERVER=unix:$XDG_RUNTIME_DIR/pulse/native \
+                  DISPLAY="$DISPLAY" \
+                  WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
+                  ${pkgs.firefox}/bin/firefox -no-remote "$@"
     '')
   ];
 

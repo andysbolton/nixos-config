@@ -54,7 +54,7 @@
 
             ${iproute2}/bin/ip link add wg0 type wireguard
             ${iproute2}/bin/ip link set wg0 netns ${config.modules.vpn.netns}
-            # ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link set dev wg0 mtu 1280
+            ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link set dev wg0 mtu 1280
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} address add ${config.modules.vpn.ip} dev wg0
             ${iproute2}/bin/ip netns exec ${config.modules.vpn.netns} \
               ${wireguard-tools}/bin/wg setconf wg0 ${config.modules.vpn.wgConfPath}

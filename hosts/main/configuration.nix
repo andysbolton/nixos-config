@@ -203,6 +203,11 @@
     wgConfPath = config.sops.secrets."proton-vpn.conf".path;
   };
 
+  services.printing.enable = true;
+  # Arkscan/Zebra usually works with standard CUPS drivers, 
+  # but gutenprint provides extra compatibility if needed.
+  services.printing.drivers = [ pkgs.gutenprint ];
+
   # services.wayland-pipewire-idle-inhibit = {
   #   enable = true;
   #   systemdTarget = "river-session.target";
