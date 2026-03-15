@@ -81,7 +81,7 @@
       bindsTo = [ "wg-proton.service" ];
       partOf = [ "qbittorrent.service" ];
       serviceConfig = {
-        NetworkNamespacePath = "/run/netns/${config.modules.vpn.netns}";
+        NetworkNamespacePath = "/var/run/netns/${config.modules.vpn.netns}";
         User = "root";
         ExecStartPre = pkgs.writers.writeBash "aquire-and-set-port" ''
           port=$(

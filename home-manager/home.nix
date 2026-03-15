@@ -1,4 +1,4 @@
-{ config, lib, pkgs, inputs, ... }:
+{ config, lib, pkgs, nixpkgs-unstable, ... }:
 let
   # https://github.com/davatorium/rofi/issues/584#issuecomment-384555551
   askPass = (pkgs.writeShellScriptBin "ask-pass" ''
@@ -28,17 +28,19 @@ in {
   home.stateVersion = "25.05"; # Please read the comment before changing.
 
   home.packages = with pkgs; [
+    (sbcl.withPackages (ps: [ ps.swank ]))
     lua
     lua52Packages.fennel
-    rsync
-    xfce.thunar
-    roswell
+    nixpkgs-unstable.github-copilot-cli
     rlwrap
-    (sbcl.withPackages (ps: [ ps.swank ]))
+    roswell
+    rsync
     slskd
     tcpdump
     traceroute
     whois
+    xclip
+    xfce.thunar
     # (pkgs.writeShellScriptBin "firefox-vpn" ''
     #   SUDO_ASKPASS=${askPass}/bin/ask-pass \
     #     sudo -A ip netns exec vpn \

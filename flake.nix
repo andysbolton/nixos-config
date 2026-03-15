@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,11 +32,19 @@
     # nur.url = "github:nix-community/nur";
   };
 
-  outputs =
-    { self, nixpkgs, home-manager, stylix, disko, sops-nix, ... }@inputs: {
-      nixosConfigurations.main = nixpkgs.lib.nixosSystem {
+  outputs = { self, nixpkgs, home-manager, stylix, disko, sops-nix
+    , nixpkgs-unstable, ... }@inputs: {
+      nixosConfigurations.main = let
+        extraSpecialArgs = {
+          inherit inputs;
+          nixpkgs-unstable = import nixpkgs-unstable {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+        };
+      in nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        specialArgs = { inherit inputs; };
+        specialArgs = extraSpecialArgs;
         modules = [
           ./hosts/main/configuration.nix
           ./modules
@@ -43,7 +52,7 @@
           home-manager.nixosModules.home-manager
           {
             home-manager.users.andy = ./home-manager/home.nix;
-            home-manager.extraSpecialArgs = { inherit inputs; };
+            home-manager.extraSpecialArgs = extraSpecialArgs;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = false;
           }

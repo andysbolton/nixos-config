@@ -84,7 +84,6 @@
     gh
     git
     gnumake
-    heroic
     httpie
     jq
     killall

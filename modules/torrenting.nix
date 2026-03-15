@@ -55,12 +55,7 @@ in {
       "wg-proton.service"
       "proton-port-forwarding.service"
     ];
-    bindsTo = [
-      "netns@${netns}.service"
-      "wg-proton.service"
-      "proton-port-forwarding.service"
-    ];
-    partOf = [
+    wants = [
       "netns@${netns}.service"
       "wg-proton.service"
       "proton-port-forwarding.service"
@@ -68,7 +63,7 @@ in {
     serviceConfig = {
       User = "qbittorrent";
       Group = lib.mkForce "media";
-      NetworkNamespacePath = "/run/netns/${netns}";
+      NetworkNamespacePath = "/var/run/netns/${netns}";
       UMask = "0002";
       BindReadOnlyPaths =
         [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
@@ -76,6 +71,10 @@ in {
   };
 
   services.plex.enable = true;
+  systemd.services.plex = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+  };
 
   systemd.services.unpackerr = {
     description = "unpackerr service";
