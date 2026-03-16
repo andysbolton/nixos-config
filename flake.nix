@@ -5,6 +5,11 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
+    nix-darwin = {
+      url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -39,31 +44,66 @@
     # nur.url = "github:nix-community/nur";
   };
 
-  outputs = { self, nixpkgs, home-manager, stylix, disko, sops-nix
-    , nixpkgs-unstable, ... }@inputs: {
+  outputs = { disko, home-manager, nixpkgs, nix-darwin, nixpkgs-unstable, self
+    , sops-nix, stylix, ... }@inputs:
+    let
+      mkPkgs = system:
+        import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+
+      mkUnstablePkgs = system:
+        import nixpkgs-unstable {
+          inherit system;
+          config.allowUnfree = true;
+        };
+    in {
       nixosConfigurations.main = let
+        system = "x86_64-linux";
+        pkgs = mkPkgs system;
         extraSpecialArgs = {
           inherit inputs;
-          nixpkgs-unstable = import nixpkgs-unstable {
-            system = "x86_64-linux";
-            config.allowUnfree = true;
-          };
+          nixpkgs-unstable = mkUnstablePkgs system;
         };
       in nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
+        inherit system pkgs;
         specialArgs = extraSpecialArgs;
         modules = [
           ./hosts/main/configuration.nix
           ./modules
           disko.nixosModules.disko
           home-manager.nixosModules.home-manager
+          stylix.nixosModules.stylix
           {
-            home-manager.users.andy = ./home-manager/home.nix;
+            home-manager.users.andy = ./home-manager/linux.nix;
             home-manager.extraSpecialArgs = extraSpecialArgs;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = false;
           }
-          stylix.nixosModules.stylix
+        ];
+      };
+
+      darwinConfigurations.work-darwin = let
+        system = "aarch64-darwin";
+        pkgs = mkPkgs system;
+        extraSpecialArgs = {
+          inherit inputs;
+          nixpkgs-unstable = mkUnstablePkgs system;
+        };
+      in nix-darwin.lib.darwinSystem {
+        inherit system pkgs;
+        specialArgs = extraSpecialArgs;
+        modules = [
+          ./hosts/work-darwin/configuration.nix
+          home-manager.darwinModules.home-manager
+          stylix.darwinModules.stylix
+          {
+            home-manager.users.andy = ./home-manager/darwin.nix;
+            home-manager.extraSpecialArgs = extraSpecialArgs;
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = false;
+          }
         ];
       };
     };

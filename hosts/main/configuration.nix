@@ -42,73 +42,20 @@
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     shell = pkgs.fish;
-    packages = with pkgs; [
-      go
-      grim # screenshot tool
-      imv # command-line image viewer
-      lf # terminal file manager
-      mangohud
-      moonlight-qt
-      mpv # command-line media player
-      slurp # select region of screen
-      solaar
-      starship
-      sunshine
-      swappy # screenshot annotation tool
-      tree
-    ];
   };
 
   programs.fish.enable = true;
-
-  nixpkgs.config.allowUnfree = true;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   environment.systemPackages = with pkgs; [
     (retroarch.withCores (cores: with cores; [ genesis-plus-gx snes9x ]))
-    _1password-cli
-    _1password-gui
-    age
-    bat
-    chezmoi
-    chromium
-    delta
-    dig
-    discord
-    # egl-wayland
-    fd
-    file
-    fzf
-    gcc
-    gh
-    git
-    gnumake
-    httpie
-    jq
-    killall
-    # lan-mouse
-    libnatpmp
-    lm_sensors
-    lsd
     lxqt.lxqt-policykit
-    lynx
-    fennel
-    nh
     pavucontrol
-    procs
-    python314
-    ripgrep
-    sops
     swaylock
-    trash-cli
-    unzip
-    wezterm
-    wget
     wl-clipboard
     wlopm
-    xorg.xdpyinfo # check resolution
-    zoxide
+    xorg.xdpyinfo
   ];
 
   fonts.fontDir.enable = true;
@@ -117,12 +64,6 @@
   # Enable the gnome-keyring secrets vault.
   # Will be exposed through DBus to programs willing to store secrets.
   services.gnome.gnome-keyring.enable = true;
-
-  stylix.enable = true;
-  stylix.autoEnable = true;
-  stylix.base16Scheme =
-    "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
-  stylix.targets.fish.enable = false;
 
   services.greetd = {
     enable = true;
