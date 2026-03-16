@@ -35,34 +35,13 @@ in {
     rlwrap
     roswell
     rsync
+    nix-search-cli
     slskd
     tcpdump
     traceroute
     whois
     xclip
     xfce.thunar
-    # (pkgs.writeShellScriptBin "firefox-vpn" ''
-    #   SUDO_ASKPASS=${askPass}/bin/ask-pass \
-    #     sudo -A ip netns exec vpn \
-    #       sudo -u $(whoami) \
-    #         sh -c "XDG_RUNTIME_DIR=/run/user/$(id -u) \
-    #                PULSE_SERVER=unix:/run/user/$(id -u)/pulse/native \
-    #                ${pkgs.firefox}/bin/firefox"
-    # '')
-    # (pkgs.writeShellScriptBin "firefox-vpn" ''
-    #   USER_ID=$(id -u)
-    #
-    #   SUDO_ASKPASS=${askPass}/bin/ask-pass \
-    #     sudo -A ip netns exec vpn \
-    #       sudo -u $(whoami) \
-    #         env \
-    #           XDG_RUNTIME_DIR=/run/user/$USER_ID \
-    #           PULSE_SERVER=unix:/run/user/$USER_ID/pulse/native \
-    #           DISPLAY="$DISPLAY" \
-    #           WAYLAND_DISPLAY="$WAYLAND_DISPLAY" \
-    #           ${pkgs.dbus}/bin/dbus-run-session \
-    #             ${pkgs.firefox}/bin/firefox -no-remote "$@"
-    # '')
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       USER_ID=$(id -u)
       # Need to share this so that sound will work correctly.
@@ -152,6 +131,11 @@ in {
     package = pkgs.rofi-wayland;
     font = lib.mkForce "CaskaydiaCove Nerd Font 14";
     theme = { "*" = { padding = config.lib.formats.rasi.mkLiteral "3px"; }; };
+    extraConfig = {
+      markup-rows = true;
+      # modi = "drun,np:${builtins.toString ./.}/rofi/search-nix-pkgs.sh";
+      # combi-modi = "drun,np";
+    };
   };
 
   programs.btop.enable = true;

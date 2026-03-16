@@ -5,7 +5,8 @@ layout_generator=rivertile
 riverctl map normal Super Return spawn wezterm
 riverctl map normal Alt+Shift F spawn "(killall .firefox-wrapped || true) && firefox"
 riverctl map normal Alt+Shift+Control F spawn "(killall .firefox-wrapped || true) && firefox-vpn"
-riverctl map normal Super T spawn "rofi -show run"
+riverctl map normal Super T spawn 'rofi -show drun -drun-exclude-categories "Game"'
+riverctl map normal Super N spawn "$HOME/nixos-config/home-manager/rofi/search-nix-pkgs.sh"
 
 # Close window
 riverctl map normal Alt+Shift Q close
