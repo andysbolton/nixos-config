@@ -3,15 +3,14 @@
 
   home.stateVersion = "25.05";
 
-  programs.home-manager.enable = true;
-
   home.sessionVariables = { EDITOR = "nvim"; };
+
+  # programs.fish.enable = true;
 
   home.packages = with pkgs; [
     (sbcl.withPackages (ps: [ ps.swank ]))
     _1password-cli
     _1password-gui
-
     age # simple modern file encryption tool
     bat # cat replacement with syntax highlighting
     chezmoi

@@ -1,7 +1,7 @@
 { pkgs, ... }: {
-  networking.hostName = "Andys-Macbook-Pro.local";
+  networking.hostName = "work";
 
-  users.users.andy = { home = "/Users/andybolton"; };
+  users.users.andybolton = { home = "/Users/andybolton"; };
 
   system.primaryUser = "andybolton";
 
@@ -10,9 +10,30 @@
     trusted-users = [ "andybolton" ];
   };
 
+  programs.fish.enable = true;
+
   environment.shells = with pkgs; [ fish ];
 
+  homebrew = {
+    enable = true;
+    brews = [ "tfenv" "lgug2z/tap/komorebi-for-mac" ];
+  };
+
   fonts.packages = with pkgs; [ nerd-fonts.caskaydia-cove ];
+
+  services.karabiner-elements = {
+    enable = true;
+    package = pkgs.karabiner-elements.overrideAttrs (old: {
+      version = "14.13.0";
+
+      src = pkgs.fetchurl {
+        inherit (old.src) url;
+        hash = "sha256-gmJwoht/Tfm5qMecmq1N6PSAIfWOqsvuHU8VDJY8bLw=";
+      };
+
+      dontFixup = true;
+    });
+  };
 
   system.defaults = {
     NSGlobalDomain = {
@@ -53,7 +74,7 @@
       ShowDayOfWeek = true;
     };
 
-    screencapture.location = "/Users/andy/Desktop";
+    screencapture.location = "/Users/andybolton/Desktop";
   };
 
   system.keyboard = {

@@ -21,7 +21,7 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -42,9 +42,11 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
     # nur.url = "github:nix-community/nur";
+
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
   };
 
-  outputs = { disko, home-manager, nixpkgs, nix-darwin, nixpkgs-unstable, self
+  outputs = { disko, home-manager, nixpkgs, nix-darwin, nix-homebrew, nixpkgs-unstable, self
     , sops-nix, stylix, ... }@inputs:
     let
       mkPkgs = system:
@@ -99,10 +101,17 @@
           home-manager.darwinModules.home-manager
           stylix.darwinModules.stylix
           {
-            home-manager.users.andy = ./home-manager/darwin.nix;
+            home-manager.users.andybolton = ./home-manager/darwin.nix;
             home-manager.extraSpecialArgs = extraSpecialArgs;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = false;
+          }
+          nix-homebrew.darwinModules.nix-homebrew {
+            nix-homebrew = {
+              enable = true;
+              enableRosetta = true;
+              user = "andybolton";
+            };
           }
         ];
       };
