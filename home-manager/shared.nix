@@ -18,7 +18,6 @@
     dig # DNS lookup tool
     discord
     fd
-    fennel
     file
     fzf
     gcc
@@ -33,7 +32,7 @@
     libnatpmp # NAT-PMP client library and tools
     lsd # modern ls replacement
     lua
-    lua52Packages.fennel
+    luaPackages.fennel
     lynx # terminal web browser
     nh # helper CLI for Nix/Home Manager workflows
     nixpkgs-unstable.github-copilot-cli # GitHub Copilot CLI from unstable nixpkgs
