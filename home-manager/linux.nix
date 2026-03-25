@@ -63,7 +63,6 @@ in {
 
   programs.rofi = {
     enable = true;
-    package = pkgs.rofi-wayland;
     font = lib.mkForce "CaskaydiaCove Nerd Font 14";
     theme = { "*" = { padding = config.lib.formats.rasi.mkLiteral "3px"; }; };
     extraConfig = { markup-rows = true; };

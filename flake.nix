@@ -46,8 +46,8 @@
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
   };
 
-  outputs = { disko, home-manager, nixpkgs, nix-darwin, nix-homebrew, nixpkgs-unstable, self
-    , sops-nix, stylix, ... }@inputs:
+  outputs = { disko, home-manager, nixpkgs, nix-darwin, nix-homebrew
+    , nixpkgs-unstable, self, sops-nix, stylix, ... }@inputs:
     let
       mkPkgs = system:
         import nixpkgs {
@@ -75,8 +75,8 @@
           ./hosts/main/configuration.nix
           ./modules
           disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
           stylix.nixosModules.stylix
+          home-manager.nixosModules.home-manager
           {
             home-manager.users.andy = ./home-manager/linux.nix;
             home-manager.extraSpecialArgs = extraSpecialArgs;
@@ -98,15 +98,16 @@
         specialArgs = extraSpecialArgs;
         modules = [
           ./hosts/work-darwin/configuration.nix
-          home-manager.darwinModules.home-manager
           stylix.darwinModules.stylix
+          home-manager.darwinModules.home-manager
           {
             home-manager.users.andybolton = ./home-manager/darwin.nix;
             home-manager.extraSpecialArgs = extraSpecialArgs;
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = false;
           }
-          nix-homebrew.darwinModules.nix-homebrew {
+          nix-homebrew.darwinModules.nix-homebrew
+          {
             nix-homebrew = {
               enable = true;
               enableRosetta = true;

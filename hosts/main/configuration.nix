@@ -70,7 +70,7 @@
     settings = {
       default_session = {
         command = ''
-          ${pkgs.greetd.tuigreet}/bin/tuigreet --time --cmd "river"
+          ${pkgs.tuigreet}/bin/tuigreet --time --cmd "river"
         '';
         user = "greeter";
       };
