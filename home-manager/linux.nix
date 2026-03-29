@@ -1,4 +1,10 @@
-{ config, lib, pkgs, nixpkgs-unstable, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-unstable,
+  ...
+}:
 let
   # https://github.com/davatorium/rofi/issues/584#issuecomment-384555551
   askPass = pkgs.writeShellScriptBin "ask-pass" ''
@@ -7,7 +13,8 @@ let
         -no-fixed-num-lines \
         -p "$(printf "$1" | sed s/://)"
   '';
-in {
+in
+{
   imports = [
     ./shared.nix
     ./modules/dunst.nix
@@ -53,11 +60,15 @@ in {
     '')
   ];
 
-  home.sessionVariables = { MOZ_ENABLE_WAYLAND = "1"; };
+  home.sessionVariables = {
+    MOZ_ENABLE_WAYLAND = "1";
+  };
 
   wayland.windowManager.river = {
     enable = true;
-    systemd = { enable = true; };
+    systemd = {
+      enable = true;
+    };
     extraConfig = builtins.readFile ./river/init;
   };
 
@@ -65,8 +76,14 @@ in {
     enable = true;
     package = pkgs.rofi-wayland;
     font = lib.mkForce "CaskaydiaCove Nerd Font 14";
-    theme = { "*" = { padding = config.lib.formats.rasi.mkLiteral "3px"; }; };
-    extraConfig = { markup-rows = true; };
+    theme = {
+      "*" = {
+        padding = config.lib.formats.rasi.mkLiteral "3px";
+      };
+    };
+    extraConfig = {
+      markup-rows = true;
+    };
   };
 
   services.swayidle = {
@@ -75,8 +92,7 @@ in {
     timeouts = [
       {
         timeout = 1740;
-        command =
-          "${pkgs.dunst}/bin/dunstify --urgency=normal 'Locking session in 1 minute'";
+        command = "${pkgs.dunst}/bin/dunstify --urgency=normal 'Locking session in 1 minute'";
       }
       {
         timeout = 1800;
@@ -89,7 +105,9 @@ in {
   services.udiskie = {
     enable = true;
     settings = {
-      program_options = { file_manager = "${pkgs.xfce.thunar}/bin/thunar"; };
+      program_options = {
+        file_manager = "${pkgs.xfce.thunar}/bin/thunar";
+      };
     };
   };
 }
