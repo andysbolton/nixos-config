@@ -19,7 +19,7 @@
     _1password-gui
     age # simple modern file encryption tool
     bat # cat replacement with syntax highlighting
-    chezmoi
+    nixpkgs-unstable.chezmoi
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
     discord
@@ -83,6 +83,10 @@
 
   stylix.targets.neovim.enable = false;
   stylix.targets.waybar.enable = false;
+  stylix.targets.gnome.enable = false;
+  stylix.targets.gtk.enable = false;
+  stylix.targets.eog.enable = false;
+  stylix.targets.gnome-text-editor.enable = false;
 
   stylix.targets.firefox.profileNames = [ "home" ];
   stylix.targets.firefox.colorTheme.enable = true;

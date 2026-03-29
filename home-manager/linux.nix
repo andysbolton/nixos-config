@@ -74,7 +74,6 @@ in
 
   programs.rofi = {
     enable = true;
-    package = pkgs.rofi-wayland;
     font = lib.mkForce "CaskaydiaCove Nerd Font 14";
     theme = {
       "*" = {
