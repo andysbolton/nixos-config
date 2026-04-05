@@ -170,3 +170,7 @@ shift + cmd - 9 : set sid (yabai -m query --spaces --display | jq -r 'map(select
 
 cmd - return : "/Users/andybolton/Applications/Home Manager Apps/WezTerm.app/wezterm-gui" start --always-new-process
 # shift + alt - t : echo "skhd works $(date)" >> /tmp/skhd-test.log
+
+cmd + shift - b : /path/to/firefox-bookmarks.sh
+
+cmd - t: /Users/andybolton/nixos-config/home-manager/choose/launch.sh

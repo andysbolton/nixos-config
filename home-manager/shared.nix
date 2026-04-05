@@ -19,7 +19,7 @@
     _1password-gui
     age # simple modern file encryption tool
     bat # cat replacement with syntax highlighting
-    nixpkgs-unstable.chezmoi
+    pkgs-unstable.chezmoi
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
     discord
@@ -61,16 +61,17 @@
 
   programs.neovim = {
     enable = true;
-    extraPackages = [
-      pkgs.cargo
-      pkgs.clang-tools
-      pkgs.dotnet-sdk
-      pkgs.fennel-ls
-      pkgs.fnlfmt
-      pkgs.nodejs_24
-      pkgs.lua-language-server
-      pkgs.stylua
-      pkgs.tree-sitter
+    extraPackages = with pkgs; [
+      cargo
+      clang-tools
+      dotnet-sdk
+      fennel-ls
+      fnlfmt
+      lua-language-server
+      luaPackages.luarocks
+      nodejs_24
+      stylua
+      tree-sitter
     ];
   };
 

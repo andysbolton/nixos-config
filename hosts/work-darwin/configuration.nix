@@ -40,7 +40,6 @@
     ];
     casks = [
       "microsoft-teams"
-      "raycast"
     ];
   };
 

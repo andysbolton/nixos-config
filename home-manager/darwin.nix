@@ -1,4 +1,10 @@
-{ pkgs, pkgs-unstable, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-unstable,
+  ...
+}:
 {
   # imports = [ ./shared.nix ./modules/firefox.nix ./modules/lan-mouse.nix ];
   imports = [
@@ -13,9 +19,14 @@
 
   home.packages = with pkgs; [
     azure-cli
+    choose-gui
     postgresql
-    reattach-to-user-namespace
+    powershell
   ];
+
+  home.sessionVariables = {
+    BROWSER = "${pkgs.firefox}/bin/firefox";
+  };
 
   services.jankyborders = {
     enable = true;
@@ -45,8 +56,9 @@
     enable = true;
     includeSystemPath = true;
     extraPackages = [
-      pkgs.jq
       pkgs-unstable.yabai
+      pkgs.ifstat-legacy
+      pkgs.jq
     ];
     config = {
       source = ./sketchybar;
