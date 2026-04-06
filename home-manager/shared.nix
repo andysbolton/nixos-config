@@ -1,17 +1,11 @@
-{
-  pkgs,
-  pkgs-unstable,
-  inputs,
-  ...
-}:
-{
+{ pkgs, pkgs-unstable, inputs, ... }: {
   imports = [ inputs.stylix.homeModules.stylix ];
 
   home.stateVersion = "25.05";
 
-  home.sessionVariables = {
-    EDITOR = "nvim";
-  };
+  home.sessionVariables = { EDITOR = "nvim"; };
+
+  xdg.configFile."nvim".source = ./nvim;
 
   home.packages = with pkgs; [
     (sbcl.withPackages (ps: [ ps.swank ]))
@@ -42,6 +36,7 @@
     lynx # terminal web browser
     nh # helper CLI for Nix/Home Manager workflows
     nixfmt
+    opencode
     pkgs-unstable.github-copilot-cli # GitHub Copilot CLI from unstable nixpkgs
     procs # modern ps replacement
     python314
@@ -80,7 +75,8 @@
   stylix.enable = true;
   stylix.autoEnable = true;
 
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+  stylix.base16Scheme =
+    "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
 
   stylix.targets.neovim.enable = false;
   stylix.targets.waybar.enable = false;
