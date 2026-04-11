@@ -6,9 +6,6 @@
   self,
   ...
 }:
-let
-  dotfilesPath = "${config.home.homeDirectory}/nixos-config/home-manager/dotfiles";
-in
 {
   imports = [
     ./shared.nix
@@ -22,9 +19,9 @@ in
 
   xdg.configFile = {
     "karabiner/karabiner.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/karabiner/karabiner.json";
-    "skhd/skhdrc".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/skhd/skhdrc";
-    sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/sketchybar";
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/karabiner/karabiner.json";
+    "skhd/skhdrc".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/skhdrc";
+    sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
   };
 
   home.packages = with pkgs; [

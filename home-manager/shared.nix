@@ -6,7 +6,10 @@
   ...
 }:
 {
-  imports = [ inputs.stylix.homeModules.stylix ];
+  imports = [
+    ./options.nix
+    inputs.stylix.homeModules.stylix
+  ];
 
   home.stateVersion = "25.05";
 
@@ -14,7 +17,11 @@
     EDITOR = "nvim";
   };
 
-  xdg.configFile."nvim".source = config.lib.file.mkOutOfStoreSymlink "${toString ./.}/dotfiles/nvim";
+  xdg.configFile = {
+    nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
+    "opencode/config.json".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
+  };
 
   home.packages = with pkgs; [
     (sbcl.withPackages (ps: [ ps.swank ]))
