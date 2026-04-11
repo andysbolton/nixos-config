@@ -46,7 +46,7 @@
   fonts.packages = with pkgs; [ nerd-fonts.caskaydia-cove ];
 
   services.karabiner-elements = {
-    enable = false;
+    enable = true;
     package = pkgs.karabiner-elements.overrideAttrs (old: {
       version = "14.13.0";
 

@@ -3,8 +3,12 @@
   lib,
   pkgs,
   pkgs-unstable,
+  self,
   ...
 }:
+let
+  dotfilesPath = "${config.home.homeDirectory}/nixos-config/home-manager/dotfiles";
+in
 {
   imports = [
     ./shared.nix
@@ -17,8 +21,10 @@
   home.homeDirectory = "/Users/andybolton";
 
   xdg.configFile = {
-    sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${toString ./.}/dotfiles/sketchybar";
-    "skhd/skhdrc".text = builtins.readFile ./dotfiles/skhd/skhdrc;
+    "karabiner/karabiner.json".source =
+      config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/karabiner/karabiner.json";
+    "skhd/skhdrc".source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/skhd/skhdrc";
+    sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${dotfilesPath}/sketchybar";
   };
 
   home.packages = with pkgs; [
