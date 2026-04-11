@@ -45,6 +45,7 @@ return {
     config = function()
       local function turn_off_line_numbers(buf)
         local win = vim.fn.bufwinid(buf)
+        vim.notify("win is" .. win)
         if win ~= -1 then
           vim.wo[win].number = false
           vim.wo[win].relativenumber = false
@@ -56,15 +57,46 @@ return {
         callback = function(args) turn_off_line_numbers(args.buf) end,
       })
 
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "CodeCompanionCLICreated",
+        callback = function(args)
+          -- print(vim.inspect(args))
+          turn_off_line_numbers(args.buf)
+          -- vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
+        end,
+      })
+
       vim.api.nvim_create_autocmd("TermOpen", {
-        pattern = "term://*opencode*",
+        pattern = "term://*opencode",
         callback = function(args)
           turn_off_line_numbers(args.buf)
           vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
         end,
       })
 
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "CodeCompanionCLICreated",
+        callback = function(args)
+          -- print(vim.inspect(args))
+          turn_off_line_numbers(args.buf)
+          -- vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
+        end,
+      })
+
       require("codecompanion").setup {
+        opts = {
+          log_level = "DEBUG",
+        },
+        tools = {
+          ["insert_edit_into_file"] = {
+            opts = {
+              require_approval_before = {
+                buffer = true,
+                file = true,
+              },
+            },
+          },
+        },
         extensions = {
           history = {
             enabled = true,
@@ -74,9 +106,9 @@ return {
           acp = {
             opencode = function()
               return require("codecompanion.adapters").extend("opencode", {
-                -- defaults = {
-                --   model = "claude-sonnet-4",
-                -- },
+                defaults = {
+                  -- model = "claude-sonnet-4.6",
+                },
               })
             end,
           },
@@ -101,6 +133,8 @@ return {
         display = {
           chat = {
             show_token_count = true,
+            show_settings = false, -- doesn't work with ACP right now
+            show_tools_processing = true,
             window = {
               layout = "vertical",
             },

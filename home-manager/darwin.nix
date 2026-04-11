@@ -6,7 +6,6 @@
   ...
 }:
 {
-  # imports = [ ./shared.nix ./modules/firefox.nix ./modules/lan-mouse.nix ];
   imports = [
     ./shared.nix
     ./modules/firefox.nix
@@ -17,8 +16,13 @@
 
   home.homeDirectory = "/Users/andybolton";
 
+  xdg.configFile = {
+    sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${toString ./.}/dotfiles/sketchybar";
+    "skhd/skhdrc".text = builtins.readFile ./dotfiles/skhd/skhdrc;
+  };
+
   home.packages = with pkgs; [
-    azure-cli
+    (azure-cli.withExtensions [ azure-cli-extensions.resource-graph ])
     choose-gui
     postgresql
     powershell
@@ -50,8 +54,6 @@
     };
   };
 
-  home.file.".config/skhd/skhdrc".text = builtins.readFile ./skhd/skhdrc;
-
   programs.sketchybar = {
     enable = true;
     includeSystemPath = true;
@@ -60,9 +62,5 @@
       pkgs.ifstat-legacy
       pkgs.jq
     ];
-    config = {
-      source = ./sketchybar;
-      recursive = true;
-    };
   };
 }

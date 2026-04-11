@@ -1,10 +1,5 @@
 #!/bin/bash
 
-# This is a demo config to showcase some of the most important commands.
-# It is meant to be changed and configured, as it is intentionally kept sparse.
-# For a (much) more advanced configuration example see my dotfiles:
-# https://github.com/FelixKratz/dotfiles
-
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
@@ -31,8 +26,8 @@ default=(
   padding_right=5
   icon.font="CaskaydiaCove Nerd Font:Bold:17.0"
   label.font="CaskaydiaCove Nerd Font:Bold:14.0"
-  # icon.color=0xffffffff
-  # label.color=0xffffffff
+  icon.color=0xffffffff
+  label.color=0xffffffff
   icon.padding_left=4
   icon.padding_right=4
   label.padding_left=4
@@ -71,7 +66,7 @@ done
 # only the properties deviating from the current defaults need to be set
 
 sketchybar --add item chevron left \
-  --set chevron icon= label.drawing=off \
+  --set chevron label.drawing=off \
   --add item front_app left \
   --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
@@ -87,8 +82,8 @@ sketchybar --add item chevron left \
 # volume is registered. More info about the event system can be found here:
 # https://felixkratz.github.io/SketchyBar/config/events
 
-sketchybar --add item clock right \
-  --set clock update_freq=10 icon= script="$PLUGIN_DIR/clock.sh" \
+sketchybar --add item clock center \
+  --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
   --add item volume right \
   --set volume script="$PLUGIN_DIR/volume.sh" \
   --subscribe volume volume_change \
@@ -96,21 +91,8 @@ sketchybar --add item clock right \
   --set battery update_freq=60 script="$PLUGIN_DIR/battery.sh" \
   --subscribe battery system_woke power_source_change
 
-sketchybar --add event hide_stats \
-  --add event show_stats \
-  --add event toggle_stats \
-  --add item animator right \
-  --set animator drawing=off \
-  updates=on \
-  script="$HOME/.config/sketchybar/plugins/toggle_stats.sh" \
-  --subscribe animator hide_stats show_stats toggle_stats
-
 cpu_percent=(
-  # label.font="CaskaydiaCove Nerd Font:Heavy:12"
-  label=CPU%
-  # label.color="$TEXT"
   icon="$CPU"
-  icon.color="$BLUE"
   update_freq=2
   mach_helper="$HELPER"
 )
@@ -119,12 +101,8 @@ sketchybar --add item cpu.percent right \
   --set cpu.percent "${cpu_percent[@]}"
 
 memory=(
-  # label.font="CaskaydiaCove Nerd Font:Heavy:12"
-  # label.color="$TEXT"
   icon="$MEMORY"
-  # icon.font="CaskaydiaCove Nerd Font:Bold:16.0"
-  # icon.color="$GREEN"
-  update_freq=15
+  update_freq=5
   script="$PLUGIN_DIR/stats/ram.sh"
 )
 
@@ -132,10 +110,7 @@ sketchybar --add item memory right \
   --set memory "${memory[@]}"
 
 disk=(
-  # label.font="CaskaydiaCove Nerd Font:Heavy:12"
-  # label.color="$TEXT"
   icon="$DISK"
-  # icon.color="$MAROON"
   update_freq=60
   script="$PLUGIN_DIR/stats/disk.sh"
 )
@@ -144,25 +119,14 @@ sketchybar --add item disk right \
   --set disk "${disk[@]}"
 
 network_down=(
-  # y_offset=-7
-  # label.font="CaskaydiaCove Nerd Font:Heavy:10"
-  # label.color="$TEXT"
   icon="$NETWORK_DOWN"
-  # icon.font="CaskaydiaCove Nerd Font:Bold:16.0"
-  # icon.color="$GREEN"
-  # icon.highlight_color="$BLUE"
+  icon.color=0xffffffff
   update_freq=1
 )
 
 network_up=(
-  # background.padding_right=-70
-  # y_offset=7
-  # label.font="CaskaydiaCove Nerd Font:Heavy:10"
-  # label.color="$TEXT"
-  # icon="$NETWORK_UP"
-  # icon.font="CaskaydiaCove Nerd Font:Bold:16.0"
-  # icon.color="$GREEN"
-  # icon.highlight_color="$BLUE"
+  icon="$NETWORK_UP"
+  icon.color=0xffffffff
   update_freq=1
   script="$PLUGIN_DIR/stats/network.sh"
 )

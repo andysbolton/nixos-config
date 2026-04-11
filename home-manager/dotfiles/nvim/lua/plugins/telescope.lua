@@ -35,7 +35,7 @@ return {
         "<leader>sr",
         function() require("telescope.builtin").resume() end,
         desc = "[S]earch [R]esume",
-      },     
+      },
       {
         "<leader>sb",
         function() require("telescope.builtin").buffers() end,
@@ -75,7 +75,8 @@ return {
               i = {
                 ["<C-h>"] = lga_actions.quote_prompt { postfix = " --hidden" },
                 ["<C-i>"] = lga_actions.quote_prompt { postfix = " --iglob" },
-                ["<C-k>"] = lga_actions.quote_prompt(),
+                ["<C-f>"] = lga_actions.quote_prompt { postfix = " --fixed-strings" },
+                ["<C-s>"] = lga_actions.quote_prompt(),
               },
             },
           },

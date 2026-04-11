@@ -173,4 +173,4 @@ cmd - return : "/Users/andybolton/Applications/Home Manager Apps/WezTerm.app/wez
 
 cmd + shift - b : /path/to/firefox-bookmarks.sh
 
-cmd - t: /Users/andybolton/nixos-config/home-manager/choose/launch.sh
+cmd - t: /Users/andybolton/nixos-config/home-manager/dotfiles/choose/launch.sh
