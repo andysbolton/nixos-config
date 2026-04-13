@@ -1,16 +1,5 @@
-{
-  config,
-  lib,
-  pkgs,
-  pkgs-unstable,
-  self,
-  ...
-}:
-{
-  imports = [
-    ./shared.nix
-    ./modules/firefox.nix
-  ];
+{ config, lib, pkgs, pkgs-unstable, self, ... }: {
+  imports = [ ./shared.nix ./modules/firefox.nix ];
 
   targets.darwin.copyApps.enable = true;
   targets.darwin.linkApps.enable = false;
@@ -18,22 +7,21 @@
   home.homeDirectory = "/Users/andybolton";
 
   xdg.configFile = {
-    "karabiner/karabiner.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/karabiner/karabiner.json";
-    "skhd/skhdrc".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/skhdrc";
-    sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
+    "karabiner/karabiner.json".source = config.lib.file.mkOutOfStoreSymlink
+      "${config.dotfilesPath}/karabiner/karabiner.json";
+    "skhd/skhdrc".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/skhdrc";
+    sketchybar.source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
   };
 
   home.packages = with pkgs; [
     (azure-cli.withExtensions [ azure-cli-extensions.resource-graph ])
     choose-gui
-    postgresql
     powershell
   ];
 
-  home.sessionVariables = {
-    BROWSER = "${pkgs.firefox}/bin/firefox";
-  };
+  home.sessionVariables = { BROWSER = "${pkgs.firefox}/bin/firefox"; };
 
   services.jankyborders = {
     enable = true;
@@ -60,10 +48,6 @@
   programs.sketchybar = {
     enable = true;
     includeSystemPath = true;
-    extraPackages = [
-      pkgs-unstable.yabai
-      pkgs.ifstat-legacy
-      pkgs.jq
-    ];
+    extraPackages = [ pkgs-unstable.yabai pkgs.ifstat-legacy pkgs.jq ];
   };
 }

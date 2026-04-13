@@ -1,26 +1,15 @@
-{
-  config,
-  pkgs,
-  pkgs-unstable,
-  inputs,
-  ...
-}:
-{
-  imports = [
-    ./options.nix
-    inputs.stylix.homeModules.stylix
-  ];
+{ config, pkgs, pkgs-unstable, inputs, ... }: {
+  imports = [ ./options.nix inputs.stylix.homeModules.stylix ];
 
   home.stateVersion = "25.05";
 
-  home.sessionVariables = {
-    EDITOR = "nvim";
-  };
+  home.sessionVariables = { EDITOR = "nvim"; };
 
   xdg.configFile = {
-    nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
-    "opencode/config.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
+    nvim.source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
+    "opencode/config.json".source = config.lib.file.mkOutOfStoreSymlink
+      "${config.dotfilesPath}/opencode/config.json";
   };
 
   home.packages = with pkgs; [
@@ -33,6 +22,7 @@
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
     discord
+    docker-compose
     fd
     file
     fzf
@@ -54,6 +44,7 @@
     nixfmt
     pkgs-unstable.opencode
     pkgs-unstable.github-copilot-cli # GitHub Copilot CLI from unstable nixpkgs
+    postgresql
     procs # modern ps replacement
     python314
     ripgrep # fast recursive text search tool
@@ -91,7 +82,8 @@
   stylix.enable = true;
   stylix.autoEnable = true;
 
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+  stylix.base16Scheme =
+    "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
 
   stylix.targets.neovim.enable = false;
   stylix.targets.waybar.enable = false;

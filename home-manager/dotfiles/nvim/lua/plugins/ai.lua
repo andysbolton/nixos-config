@@ -115,7 +115,7 @@ return {
         },
         interactions = {
           background = { adapter = { name = "opencode" } },
-          chat = { adapter = "opencode" },
+          chat = { adapter = { name = "mistral", model = "codestral-latest" } },
           inline = { adapter = "opencode" },
           cmd = { adapter = "opencode" },
           cli = {
@@ -133,7 +133,7 @@ return {
         display = {
           chat = {
             show_token_count = true,
-            show_settings = false, -- doesn't work with ACP right now
+            show_settings = true,
             show_tools_processing = true,
             window = {
               layout = "vertical",

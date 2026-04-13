@@ -40,7 +40,7 @@
 
   users.users.andy = {
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    extraGroups = [ "wheel" "docker" ];
     shell = pkgs.fish;
   };
 
@@ -147,6 +147,8 @@
   # Arkscan/Zebra usually works with standard CUPS drivers, 
   # but gutenprint provides extra compatibility if needed.
   services.printing.drivers = [ pkgs.gutenprint ];
+
+  virtualisation.docker = { enable = true; };
 
   # services.wayland-pipewire-idle-inhibit = {
   #   enable = true;

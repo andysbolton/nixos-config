@@ -7,6 +7,7 @@ riverctl map normal Alt+Shift F spawn "(killall .firefox-wrapped || true) && fir
 riverctl map normal Alt+Shift+Control F spawn "(killall .firefox-wrapped || true) && firefox-vpn"
 riverctl map normal Super T spawn 'rofi -show drun -drun-exclude-categories "Game"'
 riverctl map normal Super N spawn "$HOME/nixos-config/home-manager/rofi/search-nix-pkgs.sh"
+riverctl map normal Super S spawn 'grim -g "$(slurp)" - | wl-copy'
 
 # Close window
 riverctl map normal Alt+Shift Q close
