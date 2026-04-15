@@ -1,15 +1,37 @@
-{ config, pkgs, pkgs-unstable, inputs, ... }: {
-  imports = [ ./options.nix inputs.stylix.homeModules.stylix ];
+{
+  config,
+  pkgs,
+  pkgs-unstable,
+  inputs,
+  ...
+}:
+let
+  dotnetSdks = pkgs.dotnetCorePackages.combinePackages [
+    pkgs.dotnetCorePackages.sdk_8_0-bin
+    # https://github.com/nixos/nixpkgs/issues/464575
+    # pkgs.dotnetCorePackages.sdk_9_0-bin
+    # pkgs.dotnetCorePackages.sdk_10_0-bin
+  ];
+in
+{
+  imports = [
+    ./options.nix
+    ./modules/fish.nix
+    inputs.stylix.homeModules.stylix
+  ];
 
   home.stateVersion = "25.05";
 
-  home.sessionVariables = { EDITOR = "nvim"; };
+  home.sessionVariables = {
+    DOTNET_HOST_PATH = "${dotnetSdks}/share/dotnet/dotnet";
+    DOTNET_ROOT = "${dotnetSdks}/share/dotnet";
+    EDITOR = "nvim";
+  };
 
   xdg.configFile = {
-    nvim.source =
-      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
-    "opencode/config.json".source = config.lib.file.mkOutOfStoreSymlink
-      "${config.dotfilesPath}/opencode/config.json";
+    nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
+    "opencode/config.json".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
   };
 
   home.packages = with pkgs; [
@@ -18,16 +40,15 @@
     _1password-gui
     age # simple modern file encryption tool
     bat # cat replacement with syntax highlighting
-    pkgs-unstable.chezmoi
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
     discord
     docker-compose
+    dotnetSdks
     fd
     file
     fzf
     gcc
-    pkgs-unstable.gh
     git
     gnumake
     go
@@ -41,9 +62,11 @@
     luaPackages.fennel
     lynx # terminal web browser
     nh # helper CLI for Nix/Home Manager workflows
+    nix-tree
     nixfmt
-    pkgs-unstable.opencode
+    pkgs-unstable.gh
     pkgs-unstable.github-copilot-cli # GitHub Copilot CLI from unstable nixpkgs
+    pkgs-unstable.opencode
     postgresql
     procs # modern ps replacement
     python314
@@ -66,7 +89,6 @@
     extraPackages = with pkgs; [
       cargo
       clang-tools
-      dotnet-sdk_10
       fennel-ls
       fnlfmt
       lua-language-server
@@ -78,14 +100,15 @@
   };
 
   programs.btop.enable = true;
+  programs.fish.enable = true;
 
   stylix.enable = true;
   stylix.autoEnable = true;
 
-  stylix.base16Scheme =
-    "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
+  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-dark.yaml";
 
   stylix.targets.neovim.enable = false;
+  stylix.targets.fish.enable = false;
   stylix.targets.waybar.enable = false;
   stylix.targets.gnome.enable = false;
   stylix.targets.gtk.enable = false;

@@ -39,6 +39,7 @@
       "koekeishiya/formulae/skhd"
     ];
     casks = [
+      "bot-framework-emulator"
       "microsoft-teams"
     ];
   };

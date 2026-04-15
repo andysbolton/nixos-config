@@ -1,5 +1,16 @@
-{ config, lib, pkgs, pkgs-unstable, self, ... }: {
-  imports = [ ./shared.nix ./modules/firefox.nix ];
+{
+  config,
+  lib,
+  pkgs,
+  pkgs-unstable,
+  self,
+  ...
+}:
+{
+  imports = [
+    ./shared.nix
+    ./modules/firefox.nix
+  ];
 
   targets.darwin.copyApps.enable = true;
   targets.darwin.linkApps.enable = false;
@@ -7,12 +18,11 @@
   home.homeDirectory = "/Users/andybolton";
 
   xdg.configFile = {
-    "karabiner/karabiner.json".source = config.lib.file.mkOutOfStoreSymlink
-      "${config.dotfilesPath}/karabiner/karabiner.json";
-    "skhd/skhdrc".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/skhdrc";
-    sketchybar.source =
-      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
+    choose.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/choose";
+    "karabiner/karabiner.json".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/karabiner/karabiner.json";
+    "skhd/skhdrc".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/skhdrc";
+    sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
   };
 
   home.packages = with pkgs; [
@@ -21,7 +31,9 @@
     powershell
   ];
 
-  home.sessionVariables = { BROWSER = "${pkgs.firefox}/bin/firefox"; };
+  home.sessionVariables = {
+    BROWSER = "${pkgs.firefox}/Applications/Firefox.app/Contents/MacOS/firefox";
+  };
 
   services.jankyborders = {
     enable = true;
@@ -48,6 +60,10 @@
   programs.sketchybar = {
     enable = true;
     includeSystemPath = true;
-    extraPackages = [ pkgs-unstable.yabai pkgs.ifstat-legacy pkgs.jq ];
+    extraPackages = [
+      pkgs-unstable.yabai
+      pkgs.ifstat-legacy
+      pkgs.jq
+    ];
   };
 }

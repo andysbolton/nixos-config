@@ -22,11 +22,6 @@ return {
       ft.jq = "#%s"
     end,
   },
-  {
-    "alker0/chezmoi.vim",
-    lazy = false,
-    init = function() vim.g["chezmoi#use_tmp_buffer"] = true end,
-  },
   "tpope/vim-sensible",
   -- Detect tabstop and shiftwidth automatically
   "tpope/vim-sleuth",

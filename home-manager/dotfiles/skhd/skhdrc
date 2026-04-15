@@ -168,9 +168,7 @@ shift + cmd - 9 : set sid (yabai -m query --spaces --display | jq -r 'map(select
 # toggle sticky(+float), picture-in-picture
 # alt - p : yabai -m window --toggle sticky --toggle pip
 
-cmd - return : "/Users/andybolton/Applications/Home Manager Apps/WezTerm.app/wezterm-gui" start --always-new-process
+cmd - return : "$HOME/Applications/Home Manager Apps/WezTerm.app/wezterm-gui" start --always-new-process
 # shift + alt - t : echo "skhd works $(date)" >> /tmp/skhd-test.log
 
-cmd + shift - b : /path/to/firefox-bookmarks.sh
-
-cmd - t: /Users/andybolton/nixos-config/home-manager/dotfiles/choose/launch.sh
+cmd - t: "$HOME/.config/choose/launch.sh"

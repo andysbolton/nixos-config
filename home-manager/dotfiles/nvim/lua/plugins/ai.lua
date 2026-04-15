@@ -115,7 +115,10 @@ return {
         },
         interactions = {
           background = { adapter = { name = "opencode" } },
-          chat = { adapter = { name = "mistral", model = "codestral-latest" } },
+          chat = {
+            tools = { opts = { auto_submit_errors = true } },
+            adapter = { name = "mistral", model = "devstral-latest" },
+          },
           inline = { adapter = "opencode" },
           cmd = { adapter = "opencode" },
           cli = {

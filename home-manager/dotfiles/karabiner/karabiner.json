@@ -48,38 +48,6 @@
             ]
           },
           {
-            "description": "Return => Cmd+o (Open) (Only in Finder)",
-            "manipulators": [
-              {
-                "conditions": [
-                  {
-                    "bundle_identifiers": [
-                      "^com.apple.finder"
-                    ],
-                    "type": "frontmost_application_if"
-                  }
-                ],
-                "from": {
-                  "key_code": "return_or_enter",
-                  "modifiers": {
-                    "optional": [
-                      "any"
-                    ]
-                  }
-                },
-                "to": [
-                  {
-                    "key_code": "semicolon",
-                    "modifiers": [
-                      "right_command"
-                    ]
-                  }
-                ],
-                "type": "basic"
-              }
-            ]
-          },
-          {
             "description": "F2 => Return (Rename) (Only in Finder)",
             "manipulators": [
               {
@@ -232,6 +200,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$"
@@ -397,6 +366,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -468,6 +438,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -539,6 +510,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -610,6 +582,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -686,6 +659,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -757,6 +731,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -828,6 +803,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -904,6 +880,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -980,6 +957,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1057,6 +1035,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1133,6 +1112,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1209,6 +1189,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1285,6 +1266,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1356,6 +1338,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1429,6 +1412,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1505,6 +1489,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1576,6 +1561,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1652,6 +1638,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -1961,6 +1948,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
@@ -2037,6 +2025,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$"
@@ -2109,6 +2098,7 @@
                       "^org\\.alacritty$",
                       "^com\\.github\\.wez\\.wezterm$",
                       "^com\\.microsoft\\.teams2$",
+                      "^com\\.gather\\.GatherV2$",
                       "^com\\.hnc\\.Discord$",
                       "^net\\.kovidgoyal\\.kitty$",
                       "^com\\.mitchellh\\.ghostty$",
