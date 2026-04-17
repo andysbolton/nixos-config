@@ -4,9 +4,6 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
-printf 'started\n' >>/tmp/sketchybar.path.log
-printf '%s\n' "$PATH" >>/tmp/sketchybar.path.log
-
 ##### Bar Appearance #####
 # Configuring the general appearance of the bar.
 # These are only some of the options available. For all options see:
@@ -91,14 +88,14 @@ sketchybar --add item clock center \
   --set battery update_freq=60 script="$PLUGIN_DIR/battery.sh" \
   --subscribe battery system_woke power_source_change
 
-cpu_percent=(
+cpu=(
   icon="$CPU"
-  update_freq=2
-  mach_helper="$HELPER"
+  update_freq=3
+  script="$PLUGIN_DIR/stats/cpu.sh"
 )
 
-sketchybar --add item cpu.percent right \
-  --set cpu.percent "${cpu_percent[@]}"
+sketchybar --add item cpu right \
+  --set cpu "${cpu[@]}"
 
 memory=(
   icon="$MEMORY"

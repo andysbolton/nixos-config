@@ -48,8 +48,6 @@
 (km-set :n :<leader>c ":let @+=expand('%')<cr>"
         {:desc "[C]opy current buffer name" :silent true})
 
-(km-set :i :<C-L> "<Plug>(copilot-accept-word)")
-
 ; Fugitive
 (km-set :n :<leader>gs ":Git<CR>")
 (km-set :n :<leader>gd ":Gdiffsplit<CR>")

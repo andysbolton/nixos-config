@@ -8,8 +8,9 @@
 }:
 {
   imports = [
-    ./shared.nix
     ./modules/firefox.nix
+    ./options/work.nix
+    ./shared.nix
   ];
 
   targets.darwin.copyApps.enable = true;
@@ -28,6 +29,7 @@
   home.packages = with pkgs; [
     (azure-cli.withExtensions [ azure-cli-extensions.resource-graph ])
     choose-gui
+    jira-cli-go
     powershell
   ];
 
@@ -38,9 +40,10 @@
   services.jankyborders = {
     enable = true;
     settings = {
+      width = 9.0;
       blur_radius = 5.0;
-      active_color = "0xffe1e3e4";
-      inactive_color = "0xff494d64";
+      active_color = "0xff7aa2f7";
+      inactive_color = "0xffcfc9c2";
     };
   };
 

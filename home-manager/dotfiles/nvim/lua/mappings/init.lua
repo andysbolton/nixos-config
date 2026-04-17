@@ -28,7 +28,6 @@ end
 km_set("n", "]d", _2_, {desc = "Go to next diagnostic message"})
 km_set("n", "<leader>d", vim.diagnostic.open_float, {desc = "Open floating diagnostic message"})
 km_set("n", "<leader>c", ":let @+=expand('%')<cr>", {desc = "[C]opy current buffer name", silent = true})
-km_set("i", "<C-L>", "<Plug>(copilot-accept-word)")
 km_set("n", "<leader>gs", ":Git<CR>")
 km_set("n", "<leader>gd", ":Gdiffsplit<CR>")
 km_set("n", "<leader>gc", ":Git commit<CR>")

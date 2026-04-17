@@ -18,6 +18,7 @@ mkdir -p "$HOME/.cache"
 output=$(fd -t d -d 1 ".app\$" \
 	/Users/andybolton/Applications/Home\ Manager\ Apps \
 	/Applications \
+	/Applications/Nix\ Apps \
 	/Applications/Utilities/ \
 	/System/Applications/ \
 	/System/Applications/Utilities/)

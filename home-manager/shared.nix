@@ -15,24 +15,32 @@ let
 in
 {
   imports = [
-    ./options.nix
+    ./options/shared.nix
     ./modules/fish.nix
     inputs.stylix.homeModules.stylix
   ];
 
   home.stateVersion = "25.05";
 
+  home.shell.enableFishIntegration = true;
   home.sessionVariables = {
-    DOTNET_HOST_PATH = "${dotnetSdks}/share/dotnet/dotnet";
-    DOTNET_ROOT = "${dotnetSdks}/share/dotnet";
+    # DOTNET_HOST_PATH = "${dotnetSdks}/share/dotnet/dotnet";
+    # DOTNET_ROOT = "${dotnetSdks}/share/dotnet";
     EDITOR = "nvim";
   };
 
-  xdg.configFile = {
-    nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
-    "opencode/config.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
+  xdg = {
+    enable = true;
+    configFile = {
+      nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
+      "opencode/config.json".source =
+        config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
+    };
   };
+
+  home.file.".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/bin";
+
+  home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
 
   home.packages = with pkgs; [
     (sbcl.withPackages (ps: [ ps.swank ]))

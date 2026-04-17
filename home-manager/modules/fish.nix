@@ -32,6 +32,7 @@
     '';
 
     functions = {
+      argumentNames = [ "message" ];
       add = {
         body = ''
           set branch (git branch --show-current)
@@ -48,6 +49,7 @@
       };
 
       addp = {
+        argumentNames = [ "message" ];
         body = ''
           add $message
           if ! git push
@@ -180,9 +182,19 @@
           sudo darwin-rebuild switch --flake .#work-darwin
         '';
       };
+
+      az_group_member_id = {
+        body = ''
+          set group_name $argv[1]
+          set GROUP_ID (az ad group show --group "$group_name" --query id -o tsv)
+          az rest --method GET \
+            --url "https://graph.microsoft.com/beta/groups/$GROUP_ID/members" \
+            --query "value[].{name:displayName, type:\"@odata.type\", importId:join('/', ['$GROUP_ID', id])}" \
+            -o table
+        '';
+      };
     };
 
-    # Fish aliases
     shellAliases = {
       nvimconf = "nvim --cmd ':cd ~/.config/nvim'";
       nvc = "nvimconf";
@@ -199,5 +211,19 @@
       gp = "git pull";
       mm = "git checkout main && gp && git checkout - && git merge main";
     };
+
+    shellAbbrs =
+      let
+        helpExpansion = key: {
+          "${key}" = {
+            position = "anywhere";
+            expansion = "${key} | bat -p -lhelp";
+          };
+        };
+      in
+      helpExpansion "-h"
+      // helpExpansion "--help"
+      // {
+      };
   };
 }

@@ -9,28 +9,30 @@ return {
           keymap = {
             jump_prev = "N",
             jump_next = "n",
+            refresh = "r",
           },
         },
         suggestion = {
           keymap = {
             accept = "<C-j>",
           },
+          debounce = 75,
           auto_trigger = true,
           layout = {
             position = "right",
             ratio = 0.4,
           },
         },
-        filetypes = {
-          yaml = true,
-        },
+        -- filetypes = {
+        --   yaml = true,
+        -- },
       }
     end,
   },
-  {
-    "zbirenbaum/copilot-cmp",
-    config = function() require("copilot_cmp").setup { auto_trigger = false } end,
-  },
+  -- {
+  --   "zbirenbaum/copilot-cmp",
+  --   config = function() require("copilot_cmp").setup { auto_trigger = false } end,
+  -- },
   {
     "olimorris/codecompanion.nvim",
     dependencies = {
@@ -66,13 +68,13 @@ return {
         end,
       })
 
-      vim.api.nvim_create_autocmd("TermOpen", {
-        pattern = "term://*opencode",
-        callback = function(args)
-          turn_off_line_numbers(args.buf)
-          vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
-        end,
-      })
+      -- vim.api.nvim_create_autocmd("TermOpen", {
+      --   pattern = "term://*opencode",
+      --   callback = function(args)
+      --     turn_off_line_numbers(args.buf)
+      --     vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
+      --   end,
+      -- })
 
       vim.api.nvim_create_autocmd("User", {
         pattern = "CodeCompanionCLICreated",
