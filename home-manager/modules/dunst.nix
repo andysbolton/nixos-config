@@ -13,7 +13,7 @@
         gap_size = 0;
         sort = "yes";
 
-        font = lib.mkForce "Roboto 14";
+        font = lib.mkForce "CaskaydiaCove Nerd Font 14";
         line_height = 0;
 
         markup = "full";

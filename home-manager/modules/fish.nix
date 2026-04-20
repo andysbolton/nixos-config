@@ -1,5 +1,13 @@
-{ config, pkgs, ... }:
-{
+{ config, pkgs, ... }: {
+  xdg = {
+    configFile = {
+      "fish/themes" = {
+        source = "${pkgs.tokyonight-extras}/fish_themes";
+        recursive = true;
+      };
+    };
+  };
+
   programs.fish = {
     enable = true;
 
@@ -12,10 +20,6 @@
       fish_add_path ~/.local/bin
       fish_add_path ~/bin
 
-      # Environment variables
-      set -gx RIPGREP_CONFIG_PATH $HOME/.ripgreprc
-      set -gx MANPAGER "sh -c 'sed -u -e \"s/\\x1B\[[0-9;]*m//g; s/.\\x08//g\" | bat -p -lman'"
-
       # Key bindings
       bind \cS 'history-pager'
 
@@ -25,15 +29,17 @@
       end
     '';
 
-    # Interactive shell init (for transience and starship)
     interactiveShellInit = ''
+      batman --export-env | source
+      fish_config theme choose tokyonight_night
+
       starship init fish | source
       enable_transience
     '';
 
     functions = {
-      argumentNames = [ "message" ];
       add = {
+        argumentNames = [ "message" ];
         body = ''
           set branch (git branch --show-current)
           set match (string match --groups-only -r '(?i)(smart|cloud-\d+)' $branch)
@@ -212,18 +218,13 @@
       mm = "git checkout main && gp && git checkout - && git merge main";
     };
 
-    shellAbbrs =
-      let
-        helpExpansion = key: {
-          "${key}" = {
-            position = "anywhere";
-            expansion = "${key} | bat -p -lhelp";
-          };
+    shellAbbrs = let
+      helpExpansion = key: {
+        "${key}" = {
+          position = "anywhere";
+          expansion = "${key} | bat -p -lhelp";
         };
-      in
-      helpExpansion "-h"
-      // helpExpansion "--help"
-      // {
       };
+    in helpExpansion "-h" // helpExpansion "--help" // { };
   };
 }

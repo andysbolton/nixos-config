@@ -65,12 +65,23 @@
   # Will be exposed through DBus to programs willing to store secrets.
   services.gnome.gnome-keyring.enable = true;
 
+  programs.river-classic.enable = true;
+
+  programs.uwsm = {
+    enable = true;
+    waylandCompositors.river = {
+      prettyName = "River";
+      comment = "River compositor managed by UWSM";
+      binPath = "/run/current-system/sw/bin/river";
+    };
+  };
+
   services.greetd = {
     enable = true;
     settings = {
       default_session = {
         command = ''
-          ${pkgs.tuigreet}/bin/tuigreet --time --cmd "river"
+          ${pkgs.tuigreet}/bin/tuigreet --time --cmd "uwsm start river-uwsm.desktop"
         '';
         user = "greeter";
       };
@@ -119,12 +130,13 @@
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = [ "nvidia" ];
 
-  xdg.portal = {
-    enable = true;
-    wlr.enable = true;
-    configPackages =
-      [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
-  };
+  # Revisit, this may all be set by programs.river.enable = true;
+  # xdg.portal = {
+  #   enable = true;
+  #   wlr.enable = true;
+  #   configPackages =
+  #     [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
+  # };
 
   modules.arrs = {
     radarr.enable = true;
