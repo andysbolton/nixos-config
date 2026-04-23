@@ -1,4 +1,5 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+{
   xdg = {
     configFile = {
       "fish/themes" = {
@@ -124,6 +125,47 @@
         '';
       };
 
+      psfind = {
+        argumentNames = [ "app" ];
+        body = ''
+          set -l pids (pgrep -i $app)
+          if test -z "$pids"
+              return 1
+          end
+
+          ps -o pid,ppid,command -p $pids
+
+          set -l exe_path (ps -ww -o ppid=,command= -p $pids | awk '$1 == 1 && /\.app\// { $1=""; print substr($0,2) }' | head -1)
+
+          if test -n "$exe_path"
+            set -l app_folder (echo "$exe_path" | sed -n 's|\(.*\)\.app/.*|\1.app|p')
+            set -l source "$app_folder/Contents/Resources/en.lproj/InfoPlist.strings"
+
+            set -l bundle_name (plutil -p "$source" 2>/dev/null | awk -F '=> ' '/CFBundleDisplayName/ {print $2}' | tr -d '"')
+
+            if test -z "$bundle_name"
+              set source "$app_folder/Contents/Info.plist"
+              set bundle_name (plutil -extract CFBundleDisplayName xml1 "$source" -o - 2>/dev/null | xmllint --xpath "string(//string)" - 2>/dev/null)
+            end
+
+            if test -z "$bundle_name"
+              set bundle_name (plutil -extract CFBundleName xml1 "$source" -o - 2>/dev/null | xmllint --xpath "string(//string)" - 2>/dev/null)
+            end
+
+            if test -z "$bundle_name"
+              set bundle_name (basename "$app_folder" .app)
+              set source "app folder name"
+            end
+
+            echo ""
+            echo "parent info:"
+            echo "  exe name:    $(basename $exe_path)"
+            echo "  bundle name: $bundle_name (source: $source)"
+            echo "  id:          $(osascript -e "id of app \"$bundle_name\"")"
+          end
+        '';
+      };
+
       sub = {
         body = ''
           if count $argv >/dev/null
@@ -166,7 +208,7 @@
       restart-wm = {
         body = ''
           sudo launchctl kickstart -k system/org.nixos.yabai-sa
-          sleep 1
+          sleep 2
           launchctl kickstart -k gui/(id -u)/org.nixos.yabai
           sleep 2
           launchctl kickstart -k gui/(id -u)/org.nix-community.home.skhd
@@ -192,10 +234,10 @@
       az_group_member_id = {
         body = ''
           set group_name $argv[1]
-          set GROUP_ID (az ad group show --group "$group_name" --query id -o tsv)
+          set group_id (az ad group show --group "$group_name" --query id -o tsv)
           az rest --method GET \
-            --url "https://graph.microsoft.com/beta/groups/$GROUP_ID/members" \
-            --query "value[].{name:displayName, type:\"@odata.type\", importId:join('/', ['$GROUP_ID', id])}" \
+            --url "https://graph.microsoft.com/beta/groups/$group_id/members" \
+            --query "value[].{name:displayName, type:\"@odata.type\", importId:join('/', ['$group_id', id])}" \
             -o table
         '';
       };
@@ -218,13 +260,15 @@
       mm = "git checkout main && gp && git checkout - && git merge main";
     };
 
-    shellAbbrs = let
-      helpExpansion = key: {
-        "${key}" = {
-          position = "anywhere";
-          expansion = "${key} | bat -p -lhelp";
+    shellAbbrs =
+      let
+        helpExpansion = key: {
+          "${key}" = {
+            position = "anywhere";
+            expansion = "${key} | bat -p -lhelp";
+          };
         };
-      };
-    in helpExpansion "-h" // helpExpansion "--help" // { };
+      in
+      helpExpansion "-h" // helpExpansion "--help" // { };
   };
 }

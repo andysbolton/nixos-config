@@ -35,7 +35,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    lan-mouse = { url = "github:feschber/lan-mouse/v0.10.0"; };
+    lan-mouse = {
+      url = "github:feschber/lan-mouse/v0.10.0";
+    };
 
     # firefox-addons = {
     #   url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
@@ -46,8 +48,19 @@
     nix-homebrew.url = "github:zhaofengli/nix-homebrew";
   };
 
-  outputs = { disko, home-manager, nixpkgs, nix-darwin, nix-homebrew
-    , nixpkgs-unstable, self, sops-nix, stylix, ... }@inputs:
+  outputs =
+    {
+      disko,
+      home-manager,
+      nixpkgs,
+      nix-darwin,
+      nix-homebrew,
+      nixpkgs-unstable,
+      self,
+      sops-nix,
+      stylix,
+      ...
+    }@inputs:
     let
       overlays = [
         (final: prev: {
@@ -55,74 +68,79 @@
         })
       ];
 
-      mkPkgs = system:
+      mkPkgs =
+        system:
         import nixpkgs {
-          inherit system;
+          inherit system overlays;
           config.allowUnfree = true;
         };
 
-      mkUnstablePkgs = system:
+      mkUnstablePkgs =
+        system:
         import nixpkgs-unstable {
           inherit system;
           config.allowUnfree = true;
         };
-    in {
-      nixosConfigurations.main = let
-        system = "x86_64-linux";
-        pkgs = mkPkgs system;
-        extraSpecialArgs = {
-          inherit inputs;
-          pkgs-unstable = mkUnstablePkgs system;
+    in
+    {
+      nixosConfigurations.main =
+        let
+          system = "x86_64-linux";
+          pkgs = mkPkgs system;
+          extraSpecialArgs = {
+            inherit inputs;
+            pkgs-unstable = mkUnstablePkgs system;
+          };
+        in
+        nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          specialArgs = extraSpecialArgs;
+          modules = [
+            ./hosts/main/configuration.nix
+            ./modules
+            disko.nixosModules.disko
+            home-manager.nixosModules.home-manager
+            stylix.nixosModules.stylix
+            {
+              home-manager.users.andy = ./home-manager/linux.nix;
+              home-manager.extraSpecialArgs = extraSpecialArgs;
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = false;
+            }
+          ];
         };
-      in nixpkgs.lib.nixosSystem {
-        inherit system pkgs;
-        specialArgs = extraSpecialArgs;
-        modules = [
-          ./hosts/main/configuration.nix
-          ./modules
-          disko.nixosModules.disko
-          home-manager.nixosModules.home-manager
-          stylix.nixosModules.stylix
-          {
-            home-manager.users.andy = ./home-manager/linux.nix;
-            home-manager.extraSpecialArgs = extraSpecialArgs;
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = false;
-          }
-          { nixpkgs.overlays = overlays; }
-        ];
-      };
 
-      darwinConfigurations.work-darwin = let
-        system = "aarch64-darwin";
-        pkgs = mkPkgs system;
-        extraSpecialArgs = {
-          inherit inputs;
-          pkgs-unstable = mkUnstablePkgs system;
+      darwinConfigurations.work-darwin =
+        let
+          system = "aarch64-darwin";
+          pkgs = mkPkgs system;
+          extraSpecialArgs = {
+            inherit inputs;
+            pkgs-unstable = mkUnstablePkgs system;
+          };
+        in
+        nix-darwin.lib.darwinSystem {
+          inherit system pkgs;
+          specialArgs = extraSpecialArgs;
+          modules = [
+            ./hosts/work-darwin/configuration.nix
+            home-manager.darwinModules.home-manager
+            stylix.darwinModules.stylix
+            {
+              home-manager.users.andybolton = ./home-manager/darwin.nix;
+              home-manager.extraSpecialArgs = extraSpecialArgs;
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = false;
+            }
+            nix-homebrew.darwinModules.nix-homebrew
+            {
+              nix-homebrew = {
+                enable = true;
+                enableRosetta = false;
+                user = "andybolton";
+              };
+            }
+          ];
         };
-      in nix-darwin.lib.darwinSystem {
-        inherit system pkgs;
-        specialArgs = extraSpecialArgs;
-        modules = [
-          ./hosts/work-darwin/configuration.nix
-          home-manager.darwinModules.home-manager
-          stylix.darwinModules.stylix
-          {
-            home-manager.users.andybolton = ./home-manager/darwin.nix;
-            home-manager.extraSpecialArgs = extraSpecialArgs;
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = false;
-          }
-          nix-homebrew.darwinModules.nix-homebrew
-          {
-            nix-homebrew = {
-              enable = true;
-              enableRosetta = false;
-              user = "andybolton";
-            };
-          }
-          { nixpkgs.overlays = overlays; }
-        ];
-      };
     };
 }
