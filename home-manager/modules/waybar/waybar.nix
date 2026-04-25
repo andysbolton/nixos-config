@@ -6,7 +6,6 @@ in {
     systemd = {
       enable = true;
       target = "graphical-session.target";
-      enableDebug = true;
     };
     settings = [
       {

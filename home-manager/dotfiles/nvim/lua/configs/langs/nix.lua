@@ -7,6 +7,7 @@ return {
   },
   formatter = {
     name = "nixfmt",
+    autoinstall = false,
     actions = {
       function() return require("formatter.filetypes.nix").nixfmt() end,
     },
