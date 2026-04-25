@@ -146,7 +146,12 @@
           mouse_drop_action swap
 
       yabai -m rule --add app="^System Settings$" manage=off
+      yabai -m rule --add app="^Microsoft Teams$" display=1 space=1
+      yabai -m rule --add app="^Discord$" display=1 space=2
+      yabai -m rule --add app="^GatherV2$" display=1 space=3
+      yabai -m rule --add app="^Proton VPN$" display=1 space=7
 
+      # Ensure 7 spaces exist on each display.
       for display in $(yabai -m query --displays | jq '.[].index'); do
           count=$(yabai -m query --spaces --display "$display" | jq '[.[] | select(."is-native-fullscreen" == false)] | length')
           while [ "$count" -lt 6 ]; do
@@ -155,6 +160,9 @@
               count=$((count + 1))
           done
       done
+
+      yabai -m rule --apply
+      sketchybar --reload
     '';
   };
 

@@ -60,6 +60,7 @@
     };
   };
 
+  # TODO: Make this dependent on yabai
   programs.sketchybar = {
     enable = true;
     includeSystemPath = true;
