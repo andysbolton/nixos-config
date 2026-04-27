@@ -7,10 +7,9 @@
        (let [formatter-names {}
              filetype-actions {}]
          (each [_ formatter (pairs formatters)]
-           (do
-             (if (and formatter.name (not= formatter.use_lsp true)
-                      (not= formatter.autoinstall false))
-                 (table.insert formatter-names formatter.name)))
+           (if (and formatter.name (not= formatter.use_lsp true)
+                    (not= formatter.autoinstall false))
+               (table.insert formatter-names formatter.name))
            (each [_ filetype (pairs (or formatter.filetypes {}))]
              (tset filetype-actions filetype formatter.actions)))
          (values formatter-names filetype-actions)))

@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  pkgs-unstable,
   ...
 }:
 let
@@ -28,6 +27,7 @@ in
 
   home.packages = with pkgs; [
     cliphist
+    entr # run commands on file change
     grim # screenshot tool
     imv # command-line image viewer
     killall
@@ -51,7 +51,6 @@ in
 
   home.sessionVariables = {
     MOZ_ENABLE_WAYLAND = "1";
-    # MOZ_DISABLE_RDD_SANDBOX = "1";
   };
 
   wayland.windowManager.river = {

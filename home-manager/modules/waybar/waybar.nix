@@ -8,10 +8,10 @@ in
     systemd = {
       enable = true;
       target = "graphical-session.target";
-      enableDebug = true;
     };
     settings = [
       {
+        name = "top-bar";
         layer = "top";
         modules-left = [
           "river/tags"
@@ -142,10 +142,10 @@ in
         };
       }
       {
-        name = "clipboard-bar";
+        name = "bottom-bar";
         layer = "top";
         position = "bottom";
-        height = 30;
+        height = 35;
 
         modules-left = [
           "custom/primary-label"
@@ -162,19 +162,14 @@ in
 
         "custom/primary" = {
           exec = pkgs.writeShellScript "clipboard-primary-check" ''
-            # 1. Catch wl-paste output
-            # 2. Delete newlines to prevent Waybar line-break issues
-            # 3. Truncate to 40 chars for safety
-            CONTENT=$(${pkgs.wl-clipboard}/bin/wl-paste --primary 2>/dev/null | ${pkgs.busybox}/bin/tr -d '\n' | ${pkgs.busybox}/bin/head -c 40)
-
-            if [ -z "$CONTENT" ]; then
-              echo "unset"
-            else
-              echo "$CONTENT"
-            fi
+            db="$HOME/.cache/cliphist/primary-db"
+            echo "$db" | 
+              entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
           '';
-          interval = 2;
-          format = "{}";
+          max-length = 30;
+          min-length = 30;
+          align = 0;
+          format = "Primary: {}";
           tooltip = false;
         };
 

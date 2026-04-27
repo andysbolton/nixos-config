@@ -10,11 +10,9 @@ do
   local formatter_names0 = {}
   local filetype_actions0 = {}
   for _, formatter in pairs(formatters) do
-    do
-      if (formatter.name and (formatter.use_lsp ~= true) and (formatter.autoinstall ~= false)) then
-        table.insert(formatter_names0, formatter.name)
-      else
-      end
+    if (formatter.name and (formatter.use_lsp ~= true) and (formatter.autoinstall ~= false)) then
+      table.insert(formatter_names0, formatter.name)
+    else
     end
     for _0, filetype in pairs((formatter.filetypes or {})) do
       filetype_actions0[filetype] = formatter.actions

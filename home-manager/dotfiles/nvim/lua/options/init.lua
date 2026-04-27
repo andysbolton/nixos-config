@@ -21,7 +21,14 @@ vim.o.shiftwidth = 4
 vim.o.softtabstop = 4
 vim.o.expandtab = true
 vim.o.autoread = true
-vim.api.nvim_create_autocmd({"BufEnter", "CursorHold", "CursorHoldI", "FocusGained"}, {command = "if mode() != 'c' | checktime | endif", pattern = {"*"}})
+local function _1_()
+  if ((vim.fn.mode() ~= "c") and (vim.bo.buftype ~= "nofile")) then
+    return vim.cmd("checktime")
+  else
+    return nil
+  end
+end
+vim.api.nvim_create_autocmd({"BufEnter", "CursorHold", "CursorHoldI", "FocusGained"}, {pattern = {"*"}, callback = _1_, desc = "Reload buffer on focus/hold unless in command-line window"})
 vim.opt.list = true
 vim.opt.listchars:append({extends = "\226\128\186", precedes = "\226\128\185", eol = "\226\143\142", trail = "\194\183", nbsp = "\226\142\181", space = " "})
 vim.o.mousemoveevent = true

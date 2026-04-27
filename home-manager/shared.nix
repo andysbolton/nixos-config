@@ -64,6 +64,7 @@ in
     httpie # user-friendly HTTP client
     jq
     killall
+    lazygit
     lf # terminal file manager
     libnatpmp # NAT-PMP client library and tools
     lsd # modern ls replacement

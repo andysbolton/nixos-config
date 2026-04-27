@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  pkgs-unstable,
   inputs,
   ...
 }:
@@ -54,7 +53,7 @@
       "wheel"
       "docker"
     ];
-    shell = pkgs-unstable.fish;
+    shell = pkgs.fish;
   };
 
   programs.fish = {
@@ -68,6 +67,7 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    # TODO: move or remove this.
     (retroarch.withCores (
       cores: with cores; [
         genesis-plus-gx

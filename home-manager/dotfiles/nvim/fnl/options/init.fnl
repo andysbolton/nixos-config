@@ -44,8 +44,13 @@
 (set vim.o.autoread true)
 ; I should move this out of this file.
 (vim.api.nvim_create_autocmd [:BufEnter :CursorHold :CursorHoldI :FocusGained]
-                             {:command "if mode() != 'c' | checktime | endif"
-                              :pattern ["*"]})
+                             {:pattern ["*"]
+                              :callback (fn []
+                                          (when (and (not= (vim.fn.mode) :c)
+                                                     (not= vim.bo.buftype
+                                                           :nofile))
+                                            (vim.cmd :checktime)))
+                              :desc "Reload buffer on focus/hold unless in command-line window"})
 
 (set vim.opt.list true)
 (vim.opt.listchars:append {:extends "›"
@@ -57,4 +62,4 @@
 
 (set vim.o.mousemoveevent true)
 
-(set vim.fileformats "unix")
+(set vim.fileformats :unix)
