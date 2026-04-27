@@ -1,4 +1,10 @@
-{ lib, pkgs, config, ... }: {
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
+{
   options.modules.vpn = {
     enable = lib.mkEnableOption "the ProtonVPN WireGuard setup.";
 
@@ -48,7 +54,8 @@
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ExecStart = with pkgs;
+        ExecStart =
+          with pkgs;
           writers.writeBash "wg-up" ''
             set -e
 
@@ -64,7 +71,8 @@
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link set wg0 up
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} route add default dev wg0
           '';
-        ExecStop = with pkgs;
+        ExecStop =
+          with pkgs;
           writers.writeBash "wg-down" ''
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} route del default dev wg0
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link del wg0
@@ -75,8 +83,7 @@
 
     systemd.services."proton-port-forwarding" = {
       enable = true;
-      description =
-        "Acquire incoming port from protonvpn natpmp and update qBittorrent.";
+      description = "Acquire incoming port from protonvpn natpmp and update qBittorrent.";
       after = [ "wg-proton.service" ];
       bindsTo = [ "wg-proton.service" ];
       partOf = [ "qbittorrent.service" ];

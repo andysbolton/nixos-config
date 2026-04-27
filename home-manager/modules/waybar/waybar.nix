@@ -1,6 +1,8 @@
 { pkgs, ... }:
-let systemctl = "${pkgs.systemd}/bin/systemctl --user";
-in {
+let
+  systemctl = "${pkgs.systemd}/bin/systemctl --user";
+in
+{
   programs.waybar = {
     enable = true;
     systemd = {
@@ -11,7 +13,11 @@ in {
     settings = [
       {
         layer = "top";
-        modules-left = [ "river/tags" "river/window" "custom/lan-mouse" ];
+        modules-left = [
+          "river/tags"
+          "river/window"
+          "custom/lan-mouse"
+        ];
         modules-center = [ "clock" ];
         modules-right = [
           "systemd-failed-units"
@@ -31,14 +37,18 @@ in {
           tooltip-format = "<tt><small>{calendar}</small></tt>";
         };
 
-        "river/window" = { "max-length" = 70; };
+        "river/window" = {
+          "max-length" = 70;
+        };
 
         "river/tags" = {
           "num-tags" = 10;
           "hide-vacant" = true;
         };
 
-        disk = { format = " {used} / {total}"; };
+        disk = {
+          format = " {used} / {total}";
+        };
 
         cpu = {
           format = " {usage} %";
@@ -52,28 +62,35 @@ in {
         };
 
         temperature = {
-          "hwmon-path" =
-            "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
+          "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
           interval = 1;
           "critical-threshold" = 80;
           format = " {icon} {temperatureC}°C";
-          "format-icons" = [ "" "" "" "" ];
+          "format-icons" = [
+            ""
+            ""
+            ""
+            ""
+          ];
         };
 
         "custom/gpu-utilization" = {
-          exec =
-            "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
+          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
           format = "⚙ {}";
           interval = 1;
         };
 
         "custom/gpu-temperature" = {
-          exec =
-            "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
+          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
           format = "⚙{icon} {text}°C";
           interval = 1;
           "critical-threshold" = 80;
-          "format-icons" = [ "" "" "" "" ];
+          "format-icons" = [
+            ""
+            ""
+            ""
+            ""
+          ];
         };
 
         "custom/lan-mouse" = {
@@ -109,7 +126,11 @@ in {
             phone = "";
             portable = "";
             car = "";
-            default = [ "" "" "" ];
+            default = [
+              ""
+              ""
+              ""
+            ];
           };
           "on-click" = "${pkgs.pavucontrol}/bin/pavucontrol";
         };
@@ -126,10 +147,18 @@ in {
         position = "bottom";
         height = 30;
 
-        modules-left = [ "custom/primary-label" "custom/primary" ];
-        modules-right = [ "custom/system-label" "custom/system" ];
+        modules-left = [
+          "custom/primary-label"
+          "custom/primary"
+        ];
+        modules-right = [
+          "custom/system-label"
+          "custom/system"
+        ];
 
-        "custom/primary-label" = { format = "Primary: "; };
+        "custom/primary-label" = {
+          format = "Primary: ";
+        };
 
         "custom/primary" = {
           exec = pkgs.writeShellScript "clipboard-primary-check" ''
@@ -149,11 +178,12 @@ in {
           tooltip = false;
         };
 
-        "custom/system-label" = { format = "System: "; };
+        "custom/system-label" = {
+          format = "System: ";
+        };
 
         "custom/system" = {
-          exec = pkgs.writeShellScript "clipboard-check"
-            "(${pkgs.wl-clipboard}/bin/wl-paste 2>/dev/null | ${pkgs.busybox}/bin/tr -d '\\n' | ${pkgs.busybox}/bin/cut -c 1-100) || echo unset";
+          exec = pkgs.writeShellScript "clipboard-check" "(${pkgs.wl-clipboard}/bin/wl-paste 2>/dev/null | ${pkgs.busybox}/bin/tr -d '\\n' | ${pkgs.busybox}/bin/cut -c 1-100) || echo unset";
           interval = 2;
           format = "{}";
           tooltip = false;

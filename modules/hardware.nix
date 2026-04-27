@@ -1,4 +1,5 @@
-{ config, ... }: {
+{ config, ... }:
+{
   hardware = {
     nvidia = {
 
@@ -37,6 +38,8 @@
     };
 
     # Enable OpenGL
-    graphics = { enable = true; };
+    graphics = {
+      enable = true;
+    };
   };
 }

@@ -1,29 +1,38 @@
-{ inputs, pkgs, ... }: {
+{ inputs, pkgs, ... }:
+{
   imports = [ inputs.lan-mouse.homeManagerModules.default ];
   programs.lan-mouse = {
     enable = true;
     systemd = true;
-    settings = let
-      shareClipboard = dest:
-        "wl-paste --no-newline | ssh ${dest} -i .ssh/id_home_nokey env WAYLAND_DISPLAY='wayland-1' wl-copy";
-    in {
-      release_bind = [ "KeyA" "KeyS" "KeyD" "KeyF" ];
-      port = 4242;
-      frontend = "cli";
-      # right = {
-      #   hostname = "crom";
-      #   activate_on_startup = true;
-      #   enter_hook = shareClipboard "crom";
-      #   ips = [ "192.168.1.2" ];
-      # };
-      left = {
-        hostname = "work";
-        activate_on_startup = true;
-        ips = [ ];
-        # enter_hook = shareClipboard "fw";
-        # ips = [ "192.168.1.3" ];
+    settings =
+      let
+        shareClipboard =
+          dest:
+          "wl-paste --no-newline | ssh ${dest} -i .ssh/id_home_nokey env WAYLAND_DISPLAY='wayland-1' wl-copy";
+      in
+      {
+        release_bind = [
+          "KeyA"
+          "KeyS"
+          "KeyD"
+          "KeyF"
+        ];
+        port = 4242;
+        frontend = "cli";
+        # right = {
+        #   hostname = "crom";
+        #   activate_on_startup = true;
+        #   enter_hook = shareClipboard "crom";
+        #   ips = [ "192.168.1.2" ];
+        # };
+        left = {
+          hostname = "work";
+          activate_on_startup = true;
+          ips = [ ];
+          # enter_hook = shareClipboard "fw";
+          # ips = [ "192.168.1.3" ];
+        };
       };
-    };
   };
 
   # release_bind = [ "Key", "KeyS", "KeyD", "KeyF" ]

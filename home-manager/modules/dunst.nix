@@ -1,4 +1,5 @@
-{ lib, ... }: {
+{ lib, ... }:
+{
   services.dunst = {
     enable = true;
     settings = {
@@ -34,11 +35,17 @@
         max_icon_size = 128;
       };
 
-      urgency_low = { timeout = 5; };
+      urgency_low = {
+        timeout = 5;
+      };
 
-      urgency_normal = { timeout = 10; };
+      urgency_normal = {
+        timeout = 10;
+      };
 
-      urgency_critical = { timeout = 0; };
+      urgency_critical = {
+        timeout = 0;
+      };
     };
   };
 }

@@ -52,7 +52,10 @@
                 type = "filesystem";
                 format = "xfs";
                 mountpoint = "/mnt/media";
-                mountOptions = [ "defaults" "pquota" ];
+                mountOptions = [
+                  "defaults"
+                  "pquota"
+                ];
               };
             };
           };

@@ -1,4 +1,10 @@
-{ ... }: {
-  imports =
-    [ ./arrs.nix ./hardware.nix ./torrenting.nix ./steam.nix ./vpn.nix ];
+{ ... }:
+{
+  imports = [
+    ./arrs.nix
+    ./hardware.nix
+    ./torrenting.nix
+    ./steam.nix
+    ./vpn.nix
+  ];
 }

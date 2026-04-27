@@ -21,9 +21,14 @@
     trusted-users = [ "andybolton" ];
   };
 
-  programs.fish.enable = true;
+  programs.fish = {
+    enable = true;
+    package = pkgs-unstable.fish;
+  };
 
-  environment.shells = with pkgs; [ fish ];
+  environment.shells = [ pkgs-unstable.fish ];
+
+  documentation.man.enable = true;
 
   homebrew = {
     enable = true;
@@ -115,35 +120,35 @@
     package = pkgs-unstable.yabai;
     extraConfig = ''
       yabai -m config \
-          external_bar all:40:0 \
-          mouse_follows_focus off \
-          focus_follows_mouse off \
-          display_arrangement_order default \
-          window_origin_display default \
-          window_placement second_child \
-          window_insertion_point focused \
-          window_zoom_persist on \
-          window_shadow on \
-          window_animation_duration 0.0 \
-          window_animation_easing ease_out_circ \
-          window_opacity_duration 0.0 \
-          active_window_opacity 1.0 \
-          normal_window_opacity 0.90 \
-          window_opacity off \
-          insert_feedback_color 0xffd75f5f \
-          split_ratio 0.50 \
-          split_type auto \
-          auto_balance off \
-          top_padding 13 \
-          bottom_padding 13 \
-          left_padding 13 \
-          right_padding 13 \
-          window_gap 13 \
-          layout bsp \
-          mouse_modifier fn \
-          mouse_action1 move \
-          mouse_action2 resize \
-          mouse_drop_action swap
+        external_bar all:40:0 \
+        mouse_follows_focus off \
+        focus_follows_mouse off \
+        display_arrangement_order default \
+        window_origin_display default \
+        window_placement second_child \
+        window_insertion_point focused \
+        window_zoom_persist on \
+        window_shadow on \
+        window_animation_duration 0.0 \
+        window_animation_easing ease_out_circ \
+        window_opacity_duration 0.0 \
+        active_window_opacity 1.0 \
+        normal_window_opacity 0.90 \
+        window_opacity off \
+        insert_feedback_color 0xffd75f5f \
+        split_ratio 0.50 \
+        split_type auto \
+        auto_balance off \
+        top_padding 13 \
+        bottom_padding 13 \
+        left_padding 13 \
+        right_padding 13 \
+        window_gap 13 \
+        layout bsp \
+        mouse_modifier fn \
+        mouse_action1 move \
+        mouse_action2 resize \
+        mouse_drop_action swap
 
       yabai -m rule --add app="^System Settings$" manage=off
       yabai -m rule --add app="^Microsoft Teams$" display=1 space=1
@@ -151,14 +156,16 @@
       yabai -m rule --add app="^GatherV2$" display=1 space=3
       yabai -m rule --add app="^Proton VPN$" display=1 space=7
 
+      yabai -m signal --add event=window_created app="^WezTerm$" action="yabai -m window --focus $${YABAI_WINDOW_ID}"
+
       # Ensure 7 spaces exist on each display.
       for display in $(yabai -m query --displays | jq '.[].index'); do
-          count=$(yabai -m query --spaces --display "$display" | jq '[.[] | select(."is-native-fullscreen" == false)] | length')
-          while [ "$count" -lt 6 ]; do
-              yabai -m display --focus "$display"
-              yabai -m space --create
-              count=$((count + 1))
-          done
+        count=$(yabai -m query --spaces --display "$display" | jq '[.[] | select(."is-native-fullscreen" == false)] | length')
+        while [ "$count" -lt 6 ]; do
+          yabai -m display --focus "$display"
+          yabai -m space --create
+          count=$((count + 1))
+        done
       done
 
       yabai -m rule --apply
@@ -166,6 +173,5 @@
     '';
   };
 
-  # 2. Fix the scripting addition daemon (sudo)
   system.stateVersion = 6;
 }

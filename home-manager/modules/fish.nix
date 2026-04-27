@@ -14,7 +14,6 @@
 
     generateCompletions = true;
 
-    # Shell configuration
     shellInit = ''
       # Path additions
       fish_add_path ~/smartwyre/infra-orchestrator/scripts/util
@@ -239,6 +238,35 @@
             --url "https://graph.microsoft.com/beta/groups/$group_id/members" \
             --query "value[].{name:displayName, type:\"@odata.type\", importId:join('/', ['$group_id', id])}" \
             -o table
+        '';
+      };
+
+      unlock = {
+        body = ''
+          if [ (count $argv) -lt 2 ]
+            echo "Usage: unlock <sandbox> <prefix1> [prefix2] ... [prefixN]"
+            return 1
+          end
+
+          set sandbox $argv[1]
+
+          for prefix in $argv[2..-1]
+            set suffix "state.tfstateenv:$sandbox"
+            for blob in (az storage blob list \
+              --account-name sttfstatecusglobal \
+              --container-name tfstate \
+              --prefix $prefix \
+              --auth-mode login \
+              --query "[?ends_with(name, '$suffix')].name" \
+              -o tsv)
+              echo "Breaking lease on: $blob"
+              az storage blob lease break \
+                --account-name sttfstatecusglobal \
+                --container-name tfstate \
+                --blob-name $blob \
+                --auth-mode login
+            end
+          end
         '';
       };
     };

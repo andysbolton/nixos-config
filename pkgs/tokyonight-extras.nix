@@ -1,4 +1,8 @@
-{ fetchFromGitHub, stdenvNoCC, lib, }:
+{
+  fetchFromGitHub,
+  stdenvNoCC,
+  lib,
+}:
 
 stdenvNoCC.mkDerivation rec {
   pname = "tokyonight-extras";

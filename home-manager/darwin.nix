@@ -24,12 +24,37 @@
       config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/karabiner/karabiner.json";
     "skhd/skhdrc".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/skhdrc";
     sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
+    "yabai/jumplist.sh" = {
+      source = pkgs.writeShellScript "yabai-jumplist" ''
+        jumplist="/tmp/yabai-jumplist"
+
+        case "$1" in
+        back)
+            current_window=$(yabai -m query --windows --window | jq '.id')
+            echo "$current_window" >>"$jumplist"
+            yabai -m space --focus recent
+            ;;
+        forward)
+            if [ -s "$jumplist" ]; then
+                next_window=$(tail -n 1 "$jumplist")
+                sed -i "" "$d" "$jumplist" # Remove last line
+                yabai -m window --focus "$next_window"
+            fi
+            ;;
+        clear)
+            # Clear the stack when a new manual action happens
+            : >"$jumplist"
+            ;;
+        esac
+      '';
+    };
   };
 
   home.packages = with pkgs; [
     (azure-cli.withExtensions [ azure-cli-extensions.resource-graph ])
     choose-gui
     jira-cli-go
+    maccy
     powershell
   ];
 
