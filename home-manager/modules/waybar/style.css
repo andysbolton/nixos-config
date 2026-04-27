@@ -9,12 +9,20 @@
   font-size: 16px;
 }
 
-window#waybar {
+#waybar {
   background: @background;
   transition-property: background-color;
   transition-duration: 0.5s;
   color: @light;
+}
+
+.top-bar {
   border-bottom: 3px solid rgba(100, 114, 125, 0.5);
+}
+
+.bottom-bar {
+  border-top: 3px solid rgba(100, 114, 125, 0.5);
+  border-bottom: none;
 }
 
 #window {
@@ -31,7 +39,7 @@ window#waybar {
 }
 
 #tags button.focused,
-#tags button.focues:hover {
+#tags button.focus:hover {
   background-color: @selected;
   color: @background;
   border-radius: 0;
@@ -71,12 +79,9 @@ window#waybar {
   min-height: 10px;
 }
 
-/* window#waybar.cliboard-bar { */
-/*   border: 1px solid rgba(100, 114, 125, 1); */
-/*   border-radius: 10px; */
-/*   font-family: "CaskaydiaCove Nerd Font"; */
-/*   font-size: 13px; */
-/**/
-/*   margin-bottom: 5px; */
-/*   width: 50%; */
-/* } */
+#custom-primary,
+#custom-system {
+  padding-left: 12px;
+  padding-right: 12px;
+  border-right: 2px solid rgba(100, 114, 125, 1);
+}

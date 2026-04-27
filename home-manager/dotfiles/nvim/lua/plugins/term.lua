@@ -1,5 +1,5 @@
-local start_insert = function()
-  if not vim.g.SessionLoad then vim.cmd "startinsert!" end
+local start_insert = function(term)
+  vim.api.nvim_buf_set_keymap(term.bufnr, "n", "q", "<cmd>close<CR>", { noremap = true, silent = true })
 end
 
 return {
@@ -12,6 +12,8 @@ return {
         terminal_mappings = false,
         insert_mappings = false,
         on_open = start_insert,
+        start_in_insert = true,
+        persist_mode = false,
       }
 
       -- Exit terminal mode with <Esc>

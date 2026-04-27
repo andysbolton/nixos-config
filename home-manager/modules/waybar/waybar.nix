@@ -1,6 +1,8 @@
 { pkgs, ... }:
-let systemctl = "${pkgs.systemd}/bin/systemctl --user";
-in {
+let
+  systemctl = "${pkgs.systemd}/bin/systemctl --user";
+in
+{
   programs.waybar = {
     enable = true;
     systemd = {
@@ -9,8 +11,13 @@ in {
     };
     settings = [
       {
+        name = "top-bar";
         layer = "top";
-        modules-left = [ "river/tags" "river/window" "custom/lan-mouse" ];
+        modules-left = [
+          "river/tags"
+          "river/window"
+          "custom/lan-mouse"
+        ];
         modules-center = [ "clock" ];
         modules-right = [
           "systemd-failed-units"
@@ -30,14 +37,18 @@ in {
           tooltip-format = "<tt><small>{calendar}</small></tt>";
         };
 
-        "river/window" = { "max-length" = 70; };
+        "river/window" = {
+          "max-length" = 70;
+        };
 
         "river/tags" = {
           "num-tags" = 10;
           "hide-vacant" = true;
         };
 
-        disk = { format = " {used} / {total}"; };
+        disk = {
+          format = " {used} / {total}";
+        };
 
         cpu = {
           format = " {usage} %";
@@ -51,28 +62,35 @@ in {
         };
 
         temperature = {
-          "hwmon-path" =
-            "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
+          "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
           interval = 1;
           "critical-threshold" = 80;
           format = " {icon} {temperatureC}°C";
-          "format-icons" = [ "" "" "" "" ];
+          "format-icons" = [
+            ""
+            ""
+            ""
+            ""
+          ];
         };
 
         "custom/gpu-utilization" = {
-          exec =
-            "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
+          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
           format = "⚙ {}";
           interval = 1;
         };
 
         "custom/gpu-temperature" = {
-          exec =
-            "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
+          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
           format = "⚙{icon} {text}°C";
           interval = 1;
           "critical-threshold" = 80;
-          "format-icons" = [ "" "" "" "" ];
+          "format-icons" = [
+            ""
+            ""
+            ""
+            ""
+          ];
         };
 
         "custom/lan-mouse" = {
@@ -108,7 +126,11 @@ in {
             phone = "";
             portable = "";
             car = "";
-            default = [ "" "" "" ];
+            default = [
+              ""
+              ""
+              ""
+            ];
           };
           "on-click" = "${pkgs.pavucontrol}/bin/pavucontrol";
         };
@@ -120,43 +142,41 @@ in {
         };
       }
       {
-        name = "clipboard-bar";
+        name = "bottom-bar";
         layer = "top";
         position = "bottom";
-        height = 30;
+        height = 35;
 
-        modules-left = [ "custom/primary-label" "custom/primary" ];
-        modules-right = [ "custom/system-label" "custom/system" ];
+        modules-left = [
+          "custom/system"
+          "custom/primary"
+        ];
 
-        "custom/primary-label" = { format = "Primary: "; };
+        "custom/system" = {
+          exec = pkgs.writeShellScript "clipboard-system-check" ''
+            db="$HOME/.cache/cliphist/system-db"
+            echo "$db" | 
+              entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
+          '';
+          max-length = 30;
+          min-length = 30;
+          align = 0;
+          format = "System: {}";
+          tooltip = false;
+          escape = true;
+        };
 
         "custom/primary" = {
           exec = pkgs.writeShellScript "clipboard-primary-check" ''
-            # 1. Catch wl-paste output
-            # 2. Delete newlines to prevent Waybar line-break issues
-            # 3. Truncate to 40 chars for safety
-            CONTENT=$(${pkgs.wl-clipboard}/bin/wl-paste --primary 2>/dev/null | ${pkgs.busybox}/bin/tr -d '\n' | ${pkgs.busybox}/bin/head -c 40)
-
-            if [ -z "$CONTENT" ]; then
-              echo "unset"
-            else
-              echo "$CONTENT"
-            fi
+            db="$HOME/.cache/cliphist/primary-db"
+            echo "$db" | 
+              entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
           '';
-          interval = 2;
-          format = "{}";
+          max-length = 30;
+          min-length = 30;
+          align = 0;
+          format = "Primary: {}";
           tooltip = false;
-        };
-
-        "custom/system-label" = { format = "System: "; };
-
-        "custom/system" = {
-          exec = pkgs.writeShellScript "clipboard-check"
-            "(${pkgs.wl-clipboard}/bin/wl-paste 2>/dev/null | ${pkgs.busybox}/bin/tr -d '\\n' | ${pkgs.busybox}/bin/cut -c 1-100) || echo unset";
-          interval = 2;
-          format = "{}";
-          tooltip = false;
-          escape = true;
         };
       }
     ];

@@ -1,4 +1,11 @@
-{ config, lib, pkgs, inputs, ... }: {
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
+{
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
@@ -21,7 +28,9 @@
     enable = true;
     secretsFile = config.sops.secrets."wireless.conf".path;
     extraConfig = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=wheel";
-    networks = { "BBBP_5G".pskRaw = "ext:psk"; };
+    networks = {
+      "BBBP_5G".pskRaw = "ext:psk";
+    };
   };
 
   time.timeZone = "America/Denver";
@@ -40,16 +49,28 @@
 
   users.users.andy = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "docker" ];
+    extraGroups = [
+      "wheel"
+      "docker"
+    ];
     shell = pkgs.fish;
   };
 
   programs.fish.enable = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
 
   environment.systemPackages = with pkgs; [
-    (retroarch.withCores (cores: with cores; [ genesis-plus-gx snes9x ]))
+    # TODO: move or remove this.
+    (retroarch.withCores (
+      cores: with cores; [
+        genesis-plus-gx
+        snes9x
+      ]
+    ))
     lxqt.lxqt-policykit
     pavucontrol
     swaylock
@@ -156,11 +177,13 @@
   };
 
   services.printing.enable = true;
-  # Arkscan/Zebra usually works with standard CUPS drivers, 
+  # Arkscan/Zebra usually works with standard CUPS drivers,
   # but gutenprint provides extra compatibility if needed.
   services.printing.drivers = [ pkgs.gutenprint ];
 
-  virtualisation.docker = { enable = true; };
+  virtualisation.docker = {
+    enable = true;
+  };
 
   # services.wayland-pipewire-idle-inhibit = {
   #   enable = true;

@@ -1,4 +1,10 @@
-{ config, pkgs, pkgs-unstable, inputs, ... }:
+{
+  config,
+  pkgs,
+  pkgs-unstable,
+  inputs,
+  ...
+}:
 let
   dotnetSdks = pkgs.dotnetCorePackages.combinePackages [
     pkgs.dotnetCorePackages.sdk_8_0-bin
@@ -6,7 +12,8 @@ let
     # pkgs.dotnetCorePackages.sdk_9_0-bin
     # pkgs.dotnetCorePackages.sdk_10_0-bin
   ];
-in {
+in
+{
   imports = [
     ./options/shared.nix
     ./modules/fish.nix
@@ -25,15 +32,13 @@ in {
   xdg = {
     enable = true;
     configFile = {
-      nvim.source =
-        config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
-      "opencode/config.json".source = config.lib.file.mkOutOfStoreSymlink
-        "${config.dotfilesPath}/opencode/config.json";
+      nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
+      "opencode/config.json".source =
+        config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
     };
   };
 
-  home.file.".local/bin".source =
-    config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/bin";
+  home.file.".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/bin";
 
   home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
 
@@ -59,6 +64,7 @@ in {
     httpie # user-friendly HTTP client
     jq
     killall
+    lazygit
     lf # terminal file manager
     libnatpmp # NAT-PMP client library and tools
     lsd # modern ls replacement
@@ -110,8 +116,7 @@ in {
   stylix.enable = true;
   stylix.autoEnable = true;
 
-  stylix.base16Scheme =
-    "${pkgs.base16-schemes}/share/themes/tokyo-night-moon.yaml";
+  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-moon.yaml";
 
   stylix.targets.neovim.enable = false;
   stylix.targets.fish.enable = false;

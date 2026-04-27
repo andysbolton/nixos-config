@@ -16,7 +16,6 @@
 (km-set :i :<A-Up> "<Esc>:m .-2<CR>==gi" {:desc "Move line up" :silent true})
 
 (km-set :v :<A-Down> ":m '>+1<CR>gv=gv" {:desc "Move line down" :silent true})
-
 (km-set :v :<A-Up> ":m '<-2<CR>gv=gv" {:desc "Move line up" :silent true})
 
 ; Insert newlines without entering insert mode
@@ -54,6 +53,15 @@
 (km-set :n :<leader>gc ":Git commit<CR>")
 (km-set :n :<leader>gb ":Git blame<CR>")
 (km-set :n :<leader>gm ":Git mergetool<CR>")
+
+; (km-set :v :<LeftRelease> "\"*ygv"
+;         {:desc "On mouse release, place text in primary buffer." :silent true})
+;
+; (km-set :n :<2-LeftMouse> "viw\"*ygv"
+;         {:desc "On mouse release, place text in primary buffer." :silent true})
+
+(km-set :t :<M-Space> "<Esc>b\\<Esc>ei"
+        {:desc "Fish help abbreviation bypass." :silent true})
 
 ; Improve diff experience (move me)
 (vim.opt.diffopt:append "algorithm:patience")
