@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Change title to signal to yabai that window_title_changed
+echo -ne "\033]0;launch.sh\007"
+
 home_manager_apps="$HOME/Applications/Home Manager Apps"
 
 bookmarks=$(bookmarks.sh &)
@@ -7,14 +10,17 @@ apps=$(apps.sh &)
 
 wait
 
+export FZF_DEFAULT_OPTS="--reverse --bind=enter:replace-query+print-query"
+
 choice=$(
 	{
+		echo "tickets"
+		echo "spaces"
 		echo "$apps" |
 			xargs -I {} basename {} |
 			sort -u
 		echo "$bookmarks"
-		echo "tickets"
-	} | choose -z -m
+	} | fzf
 )
 
 if [ -z "$choice" ]; then
@@ -27,13 +33,17 @@ if [[ "$choice" == "tickets" ]]; then
 		--columns "name,summary,status" \
 		--no-headers \
 		--plain \
-		--status \
-		"~done" \
+		--status "~done" \
 		--raw |
-		jq -r '.[] | "\(.key): \(.fields.summary)"' |
-		choose |
+		jq -r 'map("(\(.fields.status.name)) \(.key): \(.fields.summary)") | sort_by(.) | .[]' |
+		fzf |
 		awk -F: '{print $1}' |
 		pbcopy
+	exit 0
+fi
+
+if [[ "$choice" == "spaces" ]]; then
+	spaces.sh
 	exit 0
 fi
 
@@ -63,8 +73,16 @@ fi
 # Check if the choice is an app
 app=$(echo "$apps" | grep "$choice/$" | head -1)
 if [ -n "$app" ]; then
-	open -na "$app"
-	exit 0
+	if [[ "$app" == *.app/ ]]; then
+		open -na "$app"
+		exit 0
+	fi
+	if [[ "$app" == *.prefPane/ ]]; then
+		open "$app"
+		exit 0
+	fi
+	echo "Don't recognize app type for: $app"
+	exit 1
 fi
 
 # Check if the choice is a URL

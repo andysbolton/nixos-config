@@ -4,19 +4,7 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
-##### Bar Appearance #####
-# Configuring the general appearance of the bar.
-# These are only some of the options available. For all options see:
-# https://felixkratz.github.io/SketchyBar/config/bar
-# If you are looking for other colors, see the color picker:
-# https://felixkratz.github.io/SketchyBar/config/tricks#color-picker
-
 sketchybar --bar position=top height=40 blur_radius=30 color=$BASE
-
-##### Changing Defaults #####
-# We now change some default values, which are applied to all further items.
-# For a full list of all available item properties see:
-# https://felixkratz.github.io/SketchyBar/config/items
 
 default=(
   padding_left=5
@@ -31,11 +19,6 @@ default=(
   label.padding_right=4
 )
 sketchybar --default "${default[@]}"
-
-##### Adding Mission Control Space Indicators #####
-# Let's add some mission control spaces:
-# https://felixkratz.github.io/SketchyBar/config/components#space----associate-mission-control-spaces-with-an-item
-# to indicate active and available mission control spaces.
 
 for did in $(yabai -m query --displays | jq '.[].index'); do
   local_idx=1
@@ -58,9 +41,7 @@ for did in $(yabai -m query --displays | jq '.[].index'); do
   done
 done
 
-##### Adding Left Items #####
-# We add some regular items to the left side of the bar, where
-# only the properties deviating from the current defaults need to be set
+# Left
 
 sketchybar --add item chevron left \
   --set chevron label.drawing=off \
@@ -68,16 +49,7 @@ sketchybar --add item chevron left \
   --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
 
-##### Adding Right Items #####
-# In the same way as the left items we can add items to the right side.
-# Additional position (e.g. center) are available, see:
-# https://felixkratz.github.io/SketchyBar/config/items#adding-items-to-sketchybar
-
-# Some items refresh on a fixed cycle, e.g. the clock runs its script once
-# every 10s. Other items respond to events they subscribe to, e.g. the
-# volume.sh script is only executed once an actual change in system audio
-# volume is registered. More info about the event system can be found here:
-# https://felixkratz.github.io/SketchyBar/config/events
+# Center
 
 sketchybar --add item clock center \
   --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
@@ -87,6 +59,8 @@ sketchybar --add item clock center \
   --add item battery right \
   --set battery update_freq=60 script="$PLUGIN_DIR/battery.sh" \
   --subscribe battery system_woke power_source_change
+
+# Right
 
 cpu=(
   icon="$CPU"
@@ -123,7 +97,6 @@ network_down=(
 
 network_up=(
   icon="$NETWORK_UP"
-  icon.color=0xffffffff
   update_freq=1
   script="$PLUGIN_DIR/stats/network.sh"
 )
@@ -133,5 +106,4 @@ sketchybar --add item network.down right \
   --add item network.up right \
   --set network.up "${network_up[@]}"
 
-##### Force all scripts to run the first time (never do this in a script) #####
 sketchybar --update

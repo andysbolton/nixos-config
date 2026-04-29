@@ -15,13 +15,16 @@ fi
 mkdir -p "$HOME/.cache"
 
 # Generate new output
-output=$(fd -t d -d 1 ".app\$" \
-	/Users/andybolton/Applications/Home\ Manager\ Apps \
-	/Applications \
-	/Applications/Nix\ Apps \
-	/Applications/Utilities/ \
-	/System/Applications/ \
-	/System/Applications/Utilities/)
+output=$(
+	fd -t d -d 1 ".app\$|.prefPane\$" \
+		/Users/andybolton/Applications/Home\ Manager\ Apps \
+		/Applications \
+		/Applications/Nix\ Apps \
+		/Applications/Utilities/ \
+		/System/Applications/ \
+		/System/Applications/Utilities/ \
+		/System/Library/PreferencePanes
+)
 
 # Store in cache
 echo "$output" >"$cache_file"

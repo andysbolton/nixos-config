@@ -50,7 +50,7 @@ riverctl map normal Super+Alt+Control L snap right
 
 riverctl map normal Super+Alt+Shift H resize horizontal 100
 riverctl map normal Super+Alt+Shift J resize vertical 100
-riverctl map normal Super+Alt+Shift K resize vertical 100
+riverctl map normal Super+Alt+Shift K resize vertical -100
 riverctl map normal Super+Alt+Shift L resize horizontal -100
 
 riverctl map-pointer normal Super BTN_LEFT move-view

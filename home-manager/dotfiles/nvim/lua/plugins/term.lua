@@ -22,7 +22,7 @@ return {
         callback = function(args)
           local filetype = vim.bo[args.buf].filetype
           if filetype == "toggleterm" then
-            vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
+            vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
           end
         end,
       })
@@ -47,23 +47,16 @@ return {
 
       vim.keymap.set(
         { "n", "t" },
-        "<leader>tf",
-        "<cmd>ToggleTerm direction=float<cr>",
-        { silent = true, desc = "[T]oggle [f]oating terminal" }
-      )
-
-      vim.keymap.set(
-        { "n", "t" },
         "<leader>tb",
         "<cmd>ToggleTerm size=10 direction=horizontal<cr>",
         { silent = true, desc = "[T]oggle [b]ottom terminal" }
       )
 
       vim.keymap.set(
-        { "n", "t" },
-        "<leader>ts",
-        "<cmd>ToggleTerm size=80 direction=vertical<cr>",
-        { silent = true, desc = "[T]oggle [s]ide terminal" }
+        { "v" },
+        "ts",
+        "<cmd>ToggleTermSendVisualSelection<cr>",
+        { silent = true, desc = "[T]erminal [s]end visual selection" }
       )
     end,
   },

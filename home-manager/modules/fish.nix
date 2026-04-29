@@ -15,6 +15,10 @@
     generateCompletions = true;
 
     shellInit = ''
+      fish_vi_key_bindings
+      set fish_cursor_default block
+      set fish_greeting ""
+
       # Path additions
       fish_add_path ~/smartwyre/infra-orchestrator/scripts/util
       fish_add_path ~/.local/bin
@@ -210,7 +214,7 @@
           sleep 2
           launchctl kickstart -k gui/(id -u)/org.nixos.yabai
           sleep 2
-          launchctl kickstart -k gui/(id -u)/org.nix-community.home.skhd
+          launchctl kickstart -k gui/(id -u)/org.nixos.skhd
           launchctl kickstart -k gui/(id -u)/org.nix-community.home.sketchybar
         '';
       };

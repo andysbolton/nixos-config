@@ -74,6 +74,7 @@ in
     nh # helper CLI for Nix/Home Manager workflows
     nix-tree
     nixfmt
+    ov # interactive pager
     pkgs-unstable.gh
     pkgs-unstable.github-copilot-cli # GitHub Copilot CLI from unstable nixpkgs
     pkgs-unstable.opencode
