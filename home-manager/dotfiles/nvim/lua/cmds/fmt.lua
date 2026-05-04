@@ -4,7 +4,7 @@ local config_utils = require("configs.util")
 local utils = require("utils")
 local formatters_by_ft = {}
 for _, lang in pairs(config_utils.get_configs()) do
-  if (lang.formatter and not (lang.autoinstall == false)) then
+  if lang.formatter then
     local or_1_ = utils.empty(lang.ft)
     if not or_1_ then
       local function _2_()
@@ -42,12 +42,8 @@ end
 local function buf_write_post_callback(ev)
   local formatter = formatters_by_ft[vim.bo.filetype]
   if formatter then
-    if formatter.use_lsp then
-      vim.lsp.buf.format()
-    else
-      vim.cmd("FormatWrite")
-    end
-    vim.notify(("Formatted " .. get_file_name(ev.file) .. " with " .. (formatter.name or "[couldn't find formatter name]") .. ((formatter.use_lsp and " (LSP)") or "") .. " (buf " .. ev.buf .. ")."))
+    vim.cmd("FormatWrite")
+    vim.notify(("Formatted " .. get_file_name(ev.file) .. " buf (" .. ev.buf .. ")."))
     return nil
   else
     return nil

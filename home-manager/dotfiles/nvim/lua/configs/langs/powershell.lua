@@ -7,6 +7,12 @@ return {
   },
   formatter = {
     name = "powershell_es",
-    use_lsp = true,
+    actions = {
+      function()
+        vim.lsp.buf.format()
+        return nil
+      end,
+    },
+    autoinstall = false,
   },
 }

@@ -101,7 +101,7 @@ in
     extraPackages = with pkgs; [
       cargo
       clang-tools
-      fennel-ls
+      pkgs-unstable.fennel-ls
       fnlfmt
       lua-language-server
       luaPackages.luarocks

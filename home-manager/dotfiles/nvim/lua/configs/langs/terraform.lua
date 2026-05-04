@@ -8,7 +8,12 @@ return {
   -- linter = { name = "tflint" },
   formatter = {
     name = "terraformls",
-    use_lsp = true,
+    actions = {
+      function()
+        vim.lsp.buf.format()
+        return nil
+      end,
+    },
   },
   treesitter = "terraform",
 }

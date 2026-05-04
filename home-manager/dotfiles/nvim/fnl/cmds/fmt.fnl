@@ -5,7 +5,7 @@
 (local formatters-by-ft {})
 
 (each [_ lang (pairs (config_utils.get_configs))]
-  (when (and lang.formatter (not (= lang.autoinstall false)))
+  (when lang.formatter
     (if (or (utils.empty lang.ft) (= #lang.ft 0))
         (vim.notify (.. "No filetypes specified for " lang.name ".")
                     vim.log.levels.WARN)
@@ -20,13 +20,8 @@
 (fn buf-write-post-callback [ev]
   (let [formatter (. formatters-by-ft vim.bo.filetype)]
     (when formatter
-      (if formatter.use_lsp
-          (vim.lsp.buf.format)
-          (vim.cmd :FormatWrite))
-      (vim.notify (.. "Formatted " (get-file-name ev.file) " with "
-                      (or formatter.name "[couldn't find formatter name]")
-                      (or (and formatter.use_lsp " (LSP)") "") " (buf " ev.buf
-                      ")."))
+      (vim.cmd :FormatWrite) ; always run formatter even even if it's using LSP format so we get default formatters like whitespace removal
+      (vim.notify (.. "Formatted " (get-file-name ev.file) " buf (" ev.buf ")."))
       nil)))
 
 ; TODO: Replace function name with kebab case once consumer is refactored.

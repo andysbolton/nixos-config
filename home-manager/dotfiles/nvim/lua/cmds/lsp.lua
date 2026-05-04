@@ -8,6 +8,7 @@ local nvim_create_augroup = vim.api.nvim_create_augroup
 local nvim_create_autocmd = vim.api.nvim_create_autocmd
 local nvim_create_namespace = vim.api.nvim_create_namespace
 local nvim_win_get_cursor = vim.api.nvim_win_get_cursor
+
 vim.fn.sign_define("light_bulb_sign", {text = "\240\159\146\161", texthl = "LspDiagnosticsDefaultInformation"})
 vim.diagnostic.config({virtual_text = true, virtual_lines = false})
 local function buf_request_callback(line, ns_id, bufnr, res)

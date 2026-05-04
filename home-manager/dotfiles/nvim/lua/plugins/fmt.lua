@@ -10,7 +10,7 @@ do
   local formatter_names0 = {}
   local filetype_actions0 = {}
   for _, formatter in pairs(formatters) do
-    if (formatter.name and (formatter.use_lsp ~= true) and (formatter.autoinstall ~= false)) then
+    if (formatter.name and (formatter.autoinstall ~= false)) then
       table.insert(formatter_names0, formatter.name)
     else
     end
@@ -28,10 +28,10 @@ local function _3_()
   local register_formatters = _let_5_.register_formatters
   local formatter = require("formatter")
   mason_tool_installer.setup({ensure_installed = {table.unpack(formatter_names)}})
-  if (vim.fn.has == "win32") then
-    filetype_actions["*"] = remove_trailing_whitespace()
-  else
+  local function _6_()
+    return remove_trailing_whitespace()
   end
+  filetype_actions["*"] = _6_
   formatter.setup({logging = true, log_level = vim.log.levels.WARN, filetype = filetype_actions})
   return register_formatters()
 end

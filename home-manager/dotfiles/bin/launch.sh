@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Change title to signal to yabai that window_title_changed
+# Change title so yabai can track
 echo -ne "\033]0;launch.sh\007"
 
 home_manager_apps="$HOME/Applications/Home Manager Apps"
@@ -37,7 +37,8 @@ if [[ "$choice" == "tickets" ]]; then
 		--raw |
 		jq -r 'map("(\(.fields.status.name)) \(.key): \(.fields.summary)") | sort_by(.) | .[]' |
 		fzf |
-		awk -F: '{print $1}' |
+		sed -E 's/^\(.+\) (.+-[0-9]+):.+/\1/' |
+		tr -d '\n' |
 		pbcopy
 	exit 0
 fi
@@ -70,7 +71,7 @@ if [[ "$choice" == ?gh* ]]; then
 	exit 0
 fi
 
-# Check if the choice is an app
+# Check if the choice is an app or prefpane
 app=$(echo "$apps" | grep "$choice/$" | head -1)
 if [ -n "$app" ]; then
 	if [[ "$app" == *.app/ ]]; then

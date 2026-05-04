@@ -28,10 +28,14 @@
   };
 
   home.packages = with pkgs; [
-    (azure-cli.withExtensions [ azure-cli-extensions.resource-graph ])
+    (azure-cli.withExtensions [
+      azure-cli-extensions.durabletask
+      azure-cli-extensions.resource-graph
+    ])
     jira-cli-go
     maccy
     powershell
+    powershell-editor-services
   ];
 
   home.sessionVariables = {

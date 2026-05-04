@@ -122,14 +122,18 @@ return {
           local language_servers_to_install = {}
 
           for _, ls in pairs(language_servers) do
-            vim.lsp.enable(ls.name)
-            vim.lsp.config(ls.name, {
+            local config = {
               settings = ls.settings,
-            })
-            if ls.auto_install ~= false then table.insert(language_servers_to_install, ls.name) end
+            }
+
+            if ls.on_init then config.on_init = ls.on_init end
+
+            vim.lsp.config(ls.name, config)
+            vim.lsp.enable(ls.name)
+
+            if ls.autoinstall ~= false then table.insert(language_servers_to_install, ls.name) end
           end
 
-          -- table.insert(language_servers_to_install, "efm")
           mason_lspconfig.setup {
             ensure_installed = language_servers_to_install,
           }
@@ -138,28 +142,7 @@ return {
             on_attach = on_attach,
           })
 
-          if vim.fn.has "win32" == 1 then
-            local ahk2_config = {
-              autostart = true,
-              cmd = {
-                "node",
-                vim.fn.expand "$HOME/vscode-autohotkey2-lsp/server/dist/server.js",
-                "--stdio",
-              },
-              filetypes = { "ahk", "autohotkey", "ah2" },
-              init_options = {
-                locale = "en-us",
-                InterpreterPath = vim.fn.expand "$HOME/scoop/shims/autohotkey.exe",
-              },
-              single_file_support = true,
-              flags = { debounce_text_changes = 500 },
-              capabilities = capabilities,
-              on_attach = on_attach,
-            }
-            local configs = require "lspconfig.configs"
-            configs["ahk2"] = { default_config = ahk2_config }
-            require("lspconfig").ahk2.setup {}
-          end
+          -- vim.lsp.set_log_level "debug"
 
           require("lspkind").init {
             mode = "symbol_text",
