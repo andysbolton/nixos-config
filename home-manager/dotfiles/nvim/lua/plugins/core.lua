@@ -40,10 +40,7 @@ return {
         },
         post_restore_cmds = {
           function()
-            if not vim.tbl_contains(vim.v.argv, "DiffviewOpen") then
-              require("neo-tree.sources.manager").show "filesystem"
-              vim.cmd "Neotree show filesystem"
-            end
+            if not vim.tbl_contains(vim.v.argv, "DiffviewOpen") then vim.cmd "Neotree show filesystem" end
           end,
         },
       }

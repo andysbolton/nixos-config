@@ -38,6 +38,10 @@
     powershell-editor-services
   ];
 
+  home.sessionPath = [
+    "${config.home.homeDirectory}/Applications/Home Manager Apps/WezTerm.app"
+  ];
+
   home.sessionVariables = {
     BROWSER = "${pkgs.firefox}/Applications/Firefox.app/Contents/MacOS/firefox";
   };

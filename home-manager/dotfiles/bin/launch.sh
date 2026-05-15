@@ -1,96 +1,122 @@
 #!/bin/bash
 
 # Change title so yabai can track
-echo -ne "\033]0;launch.sh\007"
-
-home_manager_apps="$HOME/Applications/Home Manager Apps"
+echo -ne "\033]0;launch.sh\007" >/dev/tty
 
 bookmarks=$(bookmarks.sh &)
 apps=$(apps.sh &)
+azure_resource_types=$(azure-resource-types.sh &)
 
 wait
 
-export FZF_DEFAULT_OPTS="--reverse --bind=enter:replace-query+print-query"
+export bookmarks
+export apps
+export azure_resource_types
+export FZF_DEFAULT_OPTS="--reverse --bind=tab:replace-query"
 
-choice=$(
+open_app() {
+	local app="$1"
+	local args="$2"
+	shift 2
+	local cmd="open"
+	[[ -n "$*" ]] && cmd+=" $*"
+	cmd+=" \"$app\""
+	[[ -n "$args" ]] && cmd+=" --args $args"
+	echo "$cmd"
+}
+
+handle_selection() {
+	local result="${1:-$2}"
+
+	[ -z "$result" ] && return
+
+	local choice="${result%% -- *}"
+	local args="${result#* -- }"
+
+	[[ "$choice" == "$args" ]] && args=""
+
+	if [[ "$choice" == "tickets" ]]; then
+		cat <<-'EOF'
+			jira issue list --assignee andy.bolton@smartwyre.com --columns "name,summary,status" --no-headers --plain --status "~done" --raw |
+			jq -r 'map("(\(.fields.status.name)) \(.key): \(.fields.summary)") | sort_by(.) | .[]' |
+			fzf | sed -E 's/^\(.+\) (.+-[0-9]+):.+/\1/' | tr -d '\n' | pbcopy
+		EOF
+		return
+
+	elif [[ "$choice" == "spaces" ]]; then
+		echo "spaces.sh"
+		return
+
+	elif [[ "$choice" =~ ^\?gh ]]; then
+		# Extract everything after "?gh"
+		rest=${choice//?gh/}
+
+		# Split into flags and search term at first space
+		flags=${rest%% *} #everything before first space
+		search=${rest#* } # everything after first space
+
+		type="code"
+		org_filter="org%3ASmartwyre+"
+
+		[[ "$flags" == *"r"* ]] && type="repositories"
+		[[ "$flags" == *"u"* ]] && org_filter=""
+
+		open_app "Firefox.app" "\"https://github.com/search?q=$org_filter$search&type=$type\"" -na
+		return
+
+	elif app_match=$(echo "$apps" | grep "$choice/" | head -1) && [ -n "$app_match" ]; then
+		if [[ "$app_match" == *.app/* ]]; then
+			open_app "$choice" "$args" -a
+			return
+		elif [[ "$app_match" == *.prefPane/ ]]; then
+			open_app "$app_match" "$args"
+			return
+		fi
+
+	elif [[ "$choice" =~ .*(http.*) ]]; then
+		url="${BASH_REMATCH[1]}"
+		open_app "Firefox.app" "\"$url\"" -na
+		return
+
+	elif [[ "$choice" =~ ^\>\ (.*) ]]; then
+		cmd="${BASH_REMATCH[1]}"
+
+		if [[ "$cmd" =~ ^[[:space:]]*$ ]]; then
+			echo "Can't run an empty command." >&2
+			return
+		fi
+
+		open_app "WezTerm" "start --always-new-process -- fish -l -C '$cmd'" -na
+		return
+	fi
+
+	echo "Unrecognized choice: $choice"
+}
+
+options=$(
 	{
-		echo "tickets"
-		echo "spaces"
 		echo "$apps" |
 			xargs -I {} basename {} |
 			sort -u
 		echo "$bookmarks"
-	} | fzf
+		echo "$azure_resource_types"
+		echo "tickets"
+		echo "spaces"
+	}
 )
 
-if [ -z "$choice" ]; then
-	exit 0
-fi
+export -f open_app
+export -f handle_selection
+export options
 
-if [[ "$choice" == "tickets" ]]; then
-	jira issue list \
-		--assignee andy.bolton@smartwyre.com \
-		--columns "name,summary,status" \
-		--no-headers \
-		--plain \
-		--status "~done" \
-		--raw |
-		jq -r 'map("(\(.fields.status.name)) \(.key): \(.fields.summary)") | sort_by(.) | .[]' |
-		fzf |
-		sed -E 's/^\(.+\) (.+-[0-9]+):.+/\1/' |
-		tr -d '\n' |
-		pbcopy
-	exit 0
-fi
+result=$(
+	echo "$options" | SHELL=/bin/bash fzf \
+		--preview "handle_selection {} {q}" \
+		--preview-window="bottom:3:wrap" \
+		--preview-label="Action" \
+		--prompt "❯ " \
+		--bind $'change:first+refresh-preview+reload(echo "$options"; [[ {q} =~ ^[\\?\>] ]] && printf "%s\\n" {q})' \
+		--bind "enter:become(handle_selection {} {q})"
+)
 
-if [[ "$choice" == "spaces" ]]; then
-	spaces.sh
-	exit 0
-fi
-
-# GitHub search
-if [[ "$choice" == ?gh* ]]; then
-	# Extract everything after "?gh"
-	rest=${choice//?gh/}
-
-	# Split into flags and search term at first space
-	flags=${rest%% *}      # Flags: everything before first space
-	search_term=${rest#* } # Search: everything after first space
-
-	# If no space found, flags equals rest, so reset search_term
-	[[ "$flags" == "$rest" ]] && search_term=""
-
-	# Build URL components based on flags
-	search_type="code"
-	org_filter="org%3ASmartwyre+"
-	[[ "$flags" == *"r"* ]] && search_type="repositories"
-	[[ "$flags" == *"u"* ]] && org_filter=""
-
-	# Open GitHub search
-	open -na "$home_manager_apps/Firefox.app" --args "https://github.com/search?q=$org_filter$search_term&type=$search_type"
-	exit 0
-fi
-
-# Check if the choice is an app or prefpane
-app=$(echo "$apps" | grep "$choice/$" | head -1)
-if [ -n "$app" ]; then
-	if [[ "$app" == *.app/ ]]; then
-		open -na "$app"
-		exit 0
-	fi
-	if [[ "$app" == *.prefPane/ ]]; then
-		open "$app"
-		exit 0
-	fi
-	echo "Don't recognize app type for: $app"
-	exit 1
-fi
-
-# Check if the choice is a URL
-url=$(echo "$choice" | grep -Eo '(http|https)://.*')
-if [[ "$url" == http* ]]; then
-	open -na "$home_manager_apps/Firefox.app" --args "$url"
-	exit 0
-fi
-
-echo "Unknown choice: $choice"
+eval "$result"
