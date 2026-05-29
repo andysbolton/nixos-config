@@ -32,10 +32,15 @@
       azure-cli-extensions.durabletask
       azure-cli-extensions.resource-graph
     ])
+    claude-code
     jira-cli-go
     maccy
     powershell
     powershell-editor-services
+  ];
+
+  programs.neovim.extraPackages = with pkgs; [
+    claude-code-acp
   ];
 
   home.sessionPath = [

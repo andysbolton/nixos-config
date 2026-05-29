@@ -134,10 +134,11 @@
       package = pkgs-unstable.yabai;
       extraConfig = ''
         yabai -m config \
-            external_bar all:40:0 \
+            external_bar all:45:0 \
             mouse_follows_focus off \
             focus_follows_mouse off \
             display_arrangement_order default \
+            menubar_opacity 0.0 \
             window_origin_display default \
             window_placement second_child \
             window_insertion_point focused \
@@ -179,17 +180,31 @@
             yabai -m window $YABAI_WINDOW_ID --focus
         '
 
+        spaces_per_display=7
+
+        # Clean up any extra spaces
+        for display in $(yabai -m query --displays | jq '.[].index'); do
+          space_count="$(yabai -m query --spaces --display "$display" | jq '. | length')"
+          while [ "$space_count" -gt "$spaces_per_display" ]; do
+            last_space="$(yabai -m query --spaces --display "$display" | jq '.[-1].index')"
+            yabai -m space --destroy "$last_space"
+            space_count="$((space_count - 1))"
+          done
+        done
+
         # Ensure 7 spaces exist on each display.
         for display in $(yabai -m query --displays | jq '.[].index'); do
             count=$(yabai -m query --spaces --display "$display" | jq '[.[] | select(."is-native-fullscreen" == false)] | length')
             yabai -m display --focus "$display"
-            while [ "$count" -lt 6 ]; do
+            while [ "$count" -lt "$spaces_per_display" ]; do
                 yabai -m space --create
                 count=$((count + 1))
             done
         done
 
         yabai -m rule --apply
+
+        sketchybar --trigger yabai_updated
       '';
     };
   };

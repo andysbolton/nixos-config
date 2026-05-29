@@ -66,7 +66,7 @@ handle_selection() {
 
 	elif app_match=$(echo "$apps" | grep "$choice/" | head -1) && [ -n "$app_match" ]; then
 		if [[ "$app_match" == *.app/* ]]; then
-			open_app "$choice" "$args" -a
+			open_app "$choice" "$args" -na
 			return
 		elif [[ "$app_match" == *.prefPane/ ]]; then
 			open_app "$app_match" "$args"

@@ -91,30 +91,56 @@ return {
         },
         adapters = {
           acp = {
-            opencode = function()
-              return require("codecompanion.adapters").extend("opencode", {
-                defaults = {
-                  -- model = "claude-sonnet-4.6",
+            claude_code = function()
+              return require("codecompanion.adapters").extend("claude_code", {
+                commands = {
+                  default = {
+                    "claude-code-acp",
+                  },
+                  yolo = {
+                    "claude-code-acp",
+                    "--yolo",
+                  },
                 },
               })
             end,
           },
         },
+        -- interactions = {
+        --   background = { adapter = { name = "opencode" } },
+        --   chat = {
+        --     tools = { opts = { auto_submit_errors = true } },
+        --     adapter = { name = "claude_code" },
+        --   },
+        --   inline = { adapter = "opencode" },
+        --   cmd = { adapter = "opencode" },
+        --   cli = {
+        --     agent = "opencode",
+        --     agents = {
+        --       opencode = {
+        --         cmd = "opencode",
+        --         args = {},
+        --         description = "OpenCode CLI",
+        --         provider = "terminal",
+        --       },
+        --     },
+        --   },
+        -- },
         interactions = {
-          background = { adapter = { name = "opencode" } },
+          background = { adapter = { name = "claude_code" } },
           chat = {
             tools = { opts = { auto_submit_errors = true } },
-            adapter = { name = "mistral", model = "devstral-latest" },
+            adapter = { name = "claude_code" },
           },
-          inline = { adapter = "opencode" },
-          cmd = { adapter = "opencode" },
+          inline = { adapter = "claude_code" },
+          cmd = { adapter = "claude_code" },
           cli = {
-            agent = "opencode",
+            agent = "claude_code",
             agents = {
-              opencode = {
-                cmd = "opencode",
+              claude_code = {
+                cmd = "claude",
                 args = {},
-                description = "OpenCode CLI",
+                description = "Claude Code CLI",
                 provider = "terminal",
               },
             },
@@ -123,7 +149,7 @@ return {
         display = {
           chat = {
             show_token_count = true,
-            show_settings = true,
+            -- show_settings = true,
             show_tools_processing = true,
             window = {
               layout = "vertical",
