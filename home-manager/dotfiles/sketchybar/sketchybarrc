@@ -4,7 +4,7 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
-sketchybar --bar position=top height=45 color=$BASE
+sketchybar --bar position=top height=45 color=$BASE display=all
 
 default=(
   padding_left=5
@@ -20,25 +20,36 @@ default=(
 )
 sketchybar --default "${default[@]}"
 
-sketchybar --add event yabai_updated
-
-sketchybar --add item spaces_trigger left \
-  --set spaces_trigger drawing=off \
-    script="$PLUGIN_DIR/spaces.sh" \
-  --subscribe spaces_trigger yabai_updated
-
-source "$PLUGIN_DIR/spaces.sh"
+for did in $(yabai -m query --displays 2>/dev/null | jq '.[].index'); do
+  local_idx=1
+  for sid in $(yabai -m query --spaces --display "$did" | jq '.[].index'); do
+    space=(
+      space="$sid"
+      display="$did"
+      icon="$local_idx"
+      icon.padding_left=7
+      icon.padding_right=7
+      background.color=0x40ffffff
+      background.corner_radius=5
+      background.height=25
+      label.drawing=off
+      script="$PLUGIN_DIR/space.sh"
+      click_script="yabai -m space --focus $sid"
+    )
+    sketchybar --add space space."$sid" left --set space."$sid" "${space[@]}"
+    local_idx=$((local_idx + 1))
+  done
+done
 
 # Left
 
-sketchybar --add item chevron left \
-  --set chevron label.drawing=off \
+sketchybar \
   --add item front_app left \
   --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
   --subscribe front_app front_app_switched
 
-sketchybar --add item "clock.1" left \
-  --set "clock.1" update_freq=10 script="$PLUGIN_DIR/clock.sh" display="1"
+sketchybar --add item "clock.0" left \
+  --set "clock.0" update_freq=10 script="$PLUGIN_DIR/clock.sh" display="1"
 
 # Center
 
@@ -49,7 +60,7 @@ sketchybar --add item volume right \
   --set battery update_freq=60 script="$PLUGIN_DIR/battery.sh" \
   --subscribe battery system_woke power_source_change
 
-for did in $(yabai -m query --displays | jq '.[].index | select(. != 1)'); do
+for did in $(yabai -m query --displays | jq '.[].index'); do
   sketchybar --add item "clock.$did" center \
     --set "clock.$did" update_freq=10 script="$PLUGIN_DIR/clock.sh" display="$did"
 done
