@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cache_file="$HOME/.cache/choose_apps.txt"
+cache_file="$HOME/.cache/apps.txt"
 
 # Check if cache exists and is recent (less than 1 hour old)
 if [ -f "$cache_file" ]; then
@@ -11,19 +11,20 @@ if [ -f "$cache_file" ]; then
 	fi
 fi
 
-# Cache is stale or doesn't exist, regenerate
-mkdir -p "$HOME/.cache"
-
 # Generate new output
 output=$(
 	fd -t d -d 1 ".app\$|.prefPane\$" \
-		/Users/andybolton/Applications/Home\ Manager\ Apps \
+		"$HOME/Applications/Home Manager Apps/" \
 		/Applications \
 		/Applications/Nix\ Apps \
 		/Applications/Utilities/ \
 		/System/Applications/ \
 		/System/Applications/Utilities/ \
-		/System/Library/PreferencePanes
+		/System/Library/PreferencePanes/ \
+		/System/Library/CoreServices/ |
+		rev |
+		sort -r |
+		rev
 )
 
 # Store in cache

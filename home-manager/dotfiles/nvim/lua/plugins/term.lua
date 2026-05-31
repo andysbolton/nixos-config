@@ -20,23 +20,20 @@ return {
       vim.api.nvim_create_autocmd("TermOpen", {
         pattern = "*",
         callback = function(args)
-          local filetype = vim.bo[args.buf].filetype
-          if filetype == "toggleterm" then
-            vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
-          end
+          vim.opt_local.timeoutlen = 200
+          vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
         end,
       })
 
-      -- Quick exit
-      -- This interfers when navigating 'less' in the integrated terminal.
-      -- vim.keymap.set("t", "jk", [[<C-\><C-n>]], { silent = true })
-
-      -- Enable <C-r> in terminal mode to paste from register, as in normal mode
       vim.keymap.set("t", "<C-r>", function()
         local next_char_code = vim.fn.getchar()
         local next_char = vim.fn.nr2char(next_char_code)
         return [[<C-\><C-n>"]] .. next_char .. "pi"
       end, { expr = true })
+
+      -- Quick exit
+      -- This interfers when navigating 'less' in the integrated terminal.
+      -- vim.keymap.set("t", "jk", [[<C-\><C-n>]], { silent = true })
 
       vim.keymap.set(
         { "n", "t" },

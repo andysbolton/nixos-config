@@ -1,7 +1,7 @@
 #!/bin/bash
 
 bookmarks_folder="$HOME/Library/Application Support/Firefox/Profiles/home/"
-cache_file="$HOME/.cache/choose_bookmarks.txt"
+cache_file="$HOME/.cache/bookmarks.txt"
 
 # Check if cache exists and is up to date
 if [ -f "$cache_file" ]; then
@@ -17,9 +17,6 @@ if [ -f "$cache_file" ]; then
 		exit 0
 	fi
 fi
-
-# Database changed or no cache exists, update cache
-mkdir -p "$HOME/.cache"
 
 # Copy DB since it's locked while Firefox is running
 csum_orig=$(shasum "${bookmarks_folder}/places.sqlite" | awk '{print $1}')

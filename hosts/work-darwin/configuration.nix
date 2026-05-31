@@ -43,7 +43,7 @@
       "tfenv"
     ];
     casks = [
-      "bot-framework-emulator"
+      # "bot-framework-emulator"
       "microsoft-teams"
     ];
   };
@@ -91,7 +91,7 @@
         # balance size of windows
         shift + alt - 0 : yabai -m space --balance
 
-        shift + ctrl - o : yabai -m window --focus recent 
+        shift + ctrl - o : yabai -m window --focus recent
         shift + ctrl - i : yabai -m window --focus next
 
         # fast focus desktop
@@ -108,9 +108,9 @@
         # expand window to the right OR shrink from the left
         alt + shift - l : yabai -m window --resize right:20:0 || yabai -m window --resize left:20:0
 
-        cmd - return : "$HOME/Applications/Home Manager Apps/WezTerm.app/wezterm-gui" start --always-new-process &
+        cmd - return : wezterm-gui start --always-new-process &
 
-        cmd - t: wezterm-launch.sh 
+        cmd - t : wezterm-launch.sh &
       '';
     };
 
@@ -128,71 +128,101 @@
       });
     };
 
-    yabai = {
-      enable = true;
-      enableScriptingAddition = true;
-      package = pkgs-unstable.yabai;
-      extraConfig = ''
-        yabai -m config \
-          external_bar all:40:0 \
-          mouse_follows_focus off \
-          focus_follows_mouse off \
-          display_arrangement_order default \
-          window_origin_display default \
-          window_placement second_child \
-          window_insertion_point focused \
-          window_zoom_persist on \
-          window_shadow on \
-          window_animation_duration 0.0 \
-          window_animation_easing ease_out_circ \
-          window_opacity_duration 0.0 \
-          active_window_opacity 1.0 \
-          normal_window_opacity 0.90 \
-          window_opacity off \
-          insert_feedback_color 0xffd75f5f \
-          split_ratio 0.50 \
-          split_type auto \
-          auto_balance off \
-          top_padding 13 \
-          bottom_padding 13 \
-          left_padding 13 \
-          right_padding 13 \
-          window_gap 13 \
-          layout bsp \
-          mouse_modifier fn \
-          mouse_action1 move \
-          mouse_action2 resize \
-          mouse_drop_action swap
+    yabai =
+      let
+        sketchybar = "${pkgs.sketchybar}/bin/sketchybar";
+        ensureDisplays = pkgs.writeShellScript "ensure-displays" ''
+          spaces_per_display=7
 
-        yabai -m rule --add app="^System Settings$" manage=off
-        yabai -m rule --add app="^Microsoft Teams$" display=1 space=1
-        yabai -m rule --add app="^Discord$" display=1 space=2
-        yabai -m rule --add app="^GatherV2$" display=1 space=3
-        yabai -m rule --add app="^Proton VPN$" display=1 space=7
-
-        yabai -m signal --add label="float_wezterm" event=window_created app="^WezTerm\$" action='
-            title=$(yabai -m query --windows --window $YABAI_WINDOW_ID | jq -r .title)
-            echo "title is $title" >> /tmp/title
-            if [ "$title" = "launch.sh" ]; then
-                yabai -m window $YABAI_WINDOW_ID --toggle float
-                yabai -m window $YABAI_WINDOW_ID --grid 4:4:1:1:2:2
-            fi
-            yabai -m window $YABAI_WINDOW_ID --focus
-        '
-
-        # Ensure 7 spaces exist on each display.
-        for display in $(yabai -m query --displays | jq '.[].index'); do
-          count=$(yabai -m query --spaces --display "$display" | jq '[.[] | select(."is-native-fullscreen" == false)] | length')
-          while [ "$count" -lt 6 ]; do
-            yabai -m display --focus "$display"
-            yabai -m space --create
-            count=$((count + 1))
+          # Clean up any extra spaces
+          for display in $(yabai -m query --displays | jq '.[].index'); do
+            space_count="$(yabai -m query --spaces --display "$display" | jq '. | length')"
+            while [ "$space_count" -gt "$spaces_per_display" ]; do
+              last_space="$(yabai -m query --spaces --display "$display" | jq '.[-1].index')"
+              yabai -m space --destroy "$last_space"
+              space_count="$((space_count - 1))"
+            done
           done
-        done
 
-        yabai -m rule --apply
-      '';
-    };
+          # Ensure 7 spaces exist on each display.
+          for display in $(yabai -m query --displays | jq '.[].index'); do
+            count=$(yabai -m query --spaces --display "$display" | jq '[.[] | select(."is-native-fullscreen" == false)] | length')
+            yabai -m display --focus "$display"
+            while [ "$count" -lt "$spaces_per_display" ]; do
+              yabai -m space --create
+              count=$((count + 1))
+            done
+          done
+        '';
+      in
+      {
+        enable = true;
+        enableScriptingAddition = true;
+        package = pkgs-unstable.yabai;
+        extraConfig = ''
+          yabai -m config \
+              external_bar all:45:0 \
+              mouse_follows_focus off \
+              focus_follows_mouse off \
+              display_arrangement_order default \
+              menubar_opacity 0.0 \
+              window_origin_display default \
+              window_placement second_child \
+              window_insertion_point focused \
+              window_zoom_persist on \
+              window_shadow on \
+              window_animation_duration 0.0 \
+              window_animation_easing ease_out_circ \
+              window_opacity_duration 0.0 \
+              active_window_opacity 1.0 \
+              normal_window_opacity 0.90 \
+              window_opacity off \
+              insert_feedback_color 0xffd75f5f \
+              split_ratio 0.50 \
+              split_type auto \
+              auto_balance off \
+              top_padding 13 \
+              bottom_padding 13 \
+              left_padding 13 \
+              right_padding 13 \
+              window_gap 13 \
+              layout bsp \
+              mouse_modifier fn \
+              mouse_action1 move \
+              mouse_action2 resize \
+              mouse_drop_action swap
+
+          yabai -m rule --add app="^System Settings$" manage=off
+          yabai -m rule --add app="^Microsoft Teams$" display=1 space=1
+          yabai -m rule --add app="^Discord$" display=1 space=2
+          yabai -m rule --add app="^GatherV2$" display=1 space=3
+          yabai -m rule --add app="^Proton VPN$" display=1 space=7
+
+          yabai -m signal --add label="float_wezterm" event=window_created app="^WezTerm\$" action='
+              title=$(yabai -m query --windows --window $YABAI_WINDOW_ID | jq -r .title)
+              if [ "$title" = "launch.sh" ]; then
+                  yabai -m window $YABAI_WINDOW_ID --toggle float
+                  yabai -m window $YABAI_WINDOW_ID --grid 4:4:1:1:2:2
+              fi
+              yabai -m window $YABAI_WINDOW_ID --focus
+          '
+
+          ${ensureDisplays}
+
+          yabai -m signal --add label="display_added" event=display_added action='
+            ${ensureDisplays}
+            ${sketchybar} --reload
+          '
+          yabai -m signal --add label="display_removed" event=display_removed action='
+            ${ensureDisplays}
+            ${sketchybar} --reload
+          '
+
+          yabai -m rule --apply
+
+          ${sketchybar} --reload
+        '';
+      };
   };
 
   launchd.user.agents.skhd.serviceConfig = {

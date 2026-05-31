@@ -47,41 +47,26 @@ return {
     config = function()
       local function turn_off_line_numbers(buf)
         local win = vim.fn.bufwinid(buf)
-        vim.notify("win is" .. win)
         if win ~= -1 then
           vim.wo[win].number = false
           vim.wo[win].relativenumber = false
         end
       end
 
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "codecompanion",
-        callback = function(args) turn_off_line_numbers(args.buf) end,
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "CodeCompanionChatOpened",
+        callback = function(args) turn_off_line_numbers(args.data.bufnr) end,
       })
 
       vim.api.nvim_create_autocmd("User", {
-        pattern = "CodeCompanionCLICreated",
+        pattern = "CodeCompanionCLIOpened",
         callback = function(args)
-          -- print(vim.inspect(args))
           turn_off_line_numbers(args.buf)
-          -- vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
-        end,
-      })
-
-      -- vim.api.nvim_create_autocmd("TermOpen", {
-      --   pattern = "term://*opencode",
-      --   callback = function(args)
-      --     turn_off_line_numbers(args.buf)
-      --     vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
-      --   end,
-      -- })
-
-      vim.api.nvim_create_autocmd("User", {
-        pattern = "CodeCompanionCLICreated",
-        callback = function(args)
-          -- print(vim.inspect(args))
-          turn_off_line_numbers(args.buf)
-          -- vim.keymap.set("t", "jk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
+          vim.cmd "startinsert"
+          vim.api.nvim_create_autocmd("BufEnter", {
+            callback = function() vim.cmd "startinsert" end,
+            buffer = args.data.bufnr,
+          })
         end,
       })
 
@@ -106,30 +91,56 @@ return {
         },
         adapters = {
           acp = {
-            opencode = function()
-              return require("codecompanion.adapters").extend("opencode", {
-                defaults = {
-                  -- model = "claude-sonnet-4.6",
+            claude_code = function()
+              return require("codecompanion.adapters").extend("claude_code", {
+                commands = {
+                  default = {
+                    "claude-code-acp",
+                  },
+                  yolo = {
+                    "claude-code-acp",
+                    "--yolo",
+                  },
                 },
               })
             end,
           },
         },
+        -- interactions = {
+        --   background = { adapter = { name = "opencode" } },
+        --   chat = {
+        --     tools = { opts = { auto_submit_errors = true } },
+        --     adapter = { name = "claude_code" },
+        --   },
+        --   inline = { adapter = "opencode" },
+        --   cmd = { adapter = "opencode" },
+        --   cli = {
+        --     agent = "opencode",
+        --     agents = {
+        --       opencode = {
+        --         cmd = "opencode",
+        --         args = {},
+        --         description = "OpenCode CLI",
+        --         provider = "terminal",
+        --       },
+        --     },
+        --   },
+        -- },
         interactions = {
-          background = { adapter = { name = "opencode" } },
+          background = { adapter = { name = "claude_code" } },
           chat = {
             tools = { opts = { auto_submit_errors = true } },
-            adapter = { name = "mistral", model = "devstral-latest" },
+            adapter = { name = "claude_code" },
           },
-          inline = { adapter = "opencode" },
-          cmd = { adapter = "opencode" },
+          inline = { adapter = "claude_code" },
+          cmd = { adapter = "claude_code" },
           cli = {
-            agent = "opencode",
+            agent = "claude_code",
             agents = {
-              opencode = {
-                cmd = "opencode",
+              claude_code = {
+                cmd = "claude",
                 args = {},
-                description = "OpenCode CLI",
+                description = "Claude Code CLI",
                 provider = "terminal",
               },
             },
@@ -138,7 +149,7 @@ return {
         display = {
           chat = {
             show_token_count = true,
-            show_settings = true,
+            -- show_settings = true,
             show_tools_processing = true,
             window = {
               layout = "vertical",
