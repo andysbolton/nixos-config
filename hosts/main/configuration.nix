@@ -52,10 +52,10 @@
     defaultSopsFile = ../../secrets/sops.yaml;
     defaultSopsFormat = "yaml";
     age.keyFile = "/home/andy/.config/sops/age/keys.txt";
-    secrets."wireless.conf" = { 
-	owner = "wpa_supplicant";
-	group = "wpa_supplicant";
-	mode = "0440";
+    secrets."wireless.conf" = {
+      owner = "wpa_supplicant";
+      group = "wpa_supplicant";
+      mode = "0440";
     };
     secrets."proton-vpn.conf" = { };
     secrets."radarr_api_key" = {
