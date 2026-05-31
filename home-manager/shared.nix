@@ -99,6 +99,9 @@ in
 
   programs.neovim = {
     enable = true;
+    sideloadInitLua = true;
+    withRuby = false;
+    withPython3 = false;
     extraPackages = with pkgs; [
       cargo
       clang-tools

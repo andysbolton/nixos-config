@@ -41,7 +41,7 @@ in
     traceroute
     waypipe
     trash-cli
-    xfce.thunar
+    thunar
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       SUDO_ASKPASS=${askPass}/bin/ask-pass \
          sudo -A -E ip netns exec vpn \
@@ -75,7 +75,7 @@ in
 
   services.swayidle = {
     enable = true;
-    systemdTarget = "river-session.target";
+    systemdTargets = [ "river-session.target" ];
     timeouts = [
       {
         timeout = 1740;
@@ -93,7 +93,7 @@ in
     enable = true;
     settings = {
       program_options = {
-        file_manager = "${pkgs.xfce.thunar}/bin/thunar";
+        file_manager = "${pkgs.thunar}/bin/thunar";
       };
     };
   };

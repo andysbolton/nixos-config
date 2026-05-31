@@ -34,7 +34,7 @@
     swaylock
     wl-clipboard
     wlopm
-    xorg.xdpyinfo
+    xdpyinfo
   ];
 
   fonts.fontDir.enable = true;

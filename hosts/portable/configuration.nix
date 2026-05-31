@@ -39,5 +39,5 @@
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   networking.firewall.allowedUDPPorts = [ config.services.tailscale.port ];
 
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.05";
 }

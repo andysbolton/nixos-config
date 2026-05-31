@@ -30,10 +30,10 @@
 
   networking.hostName = "home";
   networking.wireless = {
-    userControlled.enable = true;
+    userControlled.enabled = true;
     enable = true;
     secretsFile = config.sops.secrets."wireless.conf".path;
-    extraConfig = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=wheel";
+    extraConfig = "ctrl_interface=DIR=/run/wpa_supplicant GROUP=wpa_supplicant";
     networks = {
       "Hammy 5 GHz" = {
         pskRaw = "ext:psk";
@@ -43,15 +43,20 @@
   };
 
   users.users.andy.extraGroups = [
-    "wheel"
     "docker"
+    "wheel"
+    "wpa_supplicant"
   ];
 
   sops = {
     defaultSopsFile = ../../secrets/sops.yaml;
     defaultSopsFormat = "yaml";
     age.keyFile = "/home/andy/.config/sops/age/keys.txt";
-    secrets."wireless.conf" = { };
+    secrets."wireless.conf" = { 
+	owner = "wpa_supplicant";
+	group = "wpa_supplicant";
+	mode = "0440";
+    };
     secrets."proton-vpn.conf" = { };
     secrets."radarr_api_key" = {
       owner = "unpackerr";
