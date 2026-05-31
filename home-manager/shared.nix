@@ -49,6 +49,7 @@ in
     age # simple modern file encryption tool
     bat # cat replacement with syntax highlighting
     bat-extras.core
+    claude-code
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
     discord

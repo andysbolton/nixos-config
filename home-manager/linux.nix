@@ -39,6 +39,7 @@ in
     swappy # screenshot annotation tool
     tcpdump
     traceroute
+    waypipe
     trash-cli
     xfce.thunar
     (pkgs.writeShellScriptBin "firefox-vpn" ''

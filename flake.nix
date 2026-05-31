@@ -97,7 +97,32 @@
           specialArgs = extraSpecialArgs;
           modules = [
             ./hosts/main/configuration.nix
-            ./modules
+            disko.nixosModules.disko
+            home-manager.nixosModules.home-manager
+            stylix.nixosModules.stylix
+            {
+              home-manager.users.andy = ./home-manager/linux.nix;
+              home-manager.extraSpecialArgs = extraSpecialArgs;
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = false;
+            }
+          ];
+        };
+
+      nixosConfigurations.portable =
+        let
+          system = "x86_64-linux";
+          pkgs = mkPkgs system;
+          extraSpecialArgs = {
+            inherit inputs;
+            pkgs-unstable = mkUnstablePkgs system;
+          };
+        in
+        nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          specialArgs = extraSpecialArgs;
+          modules = [
+            ./hosts/portable/configuration.nix
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
             stylix.nixosModules.stylix

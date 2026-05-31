@@ -9,6 +9,12 @@
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ../../modules/desktop.nix
+    ../../modules/hardware.nix
+    ../../modules/arrs.nix
+    ../../modules/torrenting.nix
+    ../../modules/steam.nix
+    ../../modules/vpn.nix
     inputs.sops-nix.nixosModules.sops
     # inputs.wayland-pipewire-idle-inhibit.nixosModules.default
   ];
@@ -36,109 +42,10 @@
     };
   };
 
-  time.timeZone = "America/Denver";
-
-  i18n.defaultLocale = "en_US.UTF-8";
-  console = {
-    font = "Lat2-Terminus16";
-    keyMap = "us";
-  };
-
-  # Enable sound.
-  services.pipewire = {
-    enable = true;
-    pulse.enable = true;
-  };
-
-  users.users.andy = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "docker"
-    ];
-    shell = pkgs.fish;
-  };
-
-  programs.fish = {
-    enable = true;
-    package = pkgs-unstable.fish;
-  };
-
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
+  users.users.andy.extraGroups = [
+    "wheel"
+    "docker"
   ];
-
-  environment.systemPackages = with pkgs; [
-    # TODO: move or remove this.
-    (retroarch.withCores (
-      cores: with cores; [
-        genesis-plus-gx
-        snes9x
-      ]
-    ))
-    lxqt.lxqt-policykit
-    pavucontrol
-    swaylock
-    wl-clipboard
-    wlopm
-    xorg.xdpyinfo
-  ];
-
-  fonts.fontDir.enable = true;
-  fonts.packages = with pkgs; [ nerd-fonts.caskaydia-cove ];
-
-  # Enable the gnome-keyring secrets vault.
-  # Will be exposed through DBus to programs willing to store secrets.
-  services.gnome.gnome-keyring.enable = true;
-
-  programs.river-classic.enable = true;
-
-  programs.uwsm = {
-    enable = true;
-    waylandCompositors.river = {
-      prettyName = "River";
-      comment = "River compositor managed by UWSM";
-      binPath = "/run/current-system/sw/bin/river";
-    };
-  };
-
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = ''
-          ${pkgs.tuigreet}/bin/tuigreet --time --cmd "uwsm start river-uwsm.desktop"
-        '';
-        user = "greeter";
-      };
-    };
-  };
-
-  systemd.services.greetd.serviceConfig = {
-    Type = "idle";
-    StandardInput = "tty";
-    StandardOutput = "tty";
-    StandardError = "journal"; # Without this errors will spam on screen
-    # Without these bootlogs will spam on screen
-    TTYReset = true;
-    TTYVHangup = true;
-    TTYVTDisallocate = true;
-  };
-
-  services.openssh.enable = true;
-  services.dbus.enable = true;
-  services.blueman.enable = true;
-
-  networking.firewall.allowedUDPPorts = [
-    4242 # lan-mouse
-    32400 # Plex Media Server
-  ];
-  networking.firewall.allowedTCPPorts = [
-    32400 # Plex Media Server
-  ];
-
-  services.udisks2.enable = true;
 
   sops = {
     defaultSopsFile = ../../secrets/sops.yaml;
@@ -152,7 +59,24 @@
       mode = "0440";
     };
   };
-  security.polkit.enable = true;
+
+  networking.firewall.allowedUDPPorts = [
+    4242 # lan-mouse
+    32400 # Plex Media Server
+  ];
+  networking.firewall.allowedTCPPorts = [
+    32400 # Plex Media Server
+  ];
+
+  environment.systemPackages = with pkgs; [
+    # TODO: move or remove this.
+    (retroarch.withCores (
+      cores: with cores; [
+        genesis-plus-gx
+        snes9x
+      ]
+    ))
+  ];
 
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -180,6 +104,12 @@
     ip = "10.2.0.2/32";
     netns = "vpn";
     wgConfPath = config.sops.secrets."proton-vpn.conf".path;
+  };
+
+  services.sunshine = {
+    enable = true;
+    openFirewall = true;
+    capSysAdmin = true; # required for KMS/DRM capture under Wayland
   };
 
   services.printing.enable = true;

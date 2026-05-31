@@ -1,3 +1,4 @@
+# Adjust device path to match target hardware (check with: lsblk)
 {
   disko.devices = {
     disk = {
@@ -18,11 +19,11 @@
               };
             };
             swap = {
-              size = "16G";
+              size = "8G";
               content = {
                 type = "swap";
                 discardPolicy = "both";
-                resumeDevice = true; # resume from hiberation from this device
+                resumeDevice = true;
               };
             };
             root = {
@@ -31,27 +32,6 @@
                 type = "filesystem";
                 format = "ext4";
                 mountpoint = "/";
-              };
-            };
-          };
-        };
-      };
-      media1 = {
-        type = "disk";
-        device = "/dev/sda1";
-        content = {
-          type = "gpt";
-          partitions = {
-            media = {
-              size = "100%";
-              content = {
-                type = "filesystem";
-                format = "xfs";
-                mountpoint = "/mnt/media";
-                mountOptions = [
-                  "defaults"
-                  "pquota"
-                ];
               };
             };
           };
