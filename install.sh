@@ -18,33 +18,6 @@ if [ ! -d "$repo_dir/hosts/$HOST" ]; then
   exit 1
 fi
 
-if ! ping -c 1 -W 3 github.com &>/dev/null; then
-  iface=$(for dev in /sys/class/net/*/; do
-    [ -d "${dev}wireless" ] && basename "$dev" && break
-  done)
-
-  if [ -z "$iface" ]; then
-    echo "No wireless interface found and no network connectivity. Connect manually and retry."
-    exit 1
-  fi
-
-  echo "No network detected. Connecting via $iface..."
-  read -rp "WiFi SSID: " ssid
-  read -rsp "WiFi password: " password
-  echo
-
-  wpa_passphrase "$ssid" "$password" > /tmp/wpa.conf
-  wpa_supplicant -B -i "$iface" -c /tmp/wpa.conf
-  dhcpcd "$iface"
-
-  echo -n "Waiting for connection"
-  until ping -c 1 -W 2 github.com &>/dev/null; do
-    echo -n "."
-    sleep 1
-  done
-  echo " connected."
-fi
-
 echo "Generating hardware configuration..."
 nixos-generate-config --no-filesystems --show-hardware-config \
   >"$repo_dir/hosts/$HOST/hardware-configuration.nix"
