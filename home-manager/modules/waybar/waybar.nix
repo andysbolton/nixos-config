@@ -148,22 +148,14 @@ in
         height = 35;
 
         modules-left = [
-          "custom/primary-label"
           "custom/primary"
-        ];
-        modules-right = [
-          "custom/system-label"
           "custom/system"
         ];
-
-        "custom/primary-label" = {
-          format = "Primary: ";
-        };
 
         "custom/primary" = {
           exec = pkgs.writeShellScript "clipboard-primary-check" ''
             db="$HOME/.cache/cliphist/primary-db"
-            echo "$db" | 
+            echo "$db" |
               entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
           '';
           max-length = 30;
@@ -171,6 +163,7 @@ in
           align = 0;
           format = "Primary: {}";
           tooltip = false;
+          escape = true;
         };
 
         "custom/system-label" = {
@@ -178,10 +171,15 @@ in
         };
 
         "custom/system" = {
-          exec = pkgs.writeShellScript "clipboard-check" "(${pkgs.wl-clipboard}/bin/wl-paste 2>/dev/null | ${pkgs.busybox}/bin/tr -d '\\n' | ${pkgs.busybox}/bin/cut -c 1-100) || echo unset";
-          interval = 2;
-          format = "{}";
-          tooltip = false;
+          exec = pkgs.writeShellScript "clipboard-primary-check" ''
+            db="$HOME/.cache/cliphist/system-db"
+            echo "$db" |
+              entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
+          '';
+          max-length = 30;
+          min-length = 30;
+          format = "System: {}";
+          align = 0;
           escape = true;
         };
       }

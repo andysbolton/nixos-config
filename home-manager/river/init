@@ -10,7 +10,7 @@ riverctl map normal Super N spawn "uwsm app -- $HOME/nixos-config/home-manager/r
 riverctl map normal Super S spawn "uwsm app -- grim -g \"\$(slurp)\" - | wl-copy"
 
 riverctl map normal Alt+Shift Q close
-riverctl map normal Control+Shift E exit
+riverctl map normal Control+Shift E spawn "uwsm stop"
 
 riverctl input pointer-1133-45082-MX_Anywhere_2S_Mouse middle-emulation enabled
 

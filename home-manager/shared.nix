@@ -74,7 +74,6 @@ in
     nh # helper CLI for Nix/Home Manager workflows
     nix-tree
     nixfmt
-    ov # interactive pager
     pkgs-unstable.gh
     pkgs-unstable.github-copilot-cli # GitHub Copilot CLI from unstable nixpkgs
     pkgs-unstable.opencode
@@ -85,6 +84,7 @@ in
     rlwrap # readline wrapper for interactive programs
     roswell # Common Lisp environment manager
     rsync
+    sd # sed replacement
     sops # secrets editor/manager
     starship # cross-shell prompt
     tokyonight-extras
@@ -101,7 +101,7 @@ in
     extraPackages = with pkgs; [
       cargo
       clang-tools
-      pkgs-unstable.fennel-ls
+      fennel-ls
       fnlfmt
       lua-language-server
       luaPackages.luarocks
@@ -111,16 +111,8 @@ in
     ];
   };
 
-  programs.man = {
-    enable = true;
-    generateCaches = true;
-  };
-
   programs.btop.enable = true;
-  programs.fish = {
-    enable = true;
-    package = pkgs-unstable.fish;
-  };
+  programs.fish.enable = true;
 
   stylix.enable = true;
   stylix.autoEnable = true;

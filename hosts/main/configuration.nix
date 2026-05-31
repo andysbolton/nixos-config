@@ -1,7 +1,7 @@
 {
   config,
-  lib,
   pkgs,
+  pkgs-unstable,
   inputs,
   ...
 }:
@@ -29,7 +29,10 @@
     secretsFile = config.sops.secrets."wireless.conf".path;
     extraConfig = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=wheel";
     networks = {
-      "BBBP_5G".pskRaw = "ext:psk";
+      "Hammy 5 GHz" = {
+        pskRaw = "ext:psk";
+        extraConfig = "disabled=0";
+      };
     };
   };
 
