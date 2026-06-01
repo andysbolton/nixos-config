@@ -51,7 +51,10 @@ if [ ! -f "$SOPS_FILE" ]; then
     "SOPS_AGE_RECIPIENTS='$SSH_PUBKEY' sops --encrypt --input-type yaml --output-type yaml '$TMPFILE'" \
     >"$SOPS_FILE"
   echo "Created $SOPS_FILE"
+  sudo -u "$SUDO_USER" git -C "$repo_dir" add "$SOPS_FILE"
 fi
+
+sudo -u "$SUDO_USER" git -C "$repo_dir" add "$repo_dir/hosts/$HOST/hardware-configuration.nix"
 
 echo "Installing NixOS..."
 nixos-install \
@@ -62,6 +65,4 @@ nixos-install \
 nixos-enter --command "echo 'Set password for andy:' && passwd andy"
 
 echo
-echo "Installation complete. Remember to commit:"
-echo "  hosts/$HOST/hardware-configuration.nix"
-echo "  secrets/$HOST.yaml"
+echo "Installation complete. Remember to commit the staged files."
