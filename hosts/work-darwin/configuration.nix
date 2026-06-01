@@ -45,7 +45,6 @@
     ];
     casks = [
       # "bot-framework-emulator"
-      "gather"
       "microsoft-teams"
       "protonvpn"
     ];
@@ -295,17 +294,22 @@
     pkgs.jq
   ];
 
-  system.activationScripts.postActivation.text = let
-    user = config.system.primaryUser;
-    wallpaper = pkgs.runCommand "wallpaper.png" {
-      nativeBuildInputs = [ pkgs.imagemagick ];
-    } ''
-      magick -size 1x1 xc:'#2f4f4f' $out
+  system.activationScripts.postActivation.text =
+    let
+      user = config.system.primaryUser;
+      wallpaper =
+        pkgs.runCommand "wallpaper.png"
+          {
+            nativeBuildInputs = [ pkgs.imagemagick ];
+          }
+          ''
+            magick -size 1x1 xc:'#2f4f4f' $out
+          '';
+    in
+    ''
+      sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr scale stretch
+      sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr ${wallpaper}
     '';
-  in ''
-    sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr scale stretch
-    sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr ${wallpaper}
-  '';
 
   system.stateVersion = 6;
 }

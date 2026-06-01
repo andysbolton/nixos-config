@@ -66,6 +66,15 @@
         (final: prev: {
           tokyonight-extras = prev.callPackage ./pkgs/tokyonight-extras.nix { };
           gatherv2 = prev.callPackage ./pkgs/gatherv2.nix { };
+          _1password-gui =
+            if prev.stdenv.hostPlatform.isDarwin then
+              prev._1password-gui.overrideAttrs (old: {
+                src = old.src.overrideAttrs {
+                  outputHash = "sha256-WrWbGzBK65tVNl9Dc3OnJURiPpfbNLOYUJcVT0ETaAs=";
+                };
+              })
+            else
+              prev._1password-gui;
         })
       ];
 

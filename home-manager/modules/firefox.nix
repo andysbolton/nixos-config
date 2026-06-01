@@ -1,7 +1,12 @@
+{ pkgs, ... }:
 {
   programs.firefox = {
     enable = true;
-    configPath = ".mozilla/firefox";
+    configPath =
+      if pkgs.stdenv.hostPlatform.isDarwin then
+        "Library/Application Support/Firefox"
+      else
+        ".mozilla/firefox";
     profiles = {
       home = {
         id = 0;

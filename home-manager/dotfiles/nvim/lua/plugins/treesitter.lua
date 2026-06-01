@@ -8,20 +8,20 @@ return {
   main = "nvim-treesitter",
 
   init = function()
-    local ensureInstalled = require("configs.util").get_treesitters()
+    local ensure_installed = require("configs.util").get_treesitters()
     local default_treesitters = { "vimdoc", "vim", "markdown_inline" }
 
     for _, v in ipairs(default_treesitters) do
-      table.insert(ensureInstalled, v)
+      table.insert(ensure_installed, v)
     end
 
-    local alreadyInstalled = require("nvim-treesitter.config").get_installed()
-    local parsersToInstall = vim
-      .iter(ensureInstalled)
-      :filter(function(parser) return not vim.tbl_contains(alreadyInstalled, parser) end)
+    local already_installed = require("nvim-treesitter.config").get_installed()
+    local parsers_to_install = vim
+      .iter(ensure_installed)
+      :filter(function(parser) return not vim.tbl_contains(already_installed, parser) end)
       :totable()
 
-    if #parsersToInstall > 0 then require("nvim-treesitter").install(parsersToInstall) end
+    if #parsers_to_install > 0 then require("nvim-treesitter").install(parsers_to_install) end
 
     vim.api.nvim_create_autocmd("FileType", {
       callback = function()
