@@ -15,6 +15,7 @@
     ../../modules/torrenting.nix
     ../../modules/steam.nix
     ../../modules/vpn.nix
+    ../../modules/wireless.nix
     inputs.sops-nix.nixosModules.sops
     # inputs.wayland-pipewire-idle-inhibit.nixosModules.default
   ];
@@ -28,18 +29,12 @@
   boot.kernelModules = [ "nct6687" ];
   boot.kernelParams = [ "acpi_enforce_resources=lax" ];
 
-  networking.hostName = "home";
-  networking.wireless = {
-    userControlled.enabled = true;
+  networking.hostName = "main";
+
+  modules.wireless = {
     enable = true;
+    ssid = "Hammy 5 GHz";
     secretsFile = config.sops.secrets."wireless.conf".path;
-    extraConfig = "ctrl_interface=DIR=/run/wpa_supplicant GROUP=wpa_supplicant";
-    networks = {
-      "Hammy 5 GHz" = {
-        pskRaw = "ext:psk";
-        extraConfig = "disabled=0";
-      };
-    };
   };
 
   users.users.andy.extraGroups = [
@@ -51,7 +46,7 @@
   sops = {
     defaultSopsFile = ../../secrets/sops.yaml;
     defaultSopsFormat = "yaml";
-    age.keyFile = "/home/andy/.config/sops/age/keys.txt";
+    age.keyFile = "${config.users.users.andy.home}/.config/sops/age/keys.txt";
     secrets."wireless.conf" = {
       owner = "wpa_supplicant";
       group = "wpa_supplicant";

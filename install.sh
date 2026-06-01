@@ -31,36 +31,26 @@ echo
 echo "Available disks:"
 lsblk -dpno NAME,SIZE,MODEL | awk '!/loop/'
 
-mapfile -t disks < <(lsblk -dpno NAME,TYPE | awk '$2=="disk"{print $1}')
-
-if [ ${#disks[@]} -eq 0 ]; then
-  echo "No disks found."
-  exit 1
-elif [ ${#disks[@]} -eq 1 ]; then
-  disk="${disks[0]}"
-  echo "Auto-selected: $disk"
-else
-  echo
-  PS3="Select disk to install onto: "
-  select disk in "${disks[@]}"; do
-    [ -n "$disk" ] && break
-  done
-fi
-
 echo
-echo "WARNING: All data on $disk will be permanently erased."
+echo "Disk device is configured in hosts/$HOST/disko.nix."
+echo "WARNING: That disk will be permanently erased."
 read -rp "Type 'yes' to continue: " confirm
 [ "$confirm" = "yes" ] || {
   echo "Aborted."
   exit 1
 }
 
+echo "Partitioning and mounting disk..."
 nix --experimental-features "nix-command flakes" \
-  run "github:nix-community/disko#disko-install" -- \
-  --write-efi-boot-entries \
+  run "github:nix-community/disko#disko" -- \
+  --mode disko \
+  --flake "$repo_dir#$HOST"
+
+echo "Installing NixOS..."
+nixos-install \
+  --root /mnt \
   --flake "$repo_dir#$HOST" \
-  --disk main "$disk" \
-  --show-trace
+  --no-root-password
 
 nixos-enter --command "echo 'Set password for andy:' && passwd andy"
 

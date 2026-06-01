@@ -76,6 +76,8 @@
   };
 
   services.openssh.enable = true;
+  services.tailscale.enable = true;
+  networking.firewall.trustedInterfaces = [ "tailscale0" ];
   services.dbus.enable = true;
   services.blueman.enable = true;
   services.udisks2.enable = true;

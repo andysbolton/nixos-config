@@ -32,7 +32,6 @@ in
     imv # command-line image viewer
     killall
     mangohud
-    moonlight-qt
     mpv # command-line media player
     slskd
     slurp # select region of screen

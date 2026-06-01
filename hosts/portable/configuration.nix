@@ -10,18 +10,25 @@
     ./hardware-configuration.nix
     ./disko.nix
     ../../modules/desktop.nix
+    ../../modules/wireless.nix
+    inputs.sops-nix.nixosModules.sops
   ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "portable";
-  networking.networkmanager.enable = true;
 
   users.users.andy.extraGroups = [
     "wheel"
-    "networkmanager"
+    "wpa_supplicant"
   ];
+
+  modules.wireless = {
+    enable = true;
+    ssid = "Hammy 5 GHz";
+    secretsFile = config.sops.secrets."wireless.conf".path;
+  };
 
   environment.systemPackages = with pkgs; [
     moonlight-qt
@@ -35,7 +42,12 @@
 
   hardware.graphics.enable = true;
 
-  services.tailscale.enable = true;
+  sops = {
+    defaultSopsFile = ../../secrets/sops.yaml;
+    defaultSopsFormat = "yaml";
+    age.keyFile = "${config.users.users.andy.home}/.config/sops/age/keys.txt";
+  };
+
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   networking.firewall.allowedUDPPorts = [ config.services.tailscale.port ];
 
