@@ -27,19 +27,6 @@ echo "Generating hardware configuration..."
 nixos-generate-config --no-filesystems --show-hardware-config \
   >"$repo_dir/hosts/$HOST/hardware-configuration.nix"
 
-echo
-echo "Available disks:"
-lsblk -dpno NAME,SIZE,MODEL | awk '!/loop/'
-
-echo
-echo "Disk device is configured in hosts/$HOST/disko.nix."
-echo "WARNING: That disk will be permanently erased."
-read -rp "Type 'yes' to continue: " confirm
-[ "$confirm" = "yes" ] || {
-  echo "Aborted."
-  exit 1
-}
-
 echo "Partitioning and mounting disk..."
 nix --experimental-features "nix-command flakes" \
   run "github:nix-community/disko#disko" -- \
