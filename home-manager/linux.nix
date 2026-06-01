@@ -32,15 +32,15 @@ in
     imv # command-line image viewer
     killall
     mangohud
-    moonlight-qt
     mpv # command-line media player
     slskd
     slurp # select region of screen
     swappy # screenshot annotation tool
     tcpdump
     traceroute
+    waypipe
     trash-cli
-    xfce.thunar
+    thunar
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       SUDO_ASKPASS=${askPass}/bin/ask-pass \
          sudo -A -E ip netns exec vpn \
@@ -51,6 +51,7 @@ in
 
   home.sessionVariables = {
     MOZ_ENABLE_WAYLAND = "1";
+    SOPS_AGE_SSH_PRIVATE_KEY_FILE = "/etc/ssh/ssh_host_ed25519_key";
   };
 
   wayland.windowManager.river = {
@@ -74,7 +75,7 @@ in
 
   services.swayidle = {
     enable = true;
-    systemdTarget = "river-session.target";
+    systemdTargets = [ "river-session.target" ];
     timeouts = [
       {
         timeout = 1740;
@@ -92,7 +93,7 @@ in
     enable = true;
     settings = {
       program_options = {
-        file_manager = "${pkgs.xfce.thunar}/bin/thunar";
+        file_manager = "${pkgs.thunar}/bin/thunar";
       };
     };
   };

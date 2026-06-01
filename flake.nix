@@ -2,11 +2,11 @@
   description = "Andy's NixOS config.";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     nix-darwin = {
-      url = "github:nix-darwin/nix-darwin/nix-darwin-25.11";
+      url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -21,7 +21,7 @@
     };
 
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -36,7 +36,7 @@
     };
 
     lan-mouse = {
-      url = "github:feschber/lan-mouse/v0.10.0";
+      url = "github:feschber/lan-mouse/3e7b04c1848afb2d77f802c7ddf1f5f3720c1b47";
     };
 
     # firefox-addons = {
@@ -98,7 +98,32 @@
           specialArgs = extraSpecialArgs;
           modules = [
             ./hosts/main/configuration.nix
-            ./modules
+            disko.nixosModules.disko
+            home-manager.nixosModules.home-manager
+            stylix.nixosModules.stylix
+            {
+              home-manager.users.andy = ./home-manager/linux.nix;
+              home-manager.extraSpecialArgs = extraSpecialArgs;
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = false;
+            }
+          ];
+        };
+
+      nixosConfigurations.portable =
+        let
+          system = "x86_64-linux";
+          pkgs = mkPkgs system;
+          extraSpecialArgs = {
+            inherit inputs;
+            pkgs-unstable = mkUnstablePkgs system;
+          };
+        in
+        nixpkgs.lib.nixosSystem {
+          inherit system pkgs;
+          specialArgs = extraSpecialArgs;
+          modules = [
+            ./hosts/portable/configuration.nix
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
             stylix.nixosModules.stylix

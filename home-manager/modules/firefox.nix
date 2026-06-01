@@ -1,6 +1,7 @@
 {
   programs.firefox = {
     enable = true;
+    configPath = ".mozilla/firefox";
     profiles = {
       home = {
         id = 0;

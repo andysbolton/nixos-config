@@ -32,7 +32,6 @@
       azure-cli-extensions.durabletask
       azure-cli-extensions.resource-graph
     ])
-    claude-code
     desktoppr
     gatherv2
     jira-cli-go

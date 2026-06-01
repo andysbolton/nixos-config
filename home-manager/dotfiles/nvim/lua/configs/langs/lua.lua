@@ -3,7 +3,7 @@ return {
   ft = { "lua" },
   ls = {
     name = "lua_ls",
-    auto_install = false,
+    autoinstall = false,
     settings = {
       Lua = {
         telemetry = { enable = false },

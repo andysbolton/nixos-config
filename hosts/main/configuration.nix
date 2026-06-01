@@ -1,7 +1,7 @@
 {
   config,
-  lib,
   pkgs,
+  pkgs-unstable,
   inputs,
   ...
 }:
@@ -9,6 +9,13 @@
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ../../modules/desktop.nix
+    ../../modules/hardware.nix
+    ../../modules/arrs.nix
+    ../../modules/torrenting.nix
+    ../../modules/steam.nix
+    ../../modules/vpn.nix
+    ../../modules/wireless.nix
     inputs.sops-nix.nixosModules.sops
     # inputs.wayland-pipewire-idle-inhibit.nixosModules.default
   ];
@@ -22,48 +29,43 @@
   boot.kernelModules = [ "nct6687" ];
   boot.kernelParams = [ "acpi_enforce_resources=lax" ];
 
-  networking.hostName = "home";
-  networking.wireless = {
-    userControlled.enable = true;
+  networking.hostName = "main";
+
+  modules.wireless = {
     enable = true;
+    ssid = "Hammy 5 GHz";
     secretsFile = config.sops.secrets."wireless.conf".path;
-    extraConfig = "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=wheel";
-    networks = {
-      "BBBP_5G".pskRaw = "ext:psk";
+  };
+
+  users.users.andy.extraGroups = [
+    "docker"
+    "wheel"
+    "wpa_supplicant"
+  ];
+
+  sops = {
+    defaultSopsFile = ../../secrets/main.yaml;
+    defaultSopsFormat = "yaml";
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    secrets."wireless.conf" = {
+      owner = "wpa_supplicant";
+      group = "wpa_supplicant";
+      mode = "0440";
+    };
+    secrets."proton-vpn.conf" = { };
+    secrets."radarr_api_key" = {
+      owner = "unpackerr";
+      group = "media";
+      mode = "0440";
     };
   };
 
-  time.timeZone = "America/Denver";
-
-  i18n.defaultLocale = "en_US.UTF-8";
-  console = {
-    font = "Lat2-Terminus16";
-    keyMap = "us";
-  };
-
-  # Enable sound.
-  services.pipewire = {
-    enable = true;
-    pulse.enable = true;
-  };
-
-  users.users.andy = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "docker"
-    ];
-    shell = pkgs.fish;
-  };
-
-  programs.fish = {
-    enable = true;
-    package = pkgs-unstable.fish;
-  };
-
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
+  networking.firewall.allowedUDPPorts = [
+    4242 # lan-mouse
+    32400 # Plex Media Server
+  ];
+  networking.firewall.allowedTCPPorts = [
+    32400 # Plex Media Server
   ];
 
   environment.systemPackages = with pkgs; [
@@ -74,82 +76,7 @@
         snes9x
       ]
     ))
-    lxqt.lxqt-policykit
-    pavucontrol
-    swaylock
-    wl-clipboard
-    wlopm
-    xorg.xdpyinfo
   ];
-
-  fonts.fontDir.enable = true;
-  fonts.packages = with pkgs; [ nerd-fonts.caskaydia-cove ];
-
-  # Enable the gnome-keyring secrets vault.
-  # Will be exposed through DBus to programs willing to store secrets.
-  services.gnome.gnome-keyring.enable = true;
-
-  programs.river-classic.enable = true;
-
-  programs.uwsm = {
-    enable = true;
-    waylandCompositors.river = {
-      prettyName = "River";
-      comment = "River compositor managed by UWSM";
-      binPath = "/run/current-system/sw/bin/river";
-    };
-  };
-
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = ''
-          ${pkgs.tuigreet}/bin/tuigreet --time --cmd "uwsm start river-uwsm.desktop"
-        '';
-        user = "greeter";
-      };
-    };
-  };
-
-  systemd.services.greetd.serviceConfig = {
-    Type = "idle";
-    StandardInput = "tty";
-    StandardOutput = "tty";
-    StandardError = "journal"; # Without this errors will spam on screen
-    # Without these bootlogs will spam on screen
-    TTYReset = true;
-    TTYVHangup = true;
-    TTYVTDisallocate = true;
-  };
-
-  services.openssh.enable = true;
-  services.dbus.enable = true;
-  services.blueman.enable = true;
-
-  networking.firewall.allowedUDPPorts = [
-    4242 # lan-mouse
-    32400 # Plex Media Server
-  ];
-  networking.firewall.allowedTCPPorts = [
-    32400 # Plex Media Server
-  ];
-
-  services.udisks2.enable = true;
-
-  sops = {
-    defaultSopsFile = ../../secrets/sops.yaml;
-    defaultSopsFormat = "yaml";
-    age.keyFile = "/home/andy/.config/sops/age/keys.txt";
-    secrets."wireless.conf" = { };
-    secrets."proton-vpn.conf" = { };
-    secrets."radarr_api_key" = {
-      owner = "unpackerr";
-      group = "media";
-      mode = "0440";
-    };
-  };
-  security.polkit.enable = true;
 
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -179,6 +106,12 @@
     wgConfPath = config.sops.secrets."proton-vpn.conf".path;
   };
 
+  services.sunshine = {
+    enable = true;
+    openFirewall = true;
+    capSysAdmin = true; # required for KMS/DRM capture under Wayland
+  };
+
   services.printing.enable = true;
   # Arkscan/Zebra usually works with standard CUPS drivers,
   # but gutenprint provides extra compatibility if needed.
@@ -186,6 +119,10 @@
 
   virtualisation.docker = {
     enable = true;
+  };
+
+  systemd.settings.Manager = {
+    ShowStatus = "Yes";
   };
 
   # services.wayland-pipewire-idle-inhibit = {
