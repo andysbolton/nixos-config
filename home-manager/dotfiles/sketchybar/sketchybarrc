@@ -65,7 +65,7 @@ sketchybar --add item power.sleep popup.power \
   --subscribe power.sleep mouse.entered mouse.exited
 
 sketchybar --add item power.lock popup.power \
-  --set power.lock icon="⚿" label="Lock Screen" width=160 \
+  --set power.lock icon="🔐" label="Lock Screen" width=160 \
   script="$PLUGIN_DIR/power.sh" \
   click_script="pmset displaysleepnow; sketchybar --set power popup.drawing=off" \
   --subscribe power.lock mouse.entered mouse.exited
@@ -100,6 +100,7 @@ done
 sketchybar \
   --add item front_app left \
   --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
+  "${default_section[@]}" \
   --subscribe front_app front_app_switched
 
 clock_props=(
@@ -117,7 +118,7 @@ sketchybar --add item "clock.0" left \
 
 # Center
 
-for did in $(yabai -m query --displays | jq '.[].index'); do
+for did in $(yabai -m query --displays | jq '.[].index | select(. != 1)'); do
   sketchybar --add item "clock.$did" center \
     --set "clock.$did" "${clock_props[@]}" display="$did"
 done
@@ -176,22 +177,25 @@ disk=(
 sketchybar --add item disk right \
   --set disk "${disk[@]}"
 
-network_down=(
-  icon="$NETWORK_DOWN"
-  icon.color=0xffffffff
+network=(
+  icon.drawing=off
   update_freq=1
-)
-
-network_up=(
-  icon="$NETWORK_UP"
-  update_freq=e
   script="$PLUGIN_DIR/stats/network.sh"
 )
 
-sketchybar --add item network.down right \
-  --set network.down "${network_down[@]}" \
-  --add item network.up right \
-  --set network.up "${network_up[@]}"
+sketchybar --add item network right \
+  --set network "${network[@]}"
+
+vpn=(
+  icon="$NETWORK"
+  update_freq=10
+  script="$PLUGIN_DIR/stats/vpn.sh"
+  background.drawing=on
+  "${default_section[@]}"
+)
+
+sketchybar --add item vpn right \
+  --set vpn "${vpn[@]}"
 
 # Brackets
 
@@ -199,13 +203,8 @@ sketchybar --add bracket volume_group volume set_volume \
   --set volume_group \
   "${default_section[@]}"
 
-sketchybar --add bracket stats cpu memory disk network.down network.up \
+sketchybar --add bracket stats cpu memory disk network \
   --set stats \
-  "${default_section[@]}" \
-  background.drawing=on
-
-sketchybar --add bracket app front_app \
-  --set app \
   "${default_section[@]}" \
   background.drawing=on
 

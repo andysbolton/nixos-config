@@ -33,6 +33,8 @@
       azure-cli-extensions.resource-graph
     ])
     claude-code
+    desktoppr
+    gatherv2
     jira-cli-go
     maccy
     powershell

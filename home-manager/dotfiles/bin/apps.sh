@@ -21,7 +21,8 @@ output=$(
 		/System/Applications/ \
 		/System/Applications/Utilities/ \
 		/System/Library/PreferencePanes/ \
-		/System/Library/CoreServices/ |
+		/System/Library/CoreServices/ \
+		/opt/homebrew/Caskroom/ |
 		rev |
 		sort -r |
 		rev

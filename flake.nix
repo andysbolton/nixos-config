@@ -65,6 +65,7 @@
       overlays = [
         (final: prev: {
           tokyonight-extras = prev.callPackage ./pkgs/tokyonight-extras.nix { };
+          gatherv2 = prev.callPackage ./pkgs/gatherv2.nix { };
         })
       ];
 
