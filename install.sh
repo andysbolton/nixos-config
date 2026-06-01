@@ -56,12 +56,11 @@ read -rp "Type 'yes' to continue: " confirm
 }
 
 nix --experimental-features "nix-command flakes" \
-  run "github:nix-community/disko#disko" -- \
-  --mode destroy,format,mount \
+  run "github:nix-community/disko#disko-install" -- \
+  --write-efi-boot-entries \
   --flake "$repo_dir#$HOST" \
-  --disk main "$disk"
-
-nixos-install --no-root-password --flake "$repo_dir#$HOST" --show-trace
+  --disk main "$disk" \
+  --show-trace
 
 nixos-enter --command "echo 'Set password for andy:' && passwd andy"
 
