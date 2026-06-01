@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ "$EUID" -ne 0 ]; then
+  echo "This script must be run as root (sudo ./install.sh)"
+  exit 1
+fi
+
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 HOST="${1:-}"
@@ -51,15 +56,15 @@ read -rp "Type 'yes' to continue: " confirm
 }
 
 nix --experimental-features "nix-command flakes" \
-  run "github:nix-community/disko#disko-install" -- \
-  --write-efi-boot-entries \
+  run "github:nix-community/disko#disko" -- \
+  --mode destroy,format,mount \
   --flake "$repo_dir#$HOST" \
   --disk main "$disk" \
   --show-trace
 
-mount /dev/disk/by-partlabel/disk-main-root /mnt
+nixos-install --no-root-password --flake "$repo_dir#$HOST" --show-trace
+
 nixos-enter --command "echo 'Set password for andy:' && passwd andy"
-umount /dev/disk/by-partlabel/disk-main-root
 
 echo
 echo "Installation complete. Remember to commit the generated hardware config:"
