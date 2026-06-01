@@ -59,8 +59,7 @@ nix --experimental-features "nix-command flakes" \
   run "github:nix-community/disko#disko" -- \
   --mode destroy,format,mount \
   --flake "$repo_dir#$HOST" \
-  --disk main "$disk" \
-  --show-trace
+  --disk main "$disk"
 
 nixos-install --no-root-password --flake "$repo_dir#$HOST" --show-trace
 
