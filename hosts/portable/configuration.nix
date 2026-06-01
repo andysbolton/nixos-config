@@ -43,9 +43,14 @@
   hardware.graphics.enable = true;
 
   sops = {
-    defaultSopsFile = ../../secrets/sops.yaml;
+    defaultSopsFile = ../../secrets/portable.yaml;
     defaultSopsFormat = "yaml";
-    age.keyFile = "${config.users.users.andy.home}/.config/sops/age/keys.txt";
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    secrets."wireless.conf" = {
+      owner = "wpa_supplicant";
+      group = "wpa_supplicant";
+      mode = "0440";
+    };
   };
 
   networking.firewall.trustedInterfaces = [ "tailscale0" ];

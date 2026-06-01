@@ -33,6 +33,26 @@ nix --experimental-features "nix-command flakes" \
   --mode disko \
   --flake "$repo_dir#$HOST"
 
+SOPS_FILE="$repo_dir/secrets/$HOST.yaml"
+if [ ! -f "$SOPS_FILE" ]; then
+  echo "Pre-generating SSH host key..."
+  mkdir -p /mnt/etc/ssh
+  ssh-keygen -t ed25519 -f /mnt/etc/ssh/ssh_host_ed25519_key -N "" -C ""
+
+  SSH_PUBKEY=$(cat /mnt/etc/ssh/ssh_host_ed25519_key.pub)
+
+  read -rsp "WiFi PSK: " WIFI_PSK
+  echo
+
+  TMPFILE=$(mktemp)
+  trap 'rm -f $TMPFILE' EXIT
+  printf 'wireless.conf: "%s"\n' "$WIFI_PSK" >"$TMPFILE"
+  nix-shell -p sops --run \
+    "SOPS_AGE_RECIPIENTS='$SSH_PUBKEY' sops --encrypt --input-type yaml --output-type yaml '$TMPFILE'" \
+    >"$SOPS_FILE"
+  echo "Created $SOPS_FILE"
+fi
+
 echo "Installing NixOS..."
 nixos-install \
   --root /mnt \
@@ -42,5 +62,6 @@ nixos-install \
 nixos-enter --command "echo 'Set password for andy:' && passwd andy"
 
 echo
-echo "Installation complete. Remember to commit the generated hardware config:"
+echo "Installation complete. Remember to commit:"
 echo "  hosts/$HOST/hardware-configuration.nix"
+echo "  secrets/$HOST.yaml"

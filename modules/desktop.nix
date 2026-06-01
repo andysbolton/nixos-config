@@ -76,6 +76,12 @@
   };
 
   services.openssh.enable = true;
+
+  users.groups.ssh-keys = { };
+  users.users.andy.extraGroups = [ "ssh-keys" ];
+  systemd.tmpfiles.rules = [
+    "f /etc/ssh/ssh_host_ed25519_key 0640 root ssh-keys -"
+  ];
   services.tailscale.enable = true;
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   services.dbus.enable = true;
