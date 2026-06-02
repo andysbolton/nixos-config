@@ -113,6 +113,8 @@
         cmd - return : wezterm-gui start --always-new-process &
 
         cmd - t : wezterm-launch.sh &
+
+        cmd - d : yabai -m space --display 1 --focus 2
       '';
     };
 
@@ -211,14 +213,12 @@
 
           ${ensureDisplays}
 
-          yabai -m signal --add label="display_added" event=display_added action='
-            ${ensureDisplays}
-            ${sketchybar} --reload
-          '
-          yabai -m signal --add label="display_removed" event=display_removed action='
-            ${ensureDisplays}
-            ${sketchybar} --reload
-          '
+          for event in display_added display_removed system_woke; do
+            yabai -m signal --add label="$event" event="$event" action='
+              ${ensureDisplays}
+              ${sketchybar} --reload
+            '
+          done
 
           yabai -m rule --apply
 

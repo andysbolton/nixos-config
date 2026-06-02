@@ -1,7 +1,11 @@
 #!/bin/bash
 
-# The $NAME variable is passed from sketchybar and holds the name of
-# the item invoking this script:
-# https://felixkratz.github.io/SketchyBar/config/events#events-and-scripting
+STATE_FILE="/tmp/sketchybar_clock_tz"
+tz=$(cat "$STATE_FILE" 2>/dev/null || echo "America/Denver")
 
-sketchybar --set "$NAME" label="$(date +"%Y-%m-%d %I:%M %p")"
+if [ "$SENDER" = "mouse.clicked" ]; then
+    [ "$tz" = "America/Denver" ] && tz="Europe/London" || tz="America/Denver"
+    echo "$tz" > "$STATE_FILE"
+fi
+
+sketchybar --set "$NAME" label="$(TZ="$tz" date +"%Y-%m-%d %I:%M:%S %p %Z")"

@@ -97,14 +97,19 @@ for did in $(yabai -m query --displays 2>/dev/null | jq '.[].index'); do
   done
 done
 
-sketchybar \
-  --add item front_app left \
-  --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
-  "${default_section[@]}" \
-  --subscribe front_app front_app_switched
+for did in $(yabai -m query --displays | jq '.[].index'); do
+  sketchybar \
+    --add item "front_app.$did" left \
+    --set "front_app.$did" \
+    icon.drawing=off \
+    display="$did" \
+    script="$PLUGIN_DIR/front_app.sh" \
+    "${default_section[@]}" \
+    --subscribe "front_app.$did" front_app_switched
+done
 
 clock_props=(
-  update_freq=10
+  update_freq=1
   icon.drawing=off
   script="$PLUGIN_DIR/clock.sh"
   label.padding_left=10
@@ -114,21 +119,36 @@ clock_props=(
 )
 
 sketchybar --add item "clock.0" left \
-  --set "clock.0" "${clock_props[@]}" display="1"
+  --set "clock.0" "${clock_props[@]}" display="1" \
+  --subscribe "clock.0" mouse.clicked
 
 # Center
 
 for did in $(yabai -m query --displays | jq '.[].index | select(. != 1)'); do
   sketchybar --add item "clock.$did" center \
-    --set "clock.$did" "${clock_props[@]}" display="$did"
+    --set "clock.$did" "${clock_props[@]}" display="$did" \
+    --subscribe "clock.$did" mouse.clicked
 done
 
 # Right
 
 sketchybar --add item battery right \
   --set battery update_freq=60 script="$PLUGIN_DIR/battery.sh" \
-  "${default_section[@]}" \
+  icon.padding_left=0 \
   --subscribe battery system_woke power_source_change
+
+sketchybar --add item battery.plug right \
+  --set battery.plug icon="󰚥" icon.color=$TEXT \
+  icon.padding_right=0 \
+  label.drawing=off \
+  background.drawing=off \
+  drawing=off
+
+sketchybar --add item spacer.battery right \
+  --set spacer.battery width=10 \
+  icon.drawing=off \
+  label.drawing=off \
+  background.drawing=off
 
 sketchybar --add item volume right \
   --set volume script="$PLUGIN_DIR/volume.sh" \
@@ -145,7 +165,7 @@ sketchybar --add slider set_volume right 200 \
   --subscribe set_volume volume_change mouse.clicked
 
 sketchybar --add item spacer.1 right \
-  --set spacer.1 width=5 \
+  --set spacer.1 width=10 \
   icon.drawing=off \
   label.drawing=off \
   background.drawing=off
@@ -186,6 +206,12 @@ network=(
 sketchybar --add item network right \
   --set network "${network[@]}"
 
+sketchybar --add item spacer.vpn right \
+  --set spacer.vpn width=5 \
+  icon.drawing=off \
+  label.drawing=off \
+  background.drawing=off
+
 vpn=(
   icon="$NETWORK"
   update_freq=10
@@ -207,5 +233,9 @@ sketchybar --add bracket stats cpu memory disk network \
   --set stats \
   "${default_section[@]}" \
   background.drawing=on
+
+sketchybar --add bracket battery_group battery battery.plug \
+  --set battery_group \
+  "${default_section[@]}"
 
 sketchybar --update

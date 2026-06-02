@@ -1,39 +1,5 @@
 return {
   {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    event = "InsertEnter",
-    config = function()
-      require("copilot").setup {
-        panel = {
-          keymap = {
-            jump_prev = "N",
-            jump_next = "n",
-            refresh = "r",
-          },
-        },
-        suggestion = {
-          keymap = {
-            accept = "<C-j>",
-          },
-          debounce = 75,
-          auto_trigger = true,
-          layout = {
-            position = "right",
-            ratio = 0.4,
-          },
-        },
-        -- filetypes = {
-        --   yaml = true,
-        -- },
-      }
-    end,
-  },
-  -- {
-  --   "zbirenbaum/copilot-cmp",
-  --   config = function() require("copilot_cmp").setup { auto_trigger = false } end,
-  -- },
-  {
     "olimorris/codecompanion.nvim",
     dependencies = {
       "nvim-lua/plenary.nvim",
@@ -158,5 +124,9 @@ return {
         },
       }
     end,
+  },
+  {
+    "supermaven-inc/supermaven-nvim",
+    config = function() require("supermaven-nvim").setup {} end,
   },
 }

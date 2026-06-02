@@ -8,7 +8,8 @@ if [ -z "$IP" ]; then
   IP="--"
 fi
 
-if netstat -rn 2>/dev/null | grep -q "^0/1"; then
+if scutil --nc list 2>/dev/null | grep -q "^\* (Connected)" \
+  || netstat -rn 2>/dev/null | grep -q "^0/1"; then
   sketchybar --set vpn label="$IP" background.border_color=$TEAL
 else
   sketchybar --set vpn label="$IP" background.border_color=$OVERLAY

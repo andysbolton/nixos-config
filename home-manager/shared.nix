@@ -38,7 +38,10 @@ in
     };
   };
 
-  home.file.".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/bin";
+  home.file = {
+    ".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/bin";
+    ".wezterm.lua".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/wezterm.lua";
+  };
 
   home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
 
@@ -76,7 +79,6 @@ in
     nix-tree
     nixfmt
     pkgs-unstable.gh
-    pkgs-unstable.github-copilot-cli # GitHub Copilot CLI from unstable nixpkgs
     pkgs-unstable.opencode
     postgresql
     procs # modern ps replacement

@@ -1,10 +1,9 @@
 (set table.unpack (or table.unpack unpack))
 
-(set vim.g.python3_host_prog (.. (vim.fn.expand "~") ".asdf/shims/python"))
+(set vim.g.python3_host_prog (.. (vim.fn.expand "~") :.asdf/shims/python))
 
 (set vim.g.mapleader " ")
 (set vim.g.maplocalleader " ")
-(set vim.g.copilot_no_tab_map true)
 (set vim.o.winborder :rounded)
 
 ; bootstrap lazy
