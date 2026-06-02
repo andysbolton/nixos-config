@@ -29,6 +29,7 @@
 
   home.packages = with pkgs; [
     (azure-cli.withExtensions [
+      azure-cli-extensions.azure-devops
       azure-cli-extensions.durabletask
       azure-cli-extensions.resource-graph
     ])
