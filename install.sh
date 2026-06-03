@@ -37,9 +37,9 @@ SOPS_FILE="$repo_dir/secrets/$HOST.yaml"
 if [ ! -f "$SOPS_FILE" ]; then
   echo "Pre-generating SSH host key..."
   mkdir -p /mnt/etc/ssh
-  ssh-keygen -t ed25519 -f /mnt/etc/ssh/ssh_host_ed25519_key -N "" -C ""
+  ssh-keygen -q -t ed25519 -f /mnt/etc/ssh/ssh_host_ed25519_key -N "" -C "" </dev/null
 
-  SSH_PUBKEY=$(cat /mnt/etc/ssh/ssh_host_ed25519_key.pub)
+  SSH_PUBKEY_AGE=$(nix-shell -p ssh-to-age --run "ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub")
 
   read -rsp "WiFi PSK: " WIFI_PSK
   echo
@@ -48,7 +48,7 @@ if [ ! -f "$SOPS_FILE" ]; then
   trap 'rm -f $TMPFILE' EXIT
   printf 'wireless.conf: "%s"\n' "$WIFI_PSK" >"$TMPFILE"
   nix-shell -p sops --run \
-    "SOPS_AGE_RECIPIENTS='$SSH_PUBKEY' sops --encrypt --input-type yaml --output-type yaml '$TMPFILE'" \
+    "SOPS_AGE_RECIPIENTS='$SSH_PUBKEY_AGE' sops --encrypt --input-type yaml --output-type yaml '$TMPFILE'" \
     >"$SOPS_FILE"
   echo "Created $SOPS_FILE"
   sudo -u "$SUDO_USER" git -C "$repo_dir" add "$SOPS_FILE"
