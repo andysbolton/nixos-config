@@ -1,4 +1,21 @@
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  osConfig,
+  ...
+}:
+let
+  flakeName =
+    if pkgs.stdenv.isDarwin then
+      "${osConfig.networking.hostName}-darwin"
+    else
+      osConfig.networking.hostName;
+  rebuildCmd =
+    if pkgs.stdenv.isDarwin then
+      "sudo darwin-rebuild switch --flake .#${flakeName}"
+    else
+      "sudo nixos-rebuild switch --flake .#${flakeName}";
+in
 {
   xdg = {
     configFile = {
@@ -237,7 +254,7 @@
           end
 
           git status --short
-          sudo darwin-rebuild switch --flake .#work-darwin
+          ${rebuildCmd}
         '';
       };
 
