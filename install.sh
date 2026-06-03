@@ -63,7 +63,9 @@ nixos-install \
   --no-root-password
 
 nixos-enter --command "echo 'Set password for andy:' && passwd andy"
-nixos-enter --command "cp -r nixos-config /home/andy/"
+
+cp -r "$repo_dir" /mnt/home/andy/nixos-config
+nixos-enter --command "chown -R andy:users /home/andy/nixos-config"
 
 echo
 echo "Installation complete. Remember to commit the staged files on reboot."
