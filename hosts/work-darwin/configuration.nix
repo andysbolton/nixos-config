@@ -175,11 +175,11 @@
               window_insertion_point focused \
               window_zoom_persist on \
               window_shadow on \
-              window_animation_duration 0.0 \
               window_animation_easing ease_out_circ \
               window_opacity_duration 0.0 \
               active_window_opacity 1.0 \
               normal_window_opacity 0.90 \
+              window_animation_duration 0.3 \
               window_opacity off \
               insert_feedback_color 0xffd75f5f \
               split_ratio 0.50 \
