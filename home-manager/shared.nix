@@ -1,5 +1,6 @@
 {
   config,
+  lib,
   pkgs,
   pkgs-unstable,
   inputs,
@@ -47,8 +48,6 @@ in
 
   home.packages = with pkgs; [
     (sbcl.withPackages (ps: [ ps.swank ]))
-    _1password-cli
-    _1password-gui
     age # simple modern file encryption tool
     bat # cat replacement with syntax highlighting
     bat-extras.core
@@ -119,6 +118,38 @@ in
 
   programs.btop.enable = true;
   programs.fish.enable = true;
+
+  programs.ssh = {
+    enable = true;
+    enableDefaultConfig = false;
+    extraConfig = ''
+      Include ~/.ssh/config.local
+    '';
+    settings."*".identityAgent =
+      if pkgs.stdenv.isDarwin then
+        ''"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"''
+      else
+        "~/.1password/agent.sock";
+  };
+
+  home.activation.fetchSecretsFrom1Password = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if ${pkgs._1password-cli}/bin/op whoami >/dev/null 2>&1; then
+      account=my.1password.com
+
+      mkdir -p $HOME/.config/sops/age
+      ${pkgs._1password-cli}/bin/op read --account "$account" "op://Private/andy-ssh-ed25519/private key" \
+        | ${pkgs.ssh-to-age}/bin/ssh-to-age -private-key \
+        > $HOME/.config/sops/age/keys.txt
+      chmod 600 $HOME/.config/sops/age/keys.txt
+
+      mkdir -p $HOME/.ssh
+      ${pkgs._1password-cli}/bin/op read --account "$account" "op://Private/SSH Config/notesPlain" \
+        > $HOME/.ssh/config.local
+      chmod 600 $HOME/.ssh/config.local
+    else
+      echo "1Password CLI not signed in - skipping secret fetch. Run 'op signin' and re-run home-manager switch." >&2
+    fi
+  '';
 
   stylix.enable = true;
   stylix.autoEnable = true;

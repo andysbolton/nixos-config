@@ -34,25 +34,39 @@ nix --experimental-features "nix-command flakes" \
   --flake "$repo_dir#$HOST"
 
 SOPS_FILE="$repo_dir/secrets/$HOST.yaml"
-if [ ! -f "$SOPS_FILE" ]; then
-  echo "Pre-generating SSH host key..."
-  mkdir -p /mnt/etc/ssh
-  ssh-keygen -q -t ed25519 -f /mnt/etc/ssh/ssh_host_ed25519_key -N "" -C "" </dev/null
+SOPS_YAML="$repo_dir/.sops.yaml"
 
-  SSH_PUBKEY_AGE=$(nix-shell -p ssh-to-age --run "ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub")
-
-  read -rsp "WiFi PSK: " WIFI_PSK
-  echo
-
-  TMPFILE=$(mktemp)
-  trap 'rm -f $TMPFILE' EXIT
-  printf 'wireless.conf: "%s"\n' "$WIFI_PSK" >"$TMPFILE"
-  nix-shell -p sops --run \
-    "SOPS_AGE_RECIPIENTS='$SSH_PUBKEY_AGE' sops --encrypt --input-type yaml --output-type yaml '$TMPFILE'" \
-    >"$SOPS_FILE"
-  echo "Created $SOPS_FILE"
-  sudo -u "$SUDO_USER" git -C "$repo_dir" add "$SOPS_FILE"
+PERSONAL_AGE=$(grep -oE 'age1[0-9a-z]+' "$SOPS_YAML" | head -1)
+if [ -z "$PERSONAL_AGE" ]; then
+  echo "ERROR: no age key found in $SOPS_YAML"
+  exit 1
 fi
+
+echo "Pre-generating SSH host key..."
+mkdir -p /mnt/etc/ssh
+ssh-keygen -q -t ed25519 -f /mnt/etc/ssh/ssh_host_ed25519_key -N "" -C "" </dev/null
+
+HOST_AGE=$(nix-shell -p ssh-to-age --run "ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub")
+
+cat >>"$SOPS_YAML" <<EOF
+  - path_regex: secrets/${HOST}\.yaml\$
+    key_groups:
+      - age:
+          - $PERSONAL_AGE
+          - $HOST_AGE
+EOF
+
+read -rsp "WiFi PSK: " WIFI_PSK
+echo
+
+TMPFILE=$(mktemp)
+trap 'rm -f $TMPFILE' EXIT
+printf 'wireless.conf: "%s"\n' "$WIFI_PSK" >"$TMPFILE"
+nix-shell -p sops --run \
+  "sops --age '$PERSONAL_AGE,$HOST_AGE' --encrypt --input-type yaml --output-type yaml '$TMPFILE'" \
+  >"$SOPS_FILE"
+echo "Created $SOPS_FILE"
+sudo -u "$SUDO_USER" git -C "$repo_dir" add "$SOPS_YAML" "$SOPS_FILE"
 
 sudo -u "$SUDO_USER" git -C "$repo_dir" add "$repo_dir/hosts/$HOST/hardware-configuration.nix"
 

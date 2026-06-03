@@ -28,6 +28,8 @@
   };
 
   home.packages = with pkgs; [
+    _1password-cli
+    _1password-gui
     (azure-cli.withExtensions [
       azure-cli-extensions.azure-devops
       azure-cli-extensions.durabletask
@@ -42,7 +44,7 @@
   ];
 
   programs.neovim.extraPackages = with pkgs; [
-    claude-code-acp
+    claude-agent-acp
   ];
 
   home.sessionPath = [

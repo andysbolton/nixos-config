@@ -1,4 +1,10 @@
-{ pkgs, pkgs-unstable, ... }:
+{
+  pkgs,
+  pkgs-unstable,
+  lib,
+  config,
+  ...
+}:
 {
   time.timeZone = "America/Denver";
 
@@ -76,6 +82,14 @@
   };
 
   services.openssh.enable = true;
+
+  programs._1password.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = lib.attrNames (
+      lib.filterAttrs (_: u: u.isNormalUser) config.users.users
+    );
+  };
 
   users.groups.ssh-keys = { };
   users.users.andy.extraGroups = [ "ssh-keys" ];
