@@ -125,11 +125,25 @@ in
     extraConfig = ''
       Include ~/.ssh/config.local
     '';
-    settings."*".identityAgent =
-      if pkgs.stdenv.isDarwin then
-        ''"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"''
-      else
-        "~/.1password/agent.sock";
+    settings = {
+      "*".identityAgent =
+        if pkgs.stdenv.isDarwin then
+          ''"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"''
+        else
+          "~/.1password/agent.sock";
+      main = {
+        hostname = "main.local";
+        user = "andy";
+      };
+      portable = {
+        hostname = "portable.local";
+        user = "andy";
+      };
+      work = {
+        hostname = "work.local";
+        user = "andybolton";
+      };
+    };
   };
 
   home.activation.fetchSecretsFrom1Password = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

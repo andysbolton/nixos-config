@@ -22,6 +22,10 @@
   users.users.andy = {
     isNormalUser = true;
     shell = pkgs.fish;
+    openssh.authorizedKeys.keys = [
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAAGFGipKjoh/k9IHbfE00n4p5rnMMvsYNMS/Pbx3IE6SgoGSEPSFOxSiNsX7thhyT55fkDoQPaMr+0hGwaz+qeYpbInWfsZLjZOn5iqMgmqCPX5khe2UW+J9dPlAj5eCv2OCzNjbevnFU1MOlw1X26BbzdFS1VOd3OKmS72jEYOvQK7C/ciAj/ytlh+9NwJFcaUugXWJShhi6XMzfPWTDSTwcFlKfOH4n5uyRj7qi1ZGg8w9qnaSSIhaACgOGRXmfDoaVBCZx1fjeBYL9SeZMiIeCy3i2CPiUuKuVebP3p7DbavWq2055NSLQUK5MKfFeFJUHCgYtMOtckcv5SMR5 andy-rsa"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3wN9/LQcWF0pun3XaCnRfNnIiMbJlCxG2tZl3n9I3c andy-ed25519"
+    ];
   };
 
   programs.fish = {
@@ -97,6 +101,17 @@
     "f /etc/ssh/ssh_host_ed25519_key 0640 root ssh-keys -"
   ];
   services.tailscale.enable = true;
+
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      hinfo = true;
+      workstation = true;
+    };
+  };
   networking.firewall.trustedInterfaces = [ "tailscale0" ];
   services.dbus.enable = true;
   services.blueman.enable = true;
