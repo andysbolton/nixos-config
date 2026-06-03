@@ -46,6 +46,7 @@
     defaultSopsFile = ../../secrets/portable.yaml;
     defaultSopsFormat = "yaml";
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    gnupg.sshKeyPaths = [ ];
     secrets."wireless.conf" = {
       owner = "wpa_supplicant";
       group = "wpa_supplicant";

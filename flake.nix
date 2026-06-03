@@ -36,7 +36,7 @@
     };
 
     lan-mouse = {
-      url = "github:feschber/lan-mouse/3e7b04c1848afb2d77f802c7ddf1f5f3720c1b47";
+      url = "github:feschber/lan-mouse";
     };
 
     # firefox-addons = {
