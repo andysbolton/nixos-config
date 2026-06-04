@@ -59,7 +59,7 @@ EOF
 read -rsp "WiFi PSK: " WIFI_PSK
 echo
 
-printf 'wireless.conf: "%s"\n' "$WIFI_PSK" \
+printf 'wireless.conf: "psk=%s"\n' "$WIFI_PSK" \
   | nix-shell -p sops --run \
       "sops --age '$PERSONAL_AGE,$HOST_AGE' --encrypt --input-type yaml --output-type yaml --filename-override '$SOPS_FILE' /dev/stdin" \
   >"$SOPS_FILE"
