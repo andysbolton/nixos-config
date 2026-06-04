@@ -2,3 +2,8 @@ keys:
   - age1zh3drypucnvhvke86uetlzfngajm5umna69sy4h508xzdep5g52sh4f3an
 
 creation_rules:
+  - path_regex: secrets/portable\.yaml$
+    key_groups:
+      - age:
+          - age1zh3drypucnvhvke86uetlzfngajm5umna69sy4h508xzdep5g52sh4f3an
+          - age1cx0cxtsyys70jgw0zdhff8urrp76n9hr0cumrm8tazgy4kjty54qt4cxy6
