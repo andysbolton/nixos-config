@@ -59,11 +59,9 @@ EOF
 read -rsp "WiFi PSK: " WIFI_PSK
 echo
 
-TMPFILE=$(mktemp)
-trap 'rm -f $TMPFILE' EXIT
-printf 'wireless.conf: "%s"\n' "$WIFI_PSK" >"$TMPFILE"
-nix-shell -p sops --run \
-  "sops --age '$PERSONAL_AGE,$HOST_AGE' --encrypt --input-type yaml --output-type yaml '$TMPFILE'" \
+printf 'wireless.conf: "psk=%s"\n' "$WIFI_PSK" \
+  | nix-shell -p sops --run \
+      "sops --age '$PERSONAL_AGE,$HOST_AGE' --encrypt --input-type yaml --output-type yaml --filename-override '$SOPS_FILE' /dev/stdin" \
   >"$SOPS_FILE"
 echo "Created $SOPS_FILE"
 sudo -u "$SUDO_USER" git -C "$repo_dir" add "$SOPS_YAML" "$SOPS_FILE"
