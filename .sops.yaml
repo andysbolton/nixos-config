@@ -7,3 +7,8 @@ creation_rules:
       - age:
           - age1zh3drypucnvhvke86uetlzfngajm5umna69sy4h508xzdep5g52sh4f3an
           - age1cx0cxtsyys70jgw0zdhff8urrp76n9hr0cumrm8tazgy4kjty54qt4cxy6
+  - path_regex: secrets/main\.yaml$
+    key_groups:
+      - age:
+          - age1zh3drypucnvhvke86uetlzfngajm5umna69sy4h508xzdep5g52sh4f3an
+          - age1h8dlemgmygut46u6kzr5cnqrhj2gfa8lvlprpt2nnkj020pksu0qdfqm5u
