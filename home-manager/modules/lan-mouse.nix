@@ -23,7 +23,7 @@
         if pkgs.stdenv.isDarwin then
           [
             {
-              position = "left";
+              position = "right";
               hostname = "main.local";
               activate_on_startup = true;
               ips = [ ];
@@ -32,7 +32,7 @@
         else
           [
             {
-              position = "right";
+              position = "left";
               hostname = "work.local";
               activate_on_startup = true;
               ips = [ ];

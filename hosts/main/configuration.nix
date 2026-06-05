@@ -109,8 +109,11 @@
   services.sunshine = {
     enable = true;
     openFirewall = true;
-    capSysAdmin = true; # required for KMS/DRM capture under Wayland
-    package = pkgs.sunshine.override { cudaSupport = true; };
+    capSysAdmin = true;
+    settings = {
+      capture = "kms";
+      encoder = "nvenc";
+    };
   };
 
   services.printing.enable = true;
