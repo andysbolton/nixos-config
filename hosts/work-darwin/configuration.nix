@@ -53,6 +53,8 @@
   fonts.packages = with pkgs; [ nerd-fonts.caskaydia-cove ];
 
   services = {
+    tailscale.enable = true;
+
     skhd = {
       enable = true;
       skhdConfig = ''
