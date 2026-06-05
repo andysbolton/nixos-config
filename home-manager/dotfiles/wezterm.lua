@@ -158,7 +158,6 @@ config.keys = {
 		action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
 	{ key = "V", mods = "CTRL", action = act.PasteFrom("Clipboard") },
-	{ key = "V", mods = "CTRL", action = act.PasteFrom("PrimarySelection") },
 	{
 		key = "Enter",
 		mods = "ALT",

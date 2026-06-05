@@ -81,3 +81,5 @@ nixos-enter --command "chown -R andy:users /home/andy/nixos-config"
 
 echo
 echo "Installation complete. Remember to commit the staged files on reboot."
+echo "To provision 1Password secrets, run after reboot:"
+echo "  mkdir -p ~/.config/opnix && op signin && op item get service-account --field password --reveal > ~/.config/opnix/token && chmod 600 ~/.config/opnix/token"

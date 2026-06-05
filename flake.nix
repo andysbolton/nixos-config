@@ -32,6 +32,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    opnix = {
+      url = "github:brizzbuzz/opnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     stylix = {
       url = "github:nix-community/stylix/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -63,6 +68,7 @@
       nix-darwin,
       nix-homebrew,
       nixpkgs-unstable,
+      opnix,
       self,
       sops-nix,
       stylix,
@@ -122,6 +128,7 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
+              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
             }
           ];
         };
@@ -148,6 +155,7 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
+              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
             }
           ];
         };
@@ -173,6 +181,7 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
+              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
             }
             nix-homebrew.darwinModules.nix-homebrew
             {

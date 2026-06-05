@@ -148,9 +148,26 @@ in
         height = 35;
 
         modules-left = [
-          "custom/primary"
           "custom/system"
+          "custom/primary"
         ];
+
+        "custom/system-label" = {
+          format = "System: ";
+        };
+
+        "custom/system" = {
+          exec = pkgs.writeShellScript "clipboard-system-check" ''
+            db="$HOME/.cache/cliphist/system-db"
+            echo "$db" |
+              entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
+          '';
+          max-length = 30;
+          min-length = 30;
+          format = "System: {}";
+          align = 0;
+          escape = true;
+        };
 
         "custom/primary" = {
           exec = pkgs.writeShellScript "clipboard-primary-check" ''
@@ -163,23 +180,6 @@ in
           align = 0;
           format = "Primary: {}";
           tooltip = false;
-          escape = true;
-        };
-
-        "custom/system-label" = {
-          format = "System: ";
-        };
-
-        "custom/system" = {
-          exec = pkgs.writeShellScript "clipboard-primary-check" ''
-            db="$HOME/.cache/cliphist/system-db"
-            echo "$db" |
-              entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
-          '';
-          max-length = 30;
-          min-length = 30;
-          format = "System: {}";
-          align = 0;
           escape = true;
         };
       }

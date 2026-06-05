@@ -95,7 +95,10 @@
   };
 
   users.groups.ssh-keys = { };
-  users.users.andy.extraGroups = [ "ssh-keys" ];
+  users.users.andy.extraGroups = [
+    "ssh-keys"
+    "1password"
+  ];
   systemd.tmpfiles.rules = [
     "f /etc/ssh/ssh_host_ed25519_key 0640 root ssh-keys -"
   ];
@@ -116,4 +119,5 @@
   services.blueman.enable = true;
   services.udisks2.enable = true;
   security.polkit.enable = true;
+
 }

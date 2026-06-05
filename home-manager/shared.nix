@@ -146,24 +146,22 @@ in
     };
   };
 
-  home.activation.fetchSecretsFrom1Password = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if ${pkgs._1password-cli}/bin/op whoami >/dev/null 2>&1; then
-      account=my.1password.com
-
-      mkdir -p $HOME/.config/sops/age
-      ${pkgs._1password-cli}/bin/op read --account "$account" "op://Private/andy-ssh-ed25519/private key" \
-        | ${pkgs.ssh-to-age}/bin/ssh-to-age -private-key \
-        > $HOME/.config/sops/age/keys.txt
-      chmod 600 $HOME/.config/sops/age/keys.txt
-
-      mkdir -p $HOME/.ssh
-      ${pkgs._1password-cli}/bin/op read --account "$account" "op://Private/SSH Config/notesPlain" \
-        > $HOME/.ssh/config.local
-      chmod 600 $HOME/.ssh/config.local
-    else
-      echo "1Password CLI not signed in - skipping secret fetch. Run 'op signin' and re-run home-manager switch." >&2
-    fi
-  '';
+  programs.onepassword-secrets = {
+    enable = true;
+    tokenFile = "${config.home.homeDirectory}/.config/opnix/token";
+    secrets = {
+      ageKey = {
+        reference = "op://nix/age-secret-key/password";
+        path = ".config/sops/age/keys.txt";
+        mode = "0600";
+      };
+      sshConfig = {
+        reference = "op://nix/SSH Config/notesPlain";
+        path = ".ssh/config.local";
+        mode = "0600";
+      };
+    };
+  };
 
   stylix.enable = true;
   stylix.autoEnable = true;
