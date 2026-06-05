@@ -18,6 +18,7 @@ in
   imports = [
     ./options/shared.nix
     ./modules/fish.nix
+    ./modules/lan-mouse.nix
     inputs.stylix.homeModules.stylix
   ];
 

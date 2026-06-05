@@ -18,7 +18,6 @@ in
     ./shared.nix
     ./modules/dunst.nix
     ./modules/firefox.nix
-    ./modules/lan-mouse.nix
     ./modules/waybar/waybar.nix
   ];
 

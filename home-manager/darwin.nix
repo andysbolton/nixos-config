@@ -39,6 +39,7 @@
     gatherv2
     jira-cli-go
     maccy
+    moonlight-qt
     powershell
     powershell-editor-services
   ];
