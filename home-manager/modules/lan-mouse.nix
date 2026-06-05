@@ -18,22 +18,21 @@ let
   me = osConfig.networking.hostName;
   others = lib.filterAttrs (n: _: n != me) fingerprints;
 
-  # Per-host topology — who's adjacent to whom, from each host's perspective.
   topology = {
     main = [
       {
         position = "left";
-        hostname = "work";
+        hostname = "work.tail4b1b78.ts.net";
         activate_on_startup = true;
-        ips = [ ];
+        ips = [ "100.93.122.89" ];
       }
     ];
     work = [
       {
         position = "right";
-        hostname = "main";
+        hostname = "main.tail4b1b78.ts.net";
         activate_on_startup = true;
-        ips = [ ];
+        ips = [ "100.69.169.2" ];
       }
     ];
     portable = [ ];

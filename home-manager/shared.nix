@@ -133,15 +133,16 @@ in
         else
           "~/.1password/agent.sock";
       main = {
-        hostname = "main.local";
+        hostname = "main.tail4b1b78.ts.net";
         user = "andy";
       };
+      # TODO: switch to FQDN once portable is on the tailnet
       portable = {
         hostname = "portable.local";
         user = "andy";
       };
       work = {
-        hostname = "work.local";
+        hostname = "work.tail4b1b78.ts.net";
         user = "andybolton";
       };
     };
