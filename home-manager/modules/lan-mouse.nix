@@ -13,7 +13,7 @@ let
   fingerprints = {
     work = "87:94:13:86:65:a8:14:bb:25:a9:e7:25:90:ee:e9:71:d6:a2:56:bc:e1:3a:1b:49:1e:dd:ae:03:ac:7a:4d:32";
     main = "1e:98:e7:f3:05:ab:f5:a9:87:47:af:32:c3:41:f8:df:fc:71:b9:f9:87:d9:32:b1:fe:ae:21:a1:62:3c:3e:b1";
-    # portable = "cc:dd:...";
+    portable = "6e:a8:6d:1b:c4:a9:47:7c:7c:8a:ed:66:4c:ee:f4:6d:95:67:6a:18:f8:67:27:24:dc:6d:37:ef:b4:cd:eb:50";
   };
 
   me = osConfig.networking.hostName;
@@ -44,7 +44,14 @@ let
         '';
       }
     ];
-    portable = [ ];
+    portable = [
+      {
+        position = "left";
+        hostname = "portable.tail4b1b78.ts.net";
+        activate_on_startup = true;
+        ips = [ "100.127.37.90" ];
+      }
+    ];
   };
 in
 {

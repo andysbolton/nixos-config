@@ -62,7 +62,6 @@ in
     file
     fzf
     gcc
-    git
     gnumake
     go
     httpie # user-friendly HTTP client
@@ -119,6 +118,37 @@ in
 
   programs.btop.enable = true;
   programs.fish.enable = true;
+
+  programs.git = {
+    enable = true;
+    settings = {
+      user = {
+        name = "Andy Bolton";
+      };
+      core = {
+        editor = "nvim";
+        longpaths = true;
+        pager = "delta";
+      };
+      interactive = {
+        diffFilter = "delta --color-only";
+      };
+      delta = {
+        navigate = true;
+        light = false;
+        line-numbers = true;
+      };
+      push = {
+        autoSetupRemote = true;
+      };
+      mergetool = {
+        keepBackup = false;
+      };
+      pull = {
+        rebase = false;
+      };
+    };
+  };
 
   programs.ssh = {
     enable = true;

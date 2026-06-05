@@ -76,7 +76,6 @@
     };
   };
 
-  # TODO: Make this dependent on yabai
   programs.sketchybar = {
     enable = true;
     includeSystemPath = true;
@@ -85,5 +84,13 @@
       pkgs.ifstat-legacy
       pkgs.jq
     ];
+  };
+
+  programs.git = {
+    settings = {
+      user = {
+        email = config.work.email;
+      };
+    };
   };
 }
