@@ -24,7 +24,7 @@ let
     "${karabiner}" --select-profile Empty
     (
       tail -n0 -F /tmp/lan-mouse.log \
-        | grep -m1 -E "releasing capture state|client.*left|cursor returned"
+        | grep -m1 -E "releasing capture state|cursor returned"
       "${karabiner}" --select-profile Default
     ) </dev/null >/dev/null 2>&1 &
   '';

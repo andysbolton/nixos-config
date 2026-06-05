@@ -157,7 +157,7 @@ in
       ExecStart = pkgs.writeShellScript "qbittorrent-bridge" ''
         exec ${pkgs.socat}/bin/socat \
           TCP6-LISTEN:${toString qbittorrentWebuiPort},fork,reuseaddr,ipv6only=0 \
-          EXEC:"${pkgs.iproute2}/bin/ip netns exec ${netns} ${pkgs.socat}/bin/socat - TCP:127.0.0.1:${toString qbittorrentWebuiPort}"
+          EXEC:"${pkgs.iproute2}/bin/ip netns exec ${netns} ${pkgs.socat}/bin/socat - TCP\:127.0.0.1\:${toString qbittorrentWebuiPort}"
       '';
       Restart = "on-failure";
       RestartSec = "5s";
