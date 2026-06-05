@@ -10,6 +10,8 @@ let
   #   openssl x509 -in ~/.config/lan-mouse/lan-mouse.pem -fingerprint -sha256 -noout \
   #     | sed 's/.*=//' | tr 'A-Z' 'a-z'
   fingerprints = {
+    work = "87:94:13:86:65:a8:14:bb:25:a9:e7:25:90:ee:e9:71:d6:a2:56:bc:e1:3a:1b:49:1e:dd:ae:03:ac:7a:4d:32
+";
     # main     = "aa:bb:...";
     # portable = "cc:dd:...";
     # work     = "ee:ff:...";
