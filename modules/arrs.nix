@@ -51,7 +51,7 @@ let
         serviceConfig = {
           ExecStart = pkgs.writeShellScript "${name}-bridge" ''
             exec ${pkgs.socat}/bin/socat \
-              TCP-LISTEN:${toString arrPorts.${name}},fork,reuseaddr \
+              TCP6-LISTEN:${toString arrPorts.${name}},fork,reuseaddr,ipv6only=0 \
               EXEC:"${pkgs.iproute2}/bin/ip netns exec ${modules.vpn.netns} ${pkgs.socat}/bin/socat - TCP:127.0.0.1:${toString arrPorts.${name}}"
           '';
           Restart = "on-failure";

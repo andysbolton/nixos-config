@@ -19,7 +19,7 @@ let
   me = osConfig.networking.hostName;
   others = lib.filterAttrs (n: _: n != me) fingerprints;
 
-  karabiner = "/Library/Application Support/org.pqrs.Karabiner-Elements/bin/karabiner_cli";
+  karabiner = "${pkgs.karabiner-elements}/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli";
   darwinEnterHook = ''
     "${karabiner}" --select-profile Empty
     (

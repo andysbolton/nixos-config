@@ -156,7 +156,7 @@ in
     serviceConfig = {
       ExecStart = pkgs.writeShellScript "qbittorrent-bridge" ''
         exec ${pkgs.socat}/bin/socat \
-          TCP-LISTEN:${toString qbittorrentWebuiPort},fork,reuseaddr \
+          TCP6-LISTEN:${toString qbittorrentWebuiPort},fork,reuseaddr,ipv6only=0 \
           EXEC:"${pkgs.iproute2}/bin/ip netns exec ${netns} ${pkgs.socat}/bin/socat - TCP:127.0.0.1:${toString qbittorrentWebuiPort}"
       '';
       Restart = "on-failure";
