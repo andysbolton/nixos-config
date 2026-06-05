@@ -89,7 +89,7 @@
   programs.git = {
     settings = {
       user = {
-        email = config.work.email;
+        email = "andy.bolton@smartwyre.com";
       };
     };
   };

@@ -59,9 +59,6 @@ in
 
   programs.lan-mouse = {
     enable = true;
-    package = inputs.lan-mouse.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
-      patches = (old.patches or [ ]) ++ [ ../../patches/lan-mouse-invert-scroll.patch ];
-    });
     settings = {
       release_bind = [
         "KeyA"
