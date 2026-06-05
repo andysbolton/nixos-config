@@ -1,0 +1,34 @@
+Negate scroll deltas in the libei emulation backend so events forwarded
+from a host that already inverts scroll direction (e.g. macOS with
+"natural scrolling" off, where lan-mouse captures the post-inversion
+delta) arrive on Wayland clients in the expected direction.
+
+River and other wlroots compositors can't apply natural-scroll to
+virtual (non-libinput) devices, so this has to happen inside lan-mouse.
+
+--- a/input-emulation/src/libei.rs
++++ b/input-emulation/src/libei.rs
+@@ -209,8 +209,8 @@
+                 } => {
+                     let scroll_device = self.devices.scroll.read().unwrap();
+                     if let Some((d, s)) = scroll_device.as_ref() {
+                         match axis {
+-                            0 => s.scroll(0., value as f32),
+-                            _ => s.scroll(value as f32, 0.),
++                            0 => s.scroll(0., -(value as f32)),
++                            _ => s.scroll(-(value as f32), 0.),
+                         }
+                         d.frame(self.conn.serial(), now);
+                     }
+@@ -219,8 +219,8 @@
+                 PointerEvent::AxisDiscrete120 { axis, value } => {
+                     let scroll_device = self.devices.scroll.read().unwrap();
+                     if let Some((d, s)) = scroll_device.as_ref() {
+                         match axis {
+-                            0 => s.scroll_discrete(0, value),
+-                            _ => s.scroll_discrete(value, 0),
++                            0 => s.scroll_discrete(0, -value),
++                            _ => s.scroll_discrete(-value, 0),
+                         }
+                         d.frame(self.conn.serial(), now);
+                     }

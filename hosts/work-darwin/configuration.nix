@@ -239,6 +239,11 @@
     StandardErrorPath = "/tmp/yabai.err.log";
   };
 
+  launchd.daemons.tailscaled.serviceConfig = {
+    StandardOutPath = "/tmp/tailscaled.log";
+    StandardErrorPath = "/tmp/tailscaled.err.log";
+  };
+
   system.defaults = {
     NSGlobalDomain = {
       ApplePressAndHoldEnabled = false;

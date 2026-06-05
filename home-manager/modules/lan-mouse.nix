@@ -1,6 +1,7 @@
 {
   inputs,
   lib,
+  pkgs,
   osConfig,
   ...
 }:
@@ -33,6 +34,14 @@ let
         hostname = "main.tail4b1b78.ts.net";
         activate_on_startup = true;
         ips = [ "100.69.169.2" ];
+        enter_hook = ''
+          "/Library/Application Support/org.pqrs.Karabiner-Elements/bin/karabiner_cli" --select-profile Empty
+          (
+            tail -n0 -F /tmp/lan-mouse.log \
+              | grep -m1 -E "releasing capture state|client.*left|cursor returned"
+            "/Library/Application Support/org.pqrs.Karabiner-Elements/bin/karabiner_cli" --select-profile Default
+          ) </dev/null >/dev/null 2>&1 &
+        '';
       }
     ];
     portable = [ ];
@@ -43,6 +52,9 @@ in
 
   programs.lan-mouse = {
     enable = true;
+    package = inputs.lan-mouse.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+      patches = (old.patches or [ ]) ++ [ ../../patches/lan-mouse-invert-scroll.patch ];
+    });
     settings = {
       release_bind = [
         "KeyA"
