@@ -17,10 +17,10 @@ in
           "river/tags"
           "river/window"
           "custom/lan-mouse"
+          "systemd-failed-units"
         ];
         modules-center = [ "clock" ];
         modules-right = [
-          "systemd-failed-units"
           "pulseaudio"
           "pulseaudio/slider"
           "disk"
