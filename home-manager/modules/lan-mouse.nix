@@ -10,11 +10,9 @@ let
   #   openssl x509 -in ~/.config/lan-mouse/lan-mouse.pem -fingerprint -sha256 -noout \
   #     | sed 's/.*=//' | tr 'A-Z' 'a-z'
   fingerprints = {
-    work = "87:94:13:86:65:a8:14:bb:25:a9:e7:25:90:ee:e9:71:d6:a2:56:bc:e1:3a:1b:49:1e:dd:ae:03:ac:7a:4d:32
-";
-    # main     = "aa:bb:...";
+    work = "87:94:13:86:65:a8:14:bb:25:a9:e7:25:90:ee:e9:71:d6:a2:56:bc:e1:3a:1b:49:1e:dd:ae:03:ac:7a:4d:32";
+    main = "1e:98:e7:f3:05:ab:f5:a9:87:47:af:32:c3:41:f8:df:fc:71:b9:f9:87:d9:32:b1:fe:ae:21:a1:62:3c:3e:b1";
     # portable = "cc:dd:...";
-    # work     = "ee:ff:...";
   };
 
   me = osConfig.networking.hostName;
