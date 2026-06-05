@@ -22,12 +22,10 @@ let
   karabiner = "/Library/Application Support/org.pqrs.Karabiner-Elements/bin/karabiner_cli";
   darwinEnterHook = ''
     "${karabiner}" --select-profile Empty
-    defaults write -g com.apple.swipescrolldirection -bool YES
     (
       tail -n0 -F /tmp/lan-mouse.log \
         | grep -m1 -E "releasing capture state|client.*left|cursor returned"
       "${karabiner}" --select-profile Default
-      defaults write -g com.apple.swipescrolldirection -bool NO
     ) </dev/null >/dev/null 2>&1 &
   '';
 

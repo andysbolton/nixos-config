@@ -141,4 +141,28 @@ in
   };
 
   environment.etc."netns/${netns}/resolv.conf".text = "nameserver ${dns}";
+
+  systemd.services.qbittorrent-bridge = {
+    description = "Tailnet bridge for qBittorrent (port ${toString qbittorrentWebuiPort})";
+    wantedBy = [ "multi-user.target" ];
+    after = [
+      "wg-proton.service"
+      "qbittorrent.service"
+    ];
+    wants = [
+      "wg-proton.service"
+      "qbittorrent.service"
+    ];
+    serviceConfig = {
+      ExecStart = pkgs.writeShellScript "qbittorrent-bridge" ''
+        exec ${pkgs.socat}/bin/socat \
+          TCP-LISTEN:${toString qbittorrentWebuiPort},fork,reuseaddr \
+          EXEC:"${pkgs.iproute2}/bin/ip netns exec ${netns} ${pkgs.socat}/bin/socat - TCP:127.0.0.1:${toString qbittorrentWebuiPort}"
+      '';
+      Restart = "on-failure";
+      RestartSec = "5s";
+    };
+  };
+
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ qbittorrentWebuiPort ];
 }
