@@ -19,6 +19,18 @@ let
   me = osConfig.networking.hostName;
   others = lib.filterAttrs (n: _: n != me) fingerprints;
 
+  karabiner = "/Library/Application Support/org.pqrs.Karabiner-Elements/bin/karabiner_cli";
+  darwinEnterHook = ''
+    "${karabiner}" --select-profile Empty
+    defaults write -g com.apple.swipescrolldirection -bool YES
+    (
+      tail -n0 -F /tmp/lan-mouse.log \
+        | grep -m1 -E "releasing capture state|client.*left|cursor returned"
+      "${karabiner}" --select-profile Default
+      defaults write -g com.apple.swipescrolldirection -bool NO
+    ) </dev/null >/dev/null 2>&1 &
+  '';
+
   topology = {
     main = [
       {
@@ -30,26 +42,26 @@ let
     ];
     work = [
       {
-        position = "right";
-        hostname = "main.tail4b1b78.ts.net";
-        activate_on_startup = true;
-        ips = [ "100.69.169.2" ];
-        enter_hook = ''
-          "/Library/Application Support/org.pqrs.Karabiner-Elements/bin/karabiner_cli" --select-profile Empty
-          (
-            tail -n0 -F /tmp/lan-mouse.log \
-              | grep -m1 -E "releasing capture state|client.*left|cursor returned"
-            "/Library/Application Support/org.pqrs.Karabiner-Elements/bin/karabiner_cli" --select-profile Default
-          ) </dev/null >/dev/null 2>&1 &
-        '';
-      }
-    ];
-    portable = [
-      {
         position = "left";
         hostname = "portable.tail4b1b78.ts.net";
         activate_on_startup = true;
         ips = [ "100.127.37.90" ];
+        enter_hook = darwinEnterHook;
+      }
+      {
+        position = "right";
+        hostname = "main.tail4b1b78.ts.net";
+        activate_on_startup = true;
+        ips = [ "100.69.169.2" ];
+        enter_hook = darwinEnterHook;
+      }
+    ];
+    portable = [
+      {
+        position = "right";
+        hostname = "work.tail4b1b78.ts.net";
+        activate_on_startup = true;
+        ips = [ "100.93.122.89" ];
       }
     ];
   };

@@ -47,7 +47,6 @@
       # "bot-framework-emulator"
       "microsoft-teams"
       "protonvpn"
-      "scroll-reverser"
     ];
   };
 
