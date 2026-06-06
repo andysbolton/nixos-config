@@ -55,7 +55,6 @@ in
     claude-code
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
-    discord
     docker-compose
     dotnetSdks
     fd
@@ -92,6 +91,7 @@ in
     tokyonight-extras
     tree # recursive directory listing
     unzip
+    vesktop
     wezterm
     wget
     whois
@@ -166,9 +166,8 @@ in
         hostname = "main.tail4b1b78.ts.net";
         user = "andy";
       };
-      # TODO: switch to FQDN once portable is on the tailnet
       portable = {
-        hostname = "portable.local";
+        hostname = "portable.tail4b1b78.ts.net";
         user = "andy";
       };
       work = {

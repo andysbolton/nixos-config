@@ -292,7 +292,7 @@
     remapCapsLockToEscape = true;
   };
 
-  security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local.touchIdAuth = false;
 
   # Ensure the utilities are in your environment
   environment.systemPackages = [

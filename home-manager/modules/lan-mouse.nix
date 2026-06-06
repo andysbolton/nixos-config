@@ -46,13 +46,13 @@ let
         ips = [ "100.127.37.90" ];
         enter_hook = darwinEnterHook;
       }
-      {
-        position = "right";
-        hostname = "main.tail4b1b78.ts.net";
-        activate_on_startup = true;
-        ips = [ "100.69.169.2" ];
-        enter_hook = darwinEnterHook;
-      }
+      # {
+      #   position = "right";
+      #   hostname = "main.tail4b1b78.ts.net";
+      #   activate_on_startup = true;
+      #   ips = [ "100.69.169.2" ];
+      #   enter_hook = darwinEnterHook;
+      # }
     ];
     portable = [
       {
