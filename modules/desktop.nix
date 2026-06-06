@@ -67,6 +67,10 @@
   services.greetd = {
     enable = true;
     settings = {
+      initial_session = {
+        command = "uwsm start river-uwsm.desktop";
+        user = "andy";
+      };
       default_session = {
         command = ''
           ${pkgs.tuigreet}/bin/tuigreet --time --cmd "uwsm start river-uwsm.desktop"

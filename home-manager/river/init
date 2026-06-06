@@ -61,7 +61,7 @@ riverctl map-pointer normal Super BTN_MIDDLE toggle-float
 for i in $(seq 1 9); do
     tags=$((1 << (i - 1)))
     riverctl map normal Super "$i" set-focused-tags $tags
-    riverctl map normal Super+Shift "$i" set-view-tags $tags
+    riverctl map normal Super+Shift "$i" "sh -c \"riverctl set-view-tags $tags && riverctl set-focused-tags $tags\""
     riverctl map normal Super+Control "$i" toggle-focused-tags $tags
     riverctl map normal Super+Shift+Control "$i" toggle-view-tags $tags
 done
@@ -77,6 +77,10 @@ riverctl map normal Super D set-focused-tags $discord_tag
 games_tag=$((1 << 7))
 riverctl rule-add -app-id "*steam*" tags $games_tag
 riverctl map normal Super G set-focused-tags $games_tag
+
+pass_tag=$((1 << 6))
+riverctl rule-add -app-id "1password" tags $pass_tag
+riverctl map normal Super G set-focused-tags $pass_tag
 
 # All tags/Global
 all_tags=$(((1 << 9) - 1))
@@ -130,6 +134,7 @@ uwsm app -- wezterm &
 uwsm app -- blueman-applet &
 uwsm app -- blueman-manager &
 uwsm app -- discord.desktop &
+uwsm app -- 1password &
 uwsm app -- steam -silent &
 uwsm app -- lxqt-policykit-agent &
 
