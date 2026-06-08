@@ -26,7 +26,7 @@
 
   modules.wireless = {
     enable = true;
-    ssid = "Hammy 5 GHz";
+    ssid = "Fios-Xj7tG";
     secretsFile = config.sops.secrets."wireless.conf".path;
   };
 
