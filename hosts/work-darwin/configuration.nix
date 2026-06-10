@@ -137,6 +137,9 @@
     yabai =
       let
         sketchybar = "${pkgs.sketchybar}/bin/sketchybar";
+        sketchybar_bottom = "${
+          pkgs.callPackage ../../pkgs/sketchybar-bottom.nix { inherit pkgs-unstable; }
+        }/bin/sketchybar-bottom";
         ensureDisplays = pkgs.writeShellScript "ensure-displays" ''
           spaces_per_display=7
 
@@ -167,7 +170,7 @@
         package = pkgs-unstable.yabai;
         extraConfig = ''
           yabai -m config \
-              external_bar all:58:0 \
+              external_bar all:50:50 \
               mouse_follows_focus off \
               focus_follows_mouse off \
               display_arrangement_order default \
@@ -187,8 +190,8 @@
               split_ratio 0.50 \
               split_type auto \
               auto_balance off \
-              top_padding 13 \
-              bottom_padding 13 \
+              top_padding 4 \
+              bottom_padding 4 \
               left_padding 13 \
               right_padding 13 \
               window_gap 13 \
@@ -219,12 +222,14 @@
             yabai -m signal --add label="$event" event="$event" action='
               ${ensureDisplays}
               ${sketchybar} --reload
+              ${sketchybar_bottom} --reload
             '
           done
 
           yabai -m rule --apply
 
           ${sketchybar} --reload
+          ${sketchybar_bottom} --reload
         '';
       };
   };
@@ -310,7 +315,7 @@
             nativeBuildInputs = [ pkgs.imagemagick ];
           }
           ''
-            magick -size 1x1 xc:'#2f4f4f' $out
+            magick -size 1x1 xc:"#1a1b26ff" $out
           '';
     in
     ''

@@ -10,5 +10,5 @@ if [ "$SENDER" = "front_app_switched" ]; then
     if [ "$NAME" = "front_app.1" ] && [ "${#LABEL}" -gt 7 ]; then
         LABEL="${LABEL:0:7}…"
     fi
-    sketchybar --set "$NAME" label="$LABEL"
+    "$BAR_NAME" --set "$NAME" label="$LABEL"
 fi

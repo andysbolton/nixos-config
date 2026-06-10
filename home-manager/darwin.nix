@@ -7,6 +7,9 @@
   osConfig,
   ...
 }:
+let
+  sketchybarBottom = pkgs.callPackage ../pkgs/sketchybar-bottom.nix { inherit pkgs-unstable; };
+in
 {
   imports = [
     ./modules/firefox.nix
@@ -20,13 +23,13 @@
   home.homeDirectory = "/Users/andybolton";
 
   xdg.configFile = {
-    choose.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/choose";
     # This is likely redundant, let's remove it sometime.
     "karabiner.edn".source =
       config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/karabiner/karabiner.edn";
     "skhd/home-manager.skhdrc".source =
       config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/home-manager.skhdrc";
     sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
+    sketchybar-bottom.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
   };
 
   home.activation.runGoku = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -52,10 +55,7 @@
     moonlight-qt
     powershell
     powershell-editor-services
-  ];
-
-  programs.neovim.extraPackages = with pkgs; [
-    claude-agent-acp
+    sketchybarBottom
   ];
 
   home.sessionPath = [
@@ -76,12 +76,25 @@
     StandardErrorPath = "/tmp/lan-mouse.err.log";
   };
 
+  launchd.agents.sketchybar-bottom = {
+    enable = true;
+    config = {
+      Label = "org.nix-community.home.sketchybar-bottom";
+      ProcessType = "Interactive";
+      KeepAlive = true;
+      RunAtLoad = true;
+      StandardOutPath = "${config.home.homeDirectory}/Library/Logs/sketchybar/sketchybar-bottom.out.log";
+      StandardErrorPath = "${config.home.homeDirectory}/Library/Logs/sketchybar/sketchybar-bottom.err.log";
+      Program = "${sketchybarBottom}/bin/sketchybar-bottom";
+    };
+  };
+
   services.jankyborders = {
     enable = true;
     settings = {
       width = 5.0;
       blur_radius = 0.0;
-      active_color = "0xffbb9af7";
+      active_color = "0xff73daca";
       inactive_color = "0xffcfc9c2";
     };
   };

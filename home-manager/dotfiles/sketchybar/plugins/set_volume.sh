@@ -3,7 +3,7 @@
 if [ "$SENDER" = "volume_change" ]; then
     VOLUME="$INFO"
 
-    sketchybar --set "$NAME" icon="$ICON" slider.percentage="$VOLUME"
+    "$BAR_NAME" --set "$NAME" icon="$ICON" slider.percentage="$VOLUME"
 fi
 
 if [ "$SENDER" = "mouse.clicked" ]; then
