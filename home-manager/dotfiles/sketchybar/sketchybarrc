@@ -4,7 +4,17 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
-sketchybar --bar position=top height=45 color=$BASE display=all
+bar_props=(
+  position=top
+  height=45
+  color="$BASE"
+  display=all
+  margin=13
+  y_offset=13
+  corner_radius=8
+)
+
+sketchybar --bar "${bar_props[@]}"
 
 default=(
   padding_left=5
@@ -155,14 +165,21 @@ sketchybar --add item volume right \
   click_script="$PLUGIN_DIR/mute.sh" \
   --subscribe volume volume_change
 
-sketchybar --add slider set_volume right 200 \
-  --set set_volume script="$PLUGIN_DIR/set_volume.sh" \
-  slider.background.height=6 \
-  slider.background.corner_radius=3 \
-  slider.background.color=$OVERLAY \
-  slider.highlight_color=$CYAN \
-  slider.knob=⬤ \
+slider_props=(
+  --set set_volume script="$PLUGIN_DIR/set_volume.sh"
+  slider.background.height=6
+  slider.background.corner_radius=3
+  slider.background.color="$OVERLAY"
+  slider.highlight_color="$CYAN"
+  slider.knob=⬤
   --subscribe set_volume volume_change mouse.clicked
+)
+
+for did in $(yabai -m query --displays | jq '.[].index'); do
+  width=$([ "$did" = 1 ] && echo 100 || echo 200)
+  sketchybar --add slider set_volume right "$width" \
+    "${slider_props[@]}" display="$did"
+done
 
 sketchybar --add item spacer.1 right \
   --set spacer.1 width=10 \
@@ -222,6 +239,23 @@ vpn=(
 
 sketchybar --add item vpn right \
   --set vpn "${vpn[@]}"
+
+sketchybar --add item spacer.karabiner_profile right \
+  --set spacer.karabiner_profile width=5 \
+  icon.drawing=off \
+  label.drawing=off \
+  background.drawing=off
+
+karabiner_profile=(
+  icon="$KEYBOARD"
+  update_freq=2
+  script="$PLUGIN_DIR/karabiner_profile.sh"
+  background.drawing=on
+  "${default_section[@]}"
+)
+
+sketchybar --add item karabiner_profile right \
+  --set karabiner_profile "${karabiner_profile[@]}"
 
 # Brackets
 

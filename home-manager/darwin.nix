@@ -4,6 +4,7 @@
   pkgs,
   pkgs-unstable,
   self,
+  osConfig,
   ...
 }:
 {
@@ -20,12 +21,20 @@
 
   xdg.configFile = {
     choose.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/choose";
-    "karabiner/karabiner.json".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/karabiner/karabiner.json";
+    # This is likely redundant, let's remove it sometime.
+    "karabiner.edn".source =
+      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/karabiner/karabiner.edn";
     "skhd/home-manager.skhdrc".source =
       config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/home-manager.skhdrc";
     sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
   };
+
+  home.activation.runGoku = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ -f "$HOME/.config/karabiner.edn" ] && [ -f "$HOME/.config/karabiner/karabiner.json" ]; then
+      run ${pkgs.goku}/bin/goku
+      run --quiet "${osConfig.services.karabiner-elements.package}/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli" --select-profile Goku
+    fi
+  '';
 
   home.packages = with pkgs; [
     _1password-cli
@@ -37,6 +46,7 @@
     ])
     desktoppr
     gatherv2
+    goku
     jira-cli-go
     maccy
     moonlight-qt
@@ -69,9 +79,9 @@
   services.jankyborders = {
     enable = true;
     settings = {
-      width = 9.0;
-      blur_radius = 5.0;
-      active_color = "0xff7aa2f7";
+      width = 5.0;
+      blur_radius = 0.0;
+      active_color = "0xffbb9af7";
       inactive_color = "0xffcfc9c2";
     };
   };

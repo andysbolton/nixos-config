@@ -10,9 +10,9 @@ stdenvNoCC.mkDerivation rec {
   version = "0.47.5";
 
   src = fetchurl {
-    url = "https://api.v2.gather.town/api/v2/releases/latest/macos/v2";
+    url = "https://downloads.gather.town/desktop-v2/GatherV2-${version}-universal.dmg";
     hash = "sha256-1tOHHx86oTcAGR2w4qa8zrinh5ymvo0c00EBE5GJvvY=";
-    name = "GatherV2-${version}.dmg";
+    curlOpts = "-L";
   };
 
   nativeBuildInputs = [ undmg ];
@@ -20,13 +20,16 @@ stdenvNoCC.mkDerivation rec {
 
   installPhase = ''
     mkdir -p $out/Applications
-    cp -r GatherV2.app $out/Applications/
+    mv GatherV2.app $out/Applications/
   '';
 
   meta = with lib; {
     description = "Gather Town V2 - Virtual video-calling space";
     homepage = "https://gather.town";
     license = licenses.unfree;
-    platforms = [ "aarch64-darwin" "x86_64-darwin" ];
+    platforms = [
+      "aarch64-darwin"
+      "x86_64-darwin"
+    ];
   };
 }

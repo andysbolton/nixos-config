@@ -1,0 +1,49 @@
+{:applications
+   {:browsers ["^org\\.mozilla\\.firefox$" "^org\\.nixos\\.firefox$"],
+    :finder ["^com\\.apple\\.finder"],
+    :no-remap ["^com\\.apple\\.Terminal$" "^com\\.github\\.wez\\.wezterm$"
+               "^com\\.microsoft\\.teams2$" "^dev\\.vencord\\.vesktop$"],
+    :teams ["^com\\.microsoft\\.teams2$"]},
+ :global {:check_for_updates_on_startup false,
+          :show_in_menu_bar true,
+          :show_profile_name_in_menu_bar false},
+ :main
+   [;; ---- Finder file management (Windows-style) ----
+    {:des "Finder: Delete -> Cmd+Backspace (delete file)",
+     :rules [[:##delete_forward :!Cdelete_or_backspace [:finder]]]}
+    {:des "Finder: Backspace -> Cmd+Up (go up directory)",
+     :rules [[:delete_or_backspace :!Cup_arrow [:finder]]]}
+    ;; ---- Line navigation ----
+    {:des "Home -> Ctrl+A (line start)", :rules [[:##home :!Ta]]}
+    {:des "End -> Ctrl+E (line end)", :rules [[:##end :!Te]]}
+    ;; ---- PC-Style core remaps (use single combined exclude) ----
+    {:des "PC-Style: Ctrl+Left/Right -> word jump (Option+arrow)",
+     :rules [[:!T#Sleft_arrow :!O#Sleft_arrow]
+             [:!T#Sright_arrow :!O#Sright_arrow]]}
+    {:des "PC-Style: Ctrl+Up/Down -> line nav (Cmd+arrow)",
+     :rules [[:!T##up_arrow :!Cup_arrow] [:!T##down_arrow :!Cdown_arrow]]}
+    {:des "PC-Style: Ctrl+C/V/X -> Cmd+C/V/X (copy/paste/cut)",
+     :rules [[:!T##c :!Cc [:!no-remap]] [:!T##v :!Cv [:!no-remap]]
+             [:!T##x :!Cx [:!no-remap]]]}
+    {:des "PC-Style: Ctrl+Z -> Cmd+Z (undo)",
+     :rules [[:!T##z :!Cz [:!no-remap]] [:!T##z :!Cz [:teams]]]}
+    {:des "Teams: Ctrl+K -> Cmd+K (link)", :rules [[:!T##k :!Ck [:teams]]]}
+    {:des "PC-Style: Ctrl+Y -> Cmd+Shift+Z (redo)",
+     :rules [[:!T##y :!C!Sz [:!no-remap]]]}
+    {:des "PC-Style: Ctrl+A -> Cmd+A (select all)",
+     :rules [[:!T##a :!Ca [:!no-remap]]]}
+    {:des "PC-Style: Ctrl+S -> Cmd+S (save)",
+     :rules [[:!T##s :!Cs [:!no-remap]]]}
+    {:des "PC-Style: F5 or Ctrl+R -> Cmd+R (reload)",
+     :rules [[:!T##r :!Cr [:!no-remap]] [:##f5 :!Cr [:!no-remap]]]}
+    {:des "PC-Style: Ctrl+T -> Cmd+T (new tab)",
+     :rules [[:!T##t :!Ct [:!no-remap]]]}
+    {:des "PC-Style: Ctrl+F -> Cmd+F (find)",
+     :rules [[:!T##f :!Cf [:!no-remap]]]}
+    {:des "PC-Style: Ctrl+L -> Cmd+L (focus address bar, browsers only)",
+     :rules [[:!T##l :!Cl [:browsers]]]}
+    {:des
+       "PC-Style: Alt+Left/Right -> Cmd+Left/Right (back/forward, browsers only)",
+     :rules [[:!O##left_arrow :!Cleft_arrow [:browsers]]
+             [:!O##right_arrow :!Cright_arrow [:browsers]]]}],
+ :profiles {:Goku {:alone 1000, :default true, :delay 500, :held 500, :sim 50}}}

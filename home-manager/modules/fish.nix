@@ -245,6 +245,8 @@ in
 
       rebuild = {
         body = ''
+          [ "$(basename $(pwd))" != "nixos-config" ] && echo "Not in nixos-config repo." && return 1
+
           set -l untracked (git ls-files --others --exclude-standard)
 
           if test (count $untracked) -gt 0
@@ -254,7 +256,7 @@ in
           end
 
           git status --short
-          ${rebuildCmd}
+          ${rebuildCmd} $argv
         '';
       };
 
@@ -297,17 +299,30 @@ in
           end
         '';
       };
-    };
+    }
+    // (
+      if pkgs.stdenv.isDarwin then
+        {
+          kickstart = {
+            argumentNames = [ "service" ];
+            body = "launchctl kickstart gui/$(id -u)/$service";
+          };
+          skickstart = {
+            argumentNames = [ "service" ];
+            body = "sudo launchctl kickstart -k system/$service";
+          };
+          sname = {
+            argumentNames = [ "pattern" ];
+            body = ''
+              launchctl list | rg -i "$pattern" | cut -f 3
+            '';
+          };
+        }
+      else
+        { }
+    );
 
     shellAliases = {
-      nvimconf = "nvim --cmd ':cd ~/.config/nvim'";
-      nvc = "nvimconf";
-      fishconf = "nvim ~/.config/fish/config.fish";
-      fc = "fishconf";
-      riverconf = "nvim ~/.config/river/init";
-      rc = "riverconf";
-      wayconf = "nvim --cmd ':cd ~/.config/waybar'";
-      wyc = "wayconf";
       lrepl = "lein repl";
       ls = "lsd";
       syc = "systemctl";

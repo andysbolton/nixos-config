@@ -45,6 +45,7 @@
     ];
     casks = [
       # "bot-framework-emulator"
+      "karabiner-elements"
       "microsoft-teams"
       "protonvpn"
     ];
@@ -67,7 +68,6 @@
         # focus space
         cmd - 1 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 2 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[1].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 3 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[2].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 4 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[3].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 5 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[4].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 6 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[5].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
@@ -116,23 +116,23 @@
 
         cmd - t : wezterm-launch.sh &
 
-        cmd - d : yabai -m space --display 1 --focus 2
+        cmd - d : yabai -m space --focus --display 1
       '';
     };
 
-    karabiner-elements = {
-      enable = true;
-      package = pkgs.karabiner-elements.overrideAttrs (old: {
-        version = "14.13.0";
-
-        src = pkgs.fetchurl {
-          inherit (old.src) url;
-          hash = "sha256-gmJwoht/Tfm5qMecmq1N6PSAIfWOqsvuHU8VDJY8bLw=";
-        };
-
-        dontFixup = true;
-      });
-    };
+    # karabiner-elements = {
+    #   enable = false;
+    #   package = pkgs.karabiner-elements.overrideAttrs (old: {
+    #     version = "14.13.0";
+    #
+    #     src = pkgs.fetchurl {
+    #       inherit (old.src) url;
+    #       hash = "sha256-gmJwoht/Tfm5qMecmq1N6PSAIfWOqsvuHU8VDJY8bLw=";
+    #     };
+    #
+    #     dontFixup = true;
+    #   });
+    # };
 
     yabai =
       let
@@ -167,7 +167,7 @@
         package = pkgs-unstable.yabai;
         extraConfig = ''
           yabai -m config \
-              external_bar all:45:0 \
+              external_bar all:58:0 \
               mouse_follows_focus off \
               focus_follows_mouse off \
               display_arrangement_order default \

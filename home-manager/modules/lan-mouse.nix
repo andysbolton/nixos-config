@@ -19,14 +19,29 @@ let
   me = osConfig.networking.hostName;
   others = lib.filterAttrs (n: _: n != me) fingerprints;
 
-  karabiner = "${pkgs.karabiner-elements}/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli";
+  karabiner = "/opt/homebrew/bin/karabiner_cli";
   darwinEnterHook = ''
-    "${karabiner}" --select-profile Empty
+    pidfile=/tmp/lan-mouse-karabiner-watcher.pid
+
+    # Kill any prior watcher from a previous (possibly stuck) crossing
+    if [ -f "$pidfile" ]; then
+      kill "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null || true
+      rm -f "$pidfile"
+    fi
+
+    "${karabiner}" --select-profile Empty || exit 0
+
     (
-      tail -n0 -F /tmp/lan-mouse.log \
-        | grep -m1 -E "releasing capture state|cursor returned"
-      "${karabiner}" --select-profile Default
-    ) </dev/null >/dev/null 2>&1 &
+      trap '"${karabiner}" --select-profile Goku; rm -f "$pidfile"; kill $sleep_pid 2>/dev/null' EXIT
+      (
+        # lan-mouse's Rust log::info!() messages go to stderr (.err.log),
+        # not stdout (.log) — see home-manager/darwin.nix launchd.agents.lan-mouse.
+        tail -n0 -F /tmp/lan-mouse.err.log | grep -m1 -E "releasing capture"
+      ) &
+      grep_pid=$!
+      wait $grep_pid
+    ) &
+    echo $! > "$pidfile"
   '';
 
   topology = {

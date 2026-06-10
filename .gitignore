@@ -1,1 +1,4 @@
 home-manager/work.toml
+
+.clj-kondo/.cache/v1/lock
+.lsp/.cache/db.transit.json
