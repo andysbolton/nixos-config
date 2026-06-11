@@ -82,6 +82,14 @@ in
 {
   imports = [ inputs.lan-mouse.homeManagerModules.default ];
 
+  # The upstream lan-mouse module hardcodes WantedBy to hyprland/sway session
+  # targets. We run river via uwsm with river's own systemd integration disabled,
+  # so the only session target that becomes active is graphical-session.target.
+  systemd.user.services.lan-mouse = lib.mkIf pkgs.stdenv.isLinux {
+    Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
+    Unit.After = [ "graphical-session.target" ];
+  };
+
   programs.lan-mouse = {
     enable = true;
     systemd = if pkgs.stdenv.isDarwin then false else true;

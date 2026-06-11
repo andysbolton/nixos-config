@@ -49,8 +49,11 @@ in
   ];
 
   home.sessionVariables = {
-    MOZ_ENABLE_WAYLAND = "1";
     SOPS_AGE_SSH_PRIVATE_KEY_FILE = "/etc/ssh/ssh_host_ed25519_key";
+  };
+
+  systemd.user.sessionVariables = {
+    MOZ_ENABLE_WAYLAND = "1";
   };
 
   wayland.windowManager.river = {
@@ -82,7 +85,7 @@ in
 
   services.swayidle = {
     enable = true;
-    systemdTargets = [ "river-session.target" ];
+    systemdTargets = [ "graphical-session.target" ];
     timeouts = [
       {
         timeout = 1740;
