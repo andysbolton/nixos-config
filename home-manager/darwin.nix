@@ -71,11 +71,6 @@ in
     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3wN9/LQcWF0pun3XaCnRfNnIiMbJlCxG2tZl3n9I3c andy-ed25519
   '';
 
-  launchd.agents.lan-mouse.config = {
-    StandardOutPath = "/tmp/lan-mouse.log";
-    StandardErrorPath = "/tmp/lan-mouse.err.log";
-  };
-
   launchd.agents.sketchybar-bottom = {
     enable = true;
     config = {

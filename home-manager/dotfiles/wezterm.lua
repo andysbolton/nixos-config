@@ -26,7 +26,7 @@ config.colors = {
 	cursor_fg = "black",
 }
 config.window_close_confirmation = "NeverPrompt"
-config.window_background_opacity = 0.85
+config.window_background_opacity = 0.75
 
 -- Equivalent to POSIX basename(3)
 -- Given "/foo/bar" returns "bar"

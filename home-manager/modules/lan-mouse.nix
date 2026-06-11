@@ -21,27 +21,11 @@ let
 
   karabiner = "/opt/homebrew/bin/karabiner_cli";
   darwinEnterHook = ''
-    pidfile=/tmp/lan-mouse-karabiner-watcher.pid
+    "${karabiner}" --select-profile empty || exit 0
 
-    # Kill any prior watcher from a previous (possibly stuck) crossing
-    if [ -f "$pidfile" ]; then
-      kill "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null || true
-      rm -f "$pidfile"
-    fi
+    trap '"${karabiner}" --select-profile work' EXIT
 
-    "${karabiner}" --select-profile Empty || exit 0
-
-    (
-      trap '"${karabiner}" --select-profile work; rm -f "$pidfile"; kill $sleep_pid 2>/dev/null' EXIT
-      (
-        # lan-mouse's Rust log::info!() messages go to stderr (.err.log),
-        # not stdout (.log) — see home-manager/darwin.nix launchd.agents.lan-mouse.
-        tail -n0 -F /tmp/lan-mouse.err.log | grep -m1 -E "releasing capture"
-      ) &
-      grep_pid=$!
-      wait $grep_pid
-    ) &
-    echo $! > "$pidfile"
+    tail -n0 -F /tmp/lan-mouse.err.log | grep -m1 -E "releasing capture"
   '';
 
   topology = {
@@ -96,5 +80,10 @@ in
       authorized_fingerprints = lib.mapAttrs' (n: v: lib.nameValuePair v n) others;
       clients = topology.${me} or [ ];
     };
+  };
+
+  launchd.agents.lan-mouse.config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+    StandardOutPath = "/tmp/lan-mouse.log";
+    StandardErrorPath = "/tmp/lan-mouse.err.log";
   };
 }
