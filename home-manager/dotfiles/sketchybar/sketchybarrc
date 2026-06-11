@@ -4,32 +4,60 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
+HEIGHT=50
+GAP=12
+PAD=$((GAP / 2))
+
+ICON_FONT="CaskaydiaCove Nerd Font:Bold:17.0"
+LABEL_FONT="CaskaydiaCove Nerd Font:Bold:14.0"
+
+bar=(
+  height=$HEIGHT
+  display=all
+  padding_left="$GAP"
+  padding_right="$GAP"
+)
 default=(
-  padding_left=4
-  padding_right=4
-  icon.font="CaskaydiaCove Nerd Font:Bold:17.0"
-  label.font="CaskaydiaCove Nerd Font:Bold:14.0"
+  background.height=$((HEIGHT - GAP))
+  padding_left="$PAD"
+  padding_right="$PAD"
   icon.color="$TEXT"
+  icon.font="$ICON_FONT"
+  icon.padding_left="$GAP"
+  icon.padding_right="$GAP"
   label.color="$TEXT"
-  icon.padding_left=10
-  icon.padding_right=10
-  label.padding_left=10
-  label.padding_right=10
+  label.font="$LABEL_FONT"
+  label.padding_left="$GAP"
+  label.padding_right="$GAP"
 )
 
-default_section=(
+block=(
+  background.drawing=on
   background.color="$SURFACE"
   background.border_color="$OVERLAY"
   background.border_width=2
   background.corner_radius=8
-  background.height=35
 )
 
-default_label=(
+icon_only=(
+  label.drawing=off
   label.padding_left=0
-  label.padding_right=4
-  icon.padding_right=4
-  icon.padding_left=4
+  label.padding_right=0
+  icon.padding_right="$GAP"
+  icon.padding_left="$GAP"
+)
+
+label_only=(
+  icon.drawing=off
+  icon.padding_left=0
+  icon.padding_right=0
+  label.padding_left="$GAP"
+  label.padding_right="$GAP"
+)
+
+icon_with_label=(
+  label.padding_left=0
+  icon.padding_right="$((GAP / 2))"
 )
 
 "$BAR_NAME" --default "${default[@]}"

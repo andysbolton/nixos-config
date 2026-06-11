@@ -179,19 +179,19 @@
               window_placement second_child \
               window_insertion_point focused \
               window_zoom_persist on \
-              window_shadow on \
+              window_shadow off \
               window_animation_easing ease_out_circ \
               window_opacity_duration 0.0 \
               active_window_opacity 1.0 \
               normal_window_opacity 0.90 \
               window_animation_duration 0.3 \
-              window_opacity off \
+              window_opacity on \
               insert_feedback_color 0xffd75f5f \
               split_ratio 0.50 \
               split_type auto \
               auto_balance off \
-              top_padding 4 \
-              bottom_padding 4 \
+              top_padding 13 \
+              bottom_padding 13 \
               left_padding 13 \
               right_padding 13 \
               window_gap 13 \
@@ -203,7 +203,7 @@
 
           yabai -m rule --add app="^System Settings$" manage=off
           yabai -m rule --add app="^Microsoft Teams$" display=1 space=1
-          yabai -m rule --add app="^Discord$" display=1 space=2
+          yabai -m rule --add app="^vesktop$" display=1 space=2
           yabai -m rule --add app="^GatherV2$" display=1 space=3
           yabai -m rule --add app="^Proton VPN$" display=1 space=7
 

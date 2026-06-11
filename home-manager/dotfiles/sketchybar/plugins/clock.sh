@@ -11,4 +11,4 @@ fi
 DATE_TIME=$(TZ="$tz" date +"%Y-%m-%d %I:%M:%S %p %Z")
 
 "$BAR_NAME" --set "clock.date" label="$(echo "$DATE_TIME" | cut -d ' ' -f 1)"
-"$BAR_NAME" --set "clock.time" label="$(echo "$DATE_TIME" | cut -d ' ' -f 2)"
+"$BAR_NAME" --set "clock.time" label="$(echo "$DATE_TIME" | cut -d ' ' -f 2-4)"

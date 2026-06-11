@@ -35,7 +35,7 @@ in
   home.activation.runGoku = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ -f "$HOME/.config/karabiner.edn" ] && [ -f "$HOME/.config/karabiner/karabiner.json" ]; then
       run ${pkgs.goku}/bin/goku
-      run --quiet "${osConfig.services.karabiner-elements.package}/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli" --select-profile Goku
+      run --quiet "${osConfig.services.karabiner-elements.package}/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli" --select-profile work
     fi
   '';
 
@@ -93,9 +93,9 @@ in
     enable = true;
     settings = {
       width = 5.0;
-      blur_radius = 0.0;
-      active_color = "0xff73daca";
-      inactive_color = "0xffcfc9c2";
+      active_color = "0xff7dcfff";
+      inactive_color = "0xff414868";
+      hidpi = "on";
     };
   };
 

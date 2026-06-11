@@ -37,7 +37,7 @@ fi
 
 "$BAR_NAME" --set "$NAME" \
     icon="$ICON" icon.color="$COLOR" \
-    label="${PERCENTAGE}%"
+    label="$PERCENTAGE%"
 
 if [ "$CHARGING" != "" ]; then
     "$BAR_NAME" --set battery.plug drawing=on

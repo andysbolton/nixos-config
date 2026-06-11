@@ -32,7 +32,7 @@ let
     "${karabiner}" --select-profile Empty || exit 0
 
     (
-      trap '"${karabiner}" --select-profile Goku; rm -f "$pidfile"; kill $sleep_pid 2>/dev/null' EXIT
+      trap '"${karabiner}" --select-profile work; rm -f "$pidfile"; kill $sleep_pid 2>/dev/null' EXIT
       (
         # lan-mouse's Rust log::info!() messages go to stderr (.err.log),
         # not stdout (.log) — see home-manager/darwin.nix launchd.agents.lan-mouse.

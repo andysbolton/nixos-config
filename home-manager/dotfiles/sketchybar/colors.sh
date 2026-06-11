@@ -15,3 +15,4 @@ export RED=0xfff7768e
 export YELLOW=0xffe0af68
 export ORANGE=0xffff9e64
 export TRANSPARENT=0x00000000
+export HIGHLIGHT=0x40ffffff

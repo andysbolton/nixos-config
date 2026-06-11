@@ -7,8 +7,5 @@
 
 if [ "$SENDER" = "front_app_switched" ]; then
     LABEL="$INFO"
-    if [ "$NAME" = "front_app.1" ] && [ "${#LABEL}" -gt 7 ]; then
-        LABEL="${LABEL:0:7}…"
-    fi
     "$BAR_NAME" --set "$NAME" label="$LABEL"
 fi

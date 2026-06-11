@@ -46,4 +46,4 @@
        "PC-Style: Alt+Left/Right -> Cmd+Left/Right (back/forward, browsers only)",
      :rules [[:!O##left_arrow :!Cleft_arrow [:browsers]]
              [:!O##right_arrow :!Cright_arrow [:browsers]]]}],
- :profiles {:Goku {:alone 1000, :default true, :delay 500, :held 500, :sim 50}}}
+ :profiles {:work {:alone 1000, :default true, :delay 500, :held 500, :sim 50}}}

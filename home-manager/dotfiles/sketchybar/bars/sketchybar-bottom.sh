@@ -1,81 +1,53 @@
 #!/bin/bash
 
-bar_props=(
-  position=bottom
-  height=50
-  color="$BASE"
-  display=all
-)
-
-"$BAR_NAME" --bar "${bar_props[@]}"
-
 # Left
 
+"$BAR_NAME" --bar "${bar[@]}" position=bottom color="#000000"
+
 "$BAR_NAME" --add item network.up left \
-  --set network.up \
-  script="$PLUGIN_DIR/stats/network.sh" \
-  label.width=75 \
-  update_freq=1 \
-  "${default_label[@]}"
+  --set network.up icon="↑" width=95 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
+  "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item network.down left \
-  --set network.down \
-  label.width=75 \
-  "${default_label[@]}"
-
-disk=(
-  icon="$DISK"
-  update_freq=60
-  script="$PLUGIN_DIR/stats/disk.sh"
-  "${default_label[@]}"
-)
+  --set network.down icon="↓" width=95 \
+  "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item disk left \
-  --set disk "${disk[@]}"
-
-memory=(
-  icon="$MEMORY"
-  update_freq=5
-  label.width=25
-  script="$PLUGIN_DIR/stats/ram.sh"
-  "${default_label[@]}"
-)
+  --set disk icon="$DISK" width=58 update_freq=60 script="$PLUGIN_DIR/stats/disk.sh" \
+  "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item memory left \
-  --set memory "${memory[@]}"
-
-cpu=(
-  icon="$CPU"
-  update_freq=3
-  script="$PLUGIN_DIR/stats/cpu.sh"
-  label.width=60
-  "${default_label[@]}"
-)
+  --set memory icon="$MEMORY" width=58 update_freq=3 script="$PLUGIN_DIR/stats/ram.sh" \
+  "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item cpu left \
-  --set cpu "${cpu[@]}"
+  --set cpu icon="$CPU" width=72 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
+  "${icon_with_label[@]}"
 
-"$BAR_NAME" --add bracket stats cpu memory disk network.up network.down \
-  --set stats \
-  "${default_section[@]}" \
-  background.drawing=on
+"$BAR_NAME" --add bracket stats network.up network.down disk memory cpu \
+  --set stats "${block[@]}"
 
 # Center
 
 clock_props=(
-  update_freq=1
   icon.drawing=off
-  background.drawing=on
   label.padding_left=0
   label.padding_right=0
+  padding_left=3
+  padding_right=3
+  script="$PLUGIN_DIR/clock.sh"
 )
 
-"$BAR_NAME" --add item "clock.date" center \
-  --set "clock.date" "${clock_props[@]}" display="1" script="$PLUGIN_DIR/clock.sh" label.color="$SUBTEXT" \
-  --subscribe "clock.date" mouse.clicked \
-  --add item "clock.time" center \
-  --set "clock.time" "${clock_props[@]}" display="1" \
-  --subscribe "clock.time" mouse.clicked
+"$BAR_NAME" --add item clock.date center \
+  --set clock.date "${clock_props[@]}" \
+  label.color="$SUBTEXT" \
+  update_freq=1 \
+  --subscribe clock.date mouse.clicked
+
+"$BAR_NAME" --add item clock.time center \
+  --set clock.time "${clock_props[@]}" \
+  frequency=0 \
+  --subscribe clock.time mouse.clicked
 
 # Right
 
@@ -83,10 +55,9 @@ vpn=(
   icon="$NETWORK"
   update_freq=10
   script="$PLUGIN_DIR/stats/vpn.sh"
-  "${default_section[@]}"
-  "${default_label[@]}"
-  icon.padding_left=9
-  text.padding_right=9
+  icon.padding_right="$PAD"
+  "${block[@]}"
+  "${icon_with_label[@]}"
 )
 
 "$BAR_NAME" --add item vpn right \
