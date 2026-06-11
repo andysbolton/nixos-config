@@ -1,19 +1,14 @@
 #!/usr/bin/env bash
 
 UPDOWN=$(ifstat-legacy -i "en0" -b 0.1 1 | tail -n1)
-DOWN=$(echo "$UPDOWN" | awk "{ print \$1 }" | cut -f1 -d ".")
-UP=$(echo "$UPDOWN" | awk "{ print \$2 }" | cut -f1 -d ".")
 
-if [ "$DOWN" -gt "999" ]; then
-    DOWN_FORMAT=$(echo "$DOWN" | awk '{ printf "%03.0fmb", $1 / 1000}')
-else
-    DOWN_FORMAT=$(echo "$DOWN" | awk '{ printf "%03.0fkb", $1}')
-fi
+DOWN_FORMAT=$(echo "$UPDOWN" | awk '{
+    print ($1 > 999) ? sprintf("%.2fmb", $1 / 1000) : sprintf("%.2fkb", $1)
+}')
 
-if [ "$UP" -gt "999" ]; then
-    UP_FORMAT=$(echo "$UP" | awk '{ printf "%03.0fmb", $1 / 1000}')
-else
-    UP_FORMAT=$(echo "$UP" | awk '{ printf "%03.0fkb", $1}')
-fi
+UP_FORMAT=$(echo "$UPDOWN" | awk '{
+    print ($2 > 999) ? sprintf("%.2fmb", $2 / 1000) : sprintf("%.2fkb", $2)
+}')
 
-sketchybar --set network label="↑ ${UP_FORMAT} ↓ ${DOWN_FORMAT}"
+"$BAR_NAME" --set network.up label="$UP_FORMAT"
+"$BAR_NAME" --set network.down label="$DOWN_FORMAT"

@@ -2,8 +2,12 @@
   description = "Andy's NixOS config.";
 
   nixConfig = {
-    extra-substituters = [ "https://lan-mouse.cachix.org" ];
+    extra-substituters = [
+      "https://claude-code.cachix.org"
+      "https://lan-mouse.cachix.org"
+    ];
     extra-trusted-public-keys = [
+      "claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk="
       "lan-mouse.cachix.org-1:KlE2AEZUgkzNKM7BIzMQo8w9yJYqUpor1CAUNRY6OyM="
     ];
   };
@@ -11,6 +15,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+
+    claude-code.url = "github:sadjow/claude-code-nix";
 
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/nix-darwin-26.05";
@@ -62,11 +68,12 @@
 
   outputs =
     {
+      claude-code,
       disko,
       home-manager,
-      nixpkgs,
       nix-darwin,
       nix-homebrew,
+      nixpkgs,
       nixpkgs-unstable,
       opnix,
       self,
@@ -77,8 +84,6 @@
     let
       overlays = [
         (final: prev: {
-          tokyonight-extras = prev.callPackage ./pkgs/tokyonight-extras.nix { };
-          gatherv2 = prev.callPackage ./pkgs/gatherv2.nix { };
           _1password-gui =
             if prev.stdenv.hostPlatform.isDarwin then
               prev._1password-gui.overrideAttrs (old: {
@@ -88,7 +93,10 @@
               })
             else
               prev._1password-gui;
+          gatherv2 = prev.callPackage ./pkgs/gatherv2.nix { };
+          tokyonight-extras = prev.callPackage ./pkgs/tokyonight-extras.nix { };
         })
+        claude-code.overlays.default
       ];
 
       mkPkgs =

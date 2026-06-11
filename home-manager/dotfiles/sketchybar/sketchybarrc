@@ -4,238 +4,64 @@ PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/icons.sh"
 
-sketchybar --bar position=top height=45 color=$BASE display=all
+HEIGHT=50
+GAP=12
+PAD=$((GAP / 2))
 
+ICON_FONT="CaskaydiaCove Nerd Font:Bold:17.0"
+LABEL_FONT="CaskaydiaCove Nerd Font:Bold:14.0"
+
+bar=(
+  height=$HEIGHT
+  display=all
+  padding_left="$GAP"
+  padding_right="$GAP"
+)
 default=(
-  padding_left=5
-  padding_right=5
-  icon.font="CaskaydiaCove Nerd Font:Bold:17.0"
-  label.font="CaskaydiaCove Nerd Font:Bold:14.0"
-  icon.color=0xffffffff
-  label.color=0xffffffff
-  icon.padding_left=4
-  icon.padding_right=4
-  label.padding_left=4
-  label.padding_right=4
+  background.height=$((HEIGHT - GAP))
+  padding_left="$PAD"
+  padding_right="$PAD"
+  icon.color="$TEXT"
+  icon.font="$ICON_FONT"
+  icon.padding_left="$GAP"
+  icon.padding_right="$GAP"
+  label.color="$TEXT"
+  label.font="$LABEL_FONT"
+  label.padding_left="$GAP"
+  label.padding_right="$GAP"
 )
 
-sketchybar --default "${default[@]}"
-
-default_section=(
+block=(
+  background.drawing=on
   background.color="$SURFACE"
   background.border_color="$OVERLAY"
-  background.border_width=1
+  background.border_width=2
   background.corner_radius=8
-  background.height=28
 )
 
-# Left
+icon_only=(
+  label.drawing=off
+  label.padding_left=0
+  label.padding_right=0
+  icon.padding_right="$GAP"
+  icon.padding_left="$GAP"
+)
 
-sketchybar --add item power left \
-  --set power \
-  icon="⏻" \
-  icon.padding_left=8 \
-  icon.padding_right=8 \
-  label.drawing=off \
-  script="$PLUGIN_DIR/power.sh" \
-  click_script="sketchybar --set power popup.drawing=toggle" \
-  popup.background.color=$SURFACE \
-  popup.background.border_color=$OVERLAY \
-  popup.background.border_width=1 \
-  popup.background.corner_radius=8 \
-  "${default_section[@]}" \
-  --subscribe power mouse.exited.global
-
-sketchybar --add item power.shutdown popup.power \
-  --set power.shutdown icon="⏻" label="Shut Down" width=160 \
-  script="$PLUGIN_DIR/power.sh" \
-  click_script="osascript -e 'tell app \"System Events\" to shut down'; sketchybar --set power popup.drawing=off" \
-  --subscribe power.shutdown mouse.entered mouse.exited
-
-sketchybar --add item power.restart popup.power \
-  --set power.restart icon="↻" label="Restart" width=160 \
-  script="$PLUGIN_DIR/power.sh" \
-  click_script="osascript -e 'tell app \"System Events\" to restart'; sketchybar --set power popup.drawing=off" \
-  --subscribe power.restart mouse.entered mouse.exited
-
-sketchybar --add item power.sleep popup.power \
-  --set power.sleep icon="⏾" label="Sleep" width=160 \
-  script="$PLUGIN_DIR/power.sh" \
-  click_script="pmset sleepnow; sketchybar --set power popup.drawing=off" \
-  --subscribe power.sleep mouse.entered mouse.exited
-
-sketchybar --add item power.lock popup.power \
-  --set power.lock icon="🔐" label="Lock Screen" width=160 \
-  script="$PLUGIN_DIR/power.sh" \
-  click_script="pmset displaysleepnow; sketchybar --set power popup.drawing=off" \
-  --subscribe power.lock mouse.entered mouse.exited
-
-sketchybar --add item power.logout popup.power \
-  --set power.logout icon="󰍃" label="Log Out" width=160 \
-  script="$PLUGIN_DIR/power.sh" \
-  click_script="osascript -e 'tell app \"System Events\" to log out'; sketchybar --set power popup.drawing=off" \
-  --subscribe power.logout mouse.entered mouse.exited
-
-for did in $(yabai -m query --displays 2>/dev/null | jq '.[].index'); do
-  local_idx=1
-  for sid in $(yabai -m query --spaces --display "$did" | jq '.[].index'); do
-    space=(
-      space="$sid"
-      display="$did"
-      icon="$local_idx"
-      icon.padding_left=7
-      icon.padding_right=7
-      background.color=0x40ffffff
-      background.corner_radius=5
-      background.height=25
-      label.drawing=off
-      script="$PLUGIN_DIR/space.sh"
-      click_script="yabai -m space --focus $sid"
-    )
-    sketchybar --add space space."$sid" left --set space."$sid" "${space[@]}"
-    local_idx=$((local_idx + 1))
-  done
-done
-
-for did in $(yabai -m query --displays | jq '.[].index'); do
-  sketchybar \
-    --add item "front_app.$did" left \
-    --set "front_app.$did" \
-    icon.drawing=off \
-    display="$did" \
-    script="$PLUGIN_DIR/front_app.sh" \
-    "${default_section[@]}" \
-    --subscribe "front_app.$did" front_app_switched
-done
-
-clock_props=(
-  update_freq=1
+label_only=(
   icon.drawing=off
-  script="$PLUGIN_DIR/clock.sh"
-  label.padding_left=10
-  label.padding_right=10
-  background.drawing=on
-  "${default_section[@]}"
+  icon.padding_left=0
+  icon.padding_right=0
+  label.padding_left="$GAP"
+  label.padding_right="$GAP"
 )
 
-sketchybar --add item "clock.0" left \
-  --set "clock.0" "${clock_props[@]}" display="1" \
-  --subscribe "clock.0" mouse.clicked
-
-# Center
-
-for did in $(yabai -m query --displays | jq '.[].index | select(. != 1)'); do
-  sketchybar --add item "clock.$did" center \
-    --set "clock.$did" "${clock_props[@]}" display="$did" \
-    --subscribe "clock.$did" mouse.clicked
-done
-
-# Right
-
-sketchybar --add item battery right \
-  --set battery update_freq=60 script="$PLUGIN_DIR/battery.sh" \
-  icon.padding_left=0 \
-  --subscribe battery system_woke power_source_change
-
-sketchybar --add item battery.plug right \
-  --set battery.plug icon="󰚥" icon.color=$TEXT \
-  icon.padding_right=0 \
-  label.drawing=off \
-  background.drawing=off \
-  drawing=off
-
-sketchybar --add item spacer.battery right \
-  --set spacer.battery width=10 \
-  icon.drawing=off \
-  label.drawing=off \
-  background.drawing=off
-
-sketchybar --add item volume right \
-  --set volume script="$PLUGIN_DIR/volume.sh" \
-  click_script="$PLUGIN_DIR/mute.sh" \
-  --subscribe volume volume_change
-
-sketchybar --add slider set_volume right 200 \
-  --set set_volume script="$PLUGIN_DIR/set_volume.sh" \
-  slider.background.height=6 \
-  slider.background.corner_radius=3 \
-  slider.background.color=$OVERLAY \
-  slider.highlight_color=$CYAN \
-  slider.knob=⬤ \
-  --subscribe set_volume volume_change mouse.clicked
-
-sketchybar --add item spacer.1 right \
-  --set spacer.1 width=10 \
-  icon.drawing=off \
-  label.drawing=off \
-  background.drawing=off
-
-cpu=(
-  icon="$CPU"
-  update_freq=3
-  script="$PLUGIN_DIR/stats/cpu.sh"
+icon_with_label=(
+  label.padding_left=0
+  icon.padding_right="$((GAP / 2))"
 )
 
-sketchybar --add item cpu right \
-  --set cpu "${cpu[@]}"
+"$BAR_NAME" --default "${default[@]}"
 
-memory=(
-  icon="$MEMORY"
-  update_freq=5
-  script="$PLUGIN_DIR/stats/ram.sh"
-)
+source "$CONFIG_DIR/bars/${BAR_NAME}.sh"
 
-sketchybar --add item memory right \
-  --set memory "${memory[@]}"
-
-disk=(
-  icon="$DISK"
-  update_freq=60
-  script="$PLUGIN_DIR/stats/disk.sh"
-)
-
-sketchybar --add item disk right \
-  --set disk "${disk[@]}"
-
-network=(
-  icon.drawing=off
-  update_freq=1
-  script="$PLUGIN_DIR/stats/network.sh"
-)
-
-sketchybar --add item network right \
-  --set network "${network[@]}"
-
-sketchybar --add item spacer.vpn right \
-  --set spacer.vpn width=5 \
-  icon.drawing=off \
-  label.drawing=off \
-  background.drawing=off
-
-vpn=(
-  icon="$NETWORK"
-  update_freq=10
-  script="$PLUGIN_DIR/stats/vpn.sh"
-  background.drawing=on
-  "${default_section[@]}"
-)
-
-sketchybar --add item vpn right \
-  --set vpn "${vpn[@]}"
-
-# Brackets
-
-sketchybar --add bracket volume_group volume set_volume \
-  --set volume_group \
-  "${default_section[@]}"
-
-sketchybar --add bracket stats cpu memory disk network \
-  --set stats \
-  "${default_section[@]}" \
-  background.drawing=on
-
-sketchybar --add bracket battery_group battery battery.plug \
-  --set battery_group \
-  "${default_section[@]}"
-
-sketchybar --update
+"$BAR_NAME" --update

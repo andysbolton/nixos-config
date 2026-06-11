@@ -35,12 +35,12 @@ else
     COLOR=$GREEN
 fi
 
-sketchybar --set "$NAME" \
+"$BAR_NAME" --set "$NAME" \
     icon="$ICON" icon.color="$COLOR" \
-    label="${PERCENTAGE}%"
+    label="$PERCENTAGE%"
 
 if [ "$CHARGING" != "" ]; then
-    sketchybar --set battery.plug drawing=on
+    "$BAR_NAME" --set battery.plug drawing=on
 else
-    sketchybar --set battery.plug drawing=off
+    "$BAR_NAME" --set battery.plug drawing=off
 fi

@@ -20,7 +20,7 @@ config.color_scheme = "TokyoNight (Gogh)"
 config.font = wezterm.font("CaskaydiaCove Nerd Font")
 config.font_size = wezterm.hostname() == "main" and 13 or 15
 config.line_height = 1.1
-config.window_decorations = "INTEGRATED_BUTTONS|RESIZE"
+config.window_decorations = "RESIZE"
 config.use_dead_keys = false
 config.colors = {
 	cursor_fg = "black",
@@ -157,7 +157,7 @@ config.keys = {
 		mods = "LEADER",
 		action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
-	{ key = "V", mods = "CTRL", action = act.PasteFrom("Clipboard") },
+	{ key = "v", mods = "CTRL", action = act.PasteFrom("Clipboard") },
 	{
 		key = "Enter",
 		mods = "ALT",

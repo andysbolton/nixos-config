@@ -5,12 +5,12 @@ source "$CONFIG_DIR/colors.sh"
 IP=$(curl -s --max-time 3 https://ifconfig.me)
 
 if [ -z "$IP" ]; then
-  IP="--"
+  IP="(disconnected)"
 fi
 
-if scutil --nc list 2>/dev/null | grep -q "^\* (Connected)" \
-  || netstat -rn 2>/dev/null | grep -q "^0/1"; then
-  sketchybar --set vpn label="$IP" background.border_color=$TEAL
+if scutil --nc list 2>/dev/null | grep -q "^\* (Connected)" ||
+  netstat -rn 2>/dev/null | grep -q "^0/1"; then
+  "$BAR_NAME" --set vpn label="$IP" background.border_color=$TEAL
 else
-  sketchybar --set vpn label="$IP" background.border_color=$OVERLAY
+  "$BAR_NAME" --set vpn label="$IP" background.border_color=$OVERLAY
 fi

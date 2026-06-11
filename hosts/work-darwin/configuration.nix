@@ -45,6 +45,7 @@
     ];
     casks = [
       # "bot-framework-emulator"
+      "karabiner-elements"
       "microsoft-teams"
       "protonvpn"
     ];
@@ -67,7 +68,6 @@
         # focus space
         cmd - 1 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 2 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[1].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 3 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[2].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 4 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[3].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 5 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[4].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 6 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[5].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
@@ -116,27 +116,30 @@
 
         cmd - t : wezterm-launch.sh &
 
-        cmd - d : yabai -m space --display 1 --focus 2
+        cmd - d : yabai -m space --focus --display 1
       '';
     };
 
-    karabiner-elements = {
-      enable = true;
-      package = pkgs.karabiner-elements.overrideAttrs (old: {
-        version = "14.13.0";
-
-        src = pkgs.fetchurl {
-          inherit (old.src) url;
-          hash = "sha256-gmJwoht/Tfm5qMecmq1N6PSAIfWOqsvuHU8VDJY8bLw=";
-        };
-
-        dontFixup = true;
-      });
-    };
+    # karabiner-elements = {
+    #   enable = false;
+    #   package = pkgs.karabiner-elements.overrideAttrs (old: {
+    #     version = "14.13.0";
+    #
+    #     src = pkgs.fetchurl {
+    #       inherit (old.src) url;
+    #       hash = "sha256-gmJwoht/Tfm5qMecmq1N6PSAIfWOqsvuHU8VDJY8bLw=";
+    #     };
+    #
+    #     dontFixup = true;
+    #   });
+    # };
 
     yabai =
       let
         sketchybar = "${pkgs.sketchybar}/bin/sketchybar";
+        sketchybar_bottom = "${
+          pkgs.callPackage ../../pkgs/sketchybar-bottom.nix { inherit pkgs-unstable; }
+        }/bin/sketchybar-bottom";
         ensureDisplays = pkgs.writeShellScript "ensure-displays" ''
           spaces_per_display=7
 
@@ -167,7 +170,7 @@
         package = pkgs-unstable.yabai;
         extraConfig = ''
           yabai -m config \
-              external_bar all:45:0 \
+              external_bar all:50:50 \
               mouse_follows_focus off \
               focus_follows_mouse off \
               display_arrangement_order default \
@@ -176,13 +179,13 @@
               window_placement second_child \
               window_insertion_point focused \
               window_zoom_persist on \
-              window_shadow on \
+              window_shadow off \
               window_animation_easing ease_out_circ \
               window_opacity_duration 0.0 \
               active_window_opacity 1.0 \
               normal_window_opacity 0.90 \
               window_animation_duration 0.3 \
-              window_opacity off \
+              window_opacity on \
               insert_feedback_color 0xffd75f5f \
               split_ratio 0.50 \
               split_type auto \
@@ -200,7 +203,7 @@
 
           yabai -m rule --add app="^System Settings$" manage=off
           yabai -m rule --add app="^Microsoft Teams$" display=1 space=1
-          yabai -m rule --add app="^Discord$" display=1 space=2
+          yabai -m rule --add app="^vesktop$" display=1 space=2
           yabai -m rule --add app="^GatherV2$" display=1 space=3
           yabai -m rule --add app="^Proton VPN$" display=1 space=7
 
@@ -219,12 +222,14 @@
             yabai -m signal --add label="$event" event="$event" action='
               ${ensureDisplays}
               ${sketchybar} --reload
+              ${sketchybar_bottom} --reload
             '
           done
 
           yabai -m rule --apply
 
           ${sketchybar} --reload
+          ${sketchybar_bottom} --reload
         '';
       };
   };
@@ -310,7 +315,7 @@
             nativeBuildInputs = [ pkgs.imagemagick ];
           }
           ''
-            magick -size 1x1 xc:'#2f4f4f' $out
+            magick -size 1x1 xc:"#1a1b26ff" $out
           '';
     in
     ''
