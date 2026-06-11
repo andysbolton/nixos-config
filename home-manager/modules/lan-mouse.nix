@@ -69,6 +69,7 @@ in
 
   programs.lan-mouse = {
     enable = true;
+    systemd = if pkgs.stdenv.isDarwin then false else true;
     settings = {
       release_bind = [
         "KeyA"
