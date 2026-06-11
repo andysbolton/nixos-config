@@ -88,6 +88,7 @@ in
     sd # sed replacement
     sops # secrets editor/manager
     starship # cross-shell prompt
+    speedtest-cli
     tokyonight-extras
     tree # recursive directory listing
     unzip
