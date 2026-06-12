@@ -79,10 +79,6 @@ in
     BROWSER = "${pkgs.firefox}/Applications/Firefox.app/Contents/MacOS/firefox";
   };
 
-  home.file.".ssh/authorized_keys".text = ''
-    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3wN9/LQcWF0pun3XaCnRfNnIiMbJlCxG2tZl3n9I3c andy-ed25519
-  '';
-
   launchd.agents.sketchybar-bottom = {
     enable = true;
     config = {
