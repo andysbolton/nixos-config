@@ -20,12 +20,23 @@ let
   others = lib.filterAttrs (n: _: n != me) fingerprints;
 
   karabiner = "/opt/homebrew/bin/karabiner_cli";
+
   darwinEnterHook = ''
     "${karabiner}" --select-profile empty || exit 0
 
     trap '"${karabiner}" --select-profile work' EXIT
 
     tail -n0 -F /tmp/lan-mouse.err.log | grep -m1 -E "releasing capture"
+  '';
+
+  linuxEnterHook = ''
+    input=$(${pkgs.river-classic}/bin/riverctl list-inputs | grep -i "pointer.*mx_anywhere")
+
+    ${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll enabled
+
+    trap '${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll disabled' EXIT
+
+    journalctl --user -u lan-mouse.service -n0 -f -o cat | grep -m1 -E "releasing capture"
   '';
 
   # darwinToLinuxCopy = ''
@@ -63,6 +74,7 @@ let
         hostname = "work.tail4b1b78.ts.net";
         activate_on_startup = true;
         ips = [ "100.93.122.89" ];
+        enter_hook = linuxEnterHook;
       }
     ];
   };

@@ -5,8 +5,8 @@
 
 * {
   /* `otf-font-awesome` is required to be installed for icons */
-  font-family: "Bars", "CaskaydiaCove Nerd Font";
-  font-size: 16px;
+  font-family: "CaskaydiaCove Nerd Font";
+  font-size: 18px;
 }
 
 #waybar {
@@ -23,6 +23,12 @@
 .bottom-bar {
   border-top: 3px solid rgba(100, 114, 125, 0.5);
   border-bottom: none;
+}
+
+.top-bar label,
+.bottom-bar label {
+  padding-top: 10px;
+  padding-bottom: 7px;
 }
 
 #window {
@@ -54,7 +60,7 @@
 #custom-gpu-temperature {
   padding-left: 12px;
   padding-right: 12px;
-  border-left: 2px solid rgba(100, 114, 125, 1);
+  border-right: 2px solid rgba(100, 114, 125, 1);
 }
 
 #pulseaudio {
@@ -64,7 +70,7 @@
 
 #pulseaudio-slider {
   padding: 0 12px 0;
-  min-width: 80px;
+  min-width: 200px;
 }
 
 #pulseaudio-slider trough {
@@ -83,5 +89,5 @@
 #custom-system {
   padding-left: 12px;
   padding-right: 12px;
-  border-right: 2px solid rgba(100, 114, 125, 1);
+  border-left: 2px solid rgba(100, 114, 125, 1);
 }
