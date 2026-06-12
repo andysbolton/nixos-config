@@ -53,7 +53,10 @@
 
   services.gnome.gnome-keyring.enable = true;
 
-  programs.river-classic.enable = true;
+  programs.river-classic = {
+    enable = true;
+    extraPackages = [ ];
+  };
 
   programs.uwsm = {
     enable = true;
