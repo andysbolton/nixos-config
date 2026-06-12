@@ -164,17 +164,17 @@ in
       main = {
         hostname = "main.tail4b1b78.ts.net";
         user = "andy";
-        identityFile = "~/.ssh/id_ed25519";
+        identityfile = "~/.ssh/id_ed25519";
       };
       portable = {
         hostname = "portable.tail4b1b78.ts.net";
         user = "andy";
-        identityFile = "~/.ssh/id_ed25519";
+        identityfile = "~/.ssh/id_ed25519";
       };
       work = {
         hostname = "work.tail4b1b78.ts.net";
         user = "andybolton";
-        identityFile = "~/.ssh/id_ed25519";
+        identityfile = "~/.ssh/id_ed25519";
       };
     };
   };
