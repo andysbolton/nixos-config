@@ -24,6 +24,19 @@ in
 
   home.stateVersion = "25.05";
 
+  # Real-file copy, not home.file: a store symlink trips sshd StrictModes on macOS
+  # (group-writable store) and falls back to password auth.
+  home.activation.authorizedKeys =
+    let
+      keysFile = pkgs.writeText "authorized_keys" ''
+        ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3wN9/LQcWF0pun3XaCnRfNnIiMbJlCxG2tZl3n9I3c andy-ed25519
+      '';
+    in
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      run install -d -m 700 "$HOME/.ssh"
+      run install -m 600 ${keysFile} "$HOME/.ssh/authorized_keys"
+    '';
+
   home.shell.enableFishIntegration = true;
   home.sessionVariables = {
     # DOTNET_HOST_PATH = "${dotnetSdks}/share/dotnet/dotnet";

@@ -22,9 +22,6 @@
   users.users.andy = {
     isNormalUser = true;
     shell = pkgs.fish;
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3wN9/LQcWF0pun3XaCnRfNnIiMbJlCxG2tZl3n9I3c andy-ed25519"
-    ];
   };
 
   programs.fish = {
@@ -52,7 +49,10 @@
 
   services.gnome.gnome-keyring.enable = true;
 
-  programs.river-classic.enable = true;
+  programs.river-classic = {
+    enable = true;
+    extraPackages = [ ];
+  };
 
   programs.uwsm = {
     enable = true;
