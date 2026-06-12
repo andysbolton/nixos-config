@@ -21,7 +21,7 @@
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item cpu left \
-  --set cpu icon="$CPU" width=72 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
+  --set cpu icon="$CPU" width=76 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add bracket stats network.up network.down disk memory cpu \

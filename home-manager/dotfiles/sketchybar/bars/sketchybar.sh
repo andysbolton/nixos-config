@@ -134,7 +134,6 @@ set_volume=(
 
 karabiner_profile=(
   icon="$KEYBOARD"
-  update_freq=2
   script="$PLUGIN_DIR/karabiner_profile.sh"
   "${block[@]}"
   "${icon_with_label[@]}"

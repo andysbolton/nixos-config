@@ -8,7 +8,7 @@
 let
   # Per-host TLS cert fingerprints for lan-mouse cross-authentication.
   # Get each host's fingerprint with:
-  #   openssl x509 -in ~/.config/lan-mouse/lan-mouse.pem -fingerprint -sha256 -noout \
+  #   openssl x509 -in $XDG_CONFIG_HOME/lan-mouse/lan-mouse.pem -fingerprint -sha256 -noout \
   #     | sed 's/.*=//' | tr 'A-Z' 'a-z'
   fingerprints = {
     work = "87:94:13:86:65:a8:14:bb:25:a9:e7:25:90:ee:e9:71:d6:a2:56:bc:e1:3a:1b:49:1e:dd:ae:03:ac:7a:4d:32";
@@ -21,28 +21,16 @@ let
 
   karabiner = "/opt/homebrew/bin/karabiner_cli";
   darwinEnterHook = ''
-    pidfile=/tmp/lan-mouse-karabiner-watcher.pid
+    "${karabiner}" --select-profile empty || exit 0
 
-    # Kill any prior watcher from a previous (possibly stuck) crossing
-    if [ -f "$pidfile" ]; then
-      kill "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null || true
-      rm -f "$pidfile"
-    fi
+    trap '"${karabiner}" --select-profile work' EXIT
 
-    "${karabiner}" --select-profile Empty || exit 0
-
-    (
-      trap '"${karabiner}" --select-profile work; rm -f "$pidfile"; kill $sleep_pid 2>/dev/null' EXIT
-      (
-        # lan-mouse's Rust log::info!() messages go to stderr (.err.log),
-        # not stdout (.log) — see home-manager/darwin.nix launchd.agents.lan-mouse.
-        tail -n0 -F /tmp/lan-mouse.err.log | grep -m1 -E "releasing capture"
-      ) &
-      grep_pid=$!
-      wait $grep_pid
-    ) &
-    echo $! > "$pidfile"
+    tail -n0 -F /tmp/lan-mouse.err.log | grep -m1 -E "releasing capture"
   '';
+
+  # darwinToLinuxCopy = ''
+  #   pbpaste | ssh
+  # '';
 
   topology = {
     main = [
@@ -81,18 +69,8 @@ let
 in
 {
   imports = [ inputs.lan-mouse.homeManagerModules.default ];
-
-  # The upstream lan-mouse module hardcodes WantedBy to hyprland/sway session
-  # targets. We run river via uwsm with river's own systemd integration disabled,
-  # so the only session target that becomes active is graphical-session.target.
-  systemd.user.services.lan-mouse = lib.mkIf pkgs.stdenv.isLinux {
-    Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
-    Unit.After = [ "graphical-session.target" ];
-  };
-
   programs.lan-mouse = {
     enable = true;
-    systemd = if pkgs.stdenv.isDarwin then false else true;
     settings = {
       release_bind = [
         "KeyA"
@@ -105,5 +83,10 @@ in
       authorized_fingerprints = lib.mapAttrs' (n: v: lib.nameValuePair v n) others;
       clients = topology.${me} or [ ];
     };
+  };
+
+  launchd.agents.lan-mouse.config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+    StandardOutPath = "/tmp/lan-mouse.log";
+    StandardErrorPath = "/tmp/lan-mouse.err.log";
   };
 }

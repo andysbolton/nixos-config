@@ -190,11 +190,11 @@
               split_ratio 0.50 \
               split_type auto \
               auto_balance off \
-              top_padding 13 \
-              bottom_padding 13 \
-              left_padding 13 \
-              right_padding 13 \
-              window_gap 13 \
+              top_padding 15 \
+              bottom_padding 15 \
+              left_padding 15 \
+              right_padding 15 \
+              window_gap 15 \
               layout bsp \
               mouse_modifier fn \
               mouse_action1 move \

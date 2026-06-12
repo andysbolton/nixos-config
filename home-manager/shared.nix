@@ -57,6 +57,7 @@ in
     dig # DNS lookup tool
     docker-compose
     dotnetSdks
+    entr # run commands on file change
     fd
     file
     fzf
@@ -64,6 +65,7 @@ in
     gnumake
     go
     httpie # user-friendly HTTP client
+    hwatch
     jq
     killall
     lazygit
@@ -158,22 +160,21 @@ in
       Include ~/.ssh/config.local
     '';
     settings = {
-      "*".identityAgent =
-        if pkgs.stdenv.isDarwin then
-          ''"~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"''
-        else
-          "~/.1password/agent.sock";
+      "*" = { };
       main = {
         hostname = "main.tail4b1b78.ts.net";
         user = "andy";
+        identityFile = "~/.ssh/id_ed25519";
       };
       portable = {
         hostname = "portable.tail4b1b78.ts.net";
         user = "andy";
+        identityFile = "~/.ssh/id_ed25519";
       };
       work = {
         hostname = "work.tail4b1b78.ts.net";
         user = "andybolton";
+        identityFile = "~/.ssh/id_ed25519";
       };
     };
   };
@@ -185,6 +186,26 @@ in
       ageKey = {
         reference = "op://nix/age-secret-key/password";
         path = ".config/sops/age/keys.txt";
+        mode = "0600";
+      };
+      sshRsa = {
+        reference = "op://nix/andy-ssh-rsa/private key";
+        path = ".ssh/id_rsa";
+        mode = "0600";
+      };
+      sshRsaPub = {
+        reference = "op://nix/andy-ssh-rsa/public key";
+        path = ".ssh/id_rsa.pub";
+        mode = "0600";
+      };
+      sshEd25519 = {
+        reference = "op://nix/andy-ssh-ed25519/private key";
+        path = ".ssh/id_ed25519";
+        mode = "0600";
+      };
+      sshEd25519Pub = {
+        reference = "op://nix/andy-ssh-ed25519/public key";
+        path = ".ssh/id_ed25519.pub";
         mode = "0600";
       };
       sshConfig = {

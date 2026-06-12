@@ -305,7 +305,7 @@ in
         {
           kickstart = {
             argumentNames = [ "service" ];
-            body = "launchctl kickstart gui/$(id -u)/$service";
+            body = "launchctl kickstart -k gui/$(id -u)/$service";
           };
           skickstart = {
             argumentNames = [ "service" ];

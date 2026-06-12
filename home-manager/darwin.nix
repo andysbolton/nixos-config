@@ -33,7 +33,20 @@ in
   };
 
   home.activation.runGoku = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if [ -f "$HOME/.config/karabiner.edn" ] && [ -f "$HOME/.config/karabiner/karabiner.json" ]; then
+    kbjson="$HOME/.config/karabiner/karabiner.json"
+    if [ -f "$HOME/.config/karabiner.edn" ] && [ -f "$kbjson" ]; then
+      # goku can't create profiles or set per-device options. Reconcile karabiner.json
+      # to our canonical set: drop any profile that is not ours (e.g. the auto-created
+      # "Default profile") and inject any of ours that are missing, so goku's
+      # "profile must exist" check passes and the Logitech stays grabbed across the
+      # lan-mouse work<->empty switch.
+      ${pkgs.jq}/bin/jq --argjson want "$(cat ${./dotfiles/karabiner/profiles.json})" '
+        ($want | map(.name)) as $names                                    # our canonical profile names
+        | .profiles |= map(select(.name | IN($names[])))                  # drop profiles that are not ours
+        | [.profiles[].name] as $have                                     # of ours, which already exist
+        | .profiles += [ $want[] | select((.name | IN($have[])) | not) ]  # append the missing ones
+      ' "$kbjson" | ${pkgs.moreutils}/bin/sponge "$kbjson"
+
       run ${pkgs.goku}/bin/goku
       run --quiet "${osConfig.services.karabiner-elements.package}/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli" --select-profile work
     fi
@@ -67,14 +80,8 @@ in
   };
 
   home.file.".ssh/authorized_keys".text = ''
-    ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAAGFGipKjoh/k9IHbfE00n4p5rnMMvsYNMS/Pbx3IE6SgoGSEPSFOxSiNsX7thhyT55fkDoQPaMr+0hGwaz+qeYpbInWfsZLjZOn5iqMgmqCPX5khe2UW+J9dPlAj5eCv2OCzNjbevnFU1MOlw1X26BbzdFS1VOd3OKmS72jEYOvQK7C/ciAj/ytlh+9NwJFcaUugXWJShhi6XMzfPWTDSTwcFlKfOH4n5uyRj7qi1ZGg8w9qnaSSIhaACgOGRXmfDoaVBCZx1fjeBYL9SeZMiIeCy3i2CPiUuKuVebP3p7DbavWq2055NSLQUK5MKfFeFJUHCgYtMOtckcv5SMR5 andy-rsa
     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3wN9/LQcWF0pun3XaCnRfNnIiMbJlCxG2tZl3n9I3c andy-ed25519
   '';
-
-  launchd.agents.lan-mouse.config = {
-    StandardOutPath = "/tmp/lan-mouse.log";
-    StandardErrorPath = "/tmp/lan-mouse.err.log";
-  };
 
   launchd.agents.sketchybar-bottom = {
     enable = true;
@@ -104,6 +111,7 @@ in
     includeSystemPath = true;
     extraPackages = [
       pkgs-unstable.yabai
+      pkgs.entr
       pkgs.ifstat-legacy
       pkgs.jq
     ];
