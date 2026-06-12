@@ -26,7 +26,6 @@ in
 
   home.packages = with pkgs; [
     cliphist
-    entr # run commands on file change
     grim # screenshot tool
     imv # command-line image viewer
     killall

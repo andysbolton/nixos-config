@@ -8,7 +8,7 @@
 let
   # Per-host TLS cert fingerprints for lan-mouse cross-authentication.
   # Get each host's fingerprint with:
-  #   openssl x509 -in ~/.config/lan-mouse/lan-mouse.pem -fingerprint -sha256 -noout \
+  #   openssl x509 -in $XDG_CONFIG_HOME/lan-mouse/lan-mouse.pem -fingerprint -sha256 -noout \
   #     | sed 's/.*=//' | tr 'A-Z' 'a-z'
   fingerprints = {
     work = "87:94:13:86:65:a8:14:bb:25:a9:e7:25:90:ee:e9:71:d6:a2:56:bc:e1:3a:1b:49:1e:dd:ae:03:ac:7a:4d:32";
@@ -27,6 +27,10 @@ let
 
     tail -n0 -F /tmp/lan-mouse.err.log | grep -m1 -E "releasing capture"
   '';
+
+  # darwinToLinuxCopy = ''
+  #   pbpaste | ssh
+  # '';
 
   topology = {
     main = [
@@ -65,18 +69,8 @@ let
 in
 {
   imports = [ inputs.lan-mouse.homeManagerModules.default ];
-
-  # The upstream lan-mouse module hardcodes WantedBy to hyprland/sway session
-  # targets. We run river via uwsm with river's own systemd integration disabled,
-  # so the only session target that becomes active is graphical-session.target.
-  systemd.user.services.lan-mouse = lib.mkIf pkgs.stdenv.isLinux {
-    Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
-    Unit.After = [ "graphical-session.target" ];
-  };
-
   programs.lan-mouse = {
     enable = true;
-    systemd = if pkgs.stdenv.isDarwin then false else true;
     settings = {
       release_bind = [
         "KeyA"
