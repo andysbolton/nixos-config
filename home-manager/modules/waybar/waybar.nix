@@ -13,22 +13,19 @@ in
       {
         name = "top-bar";
         layer = "top";
+
         modules-left = [
           "river/tags"
           "river/window"
           "custom/lan-mouse"
           "systemd-failed-units"
         ];
+
         modules-center = [ "clock" ];
+
         modules-right = [
           "pulseaudio"
           "pulseaudio/slider"
-          "disk"
-          "memory"
-          "cpu"
-          "temperature"
-          "custom/gpu-utilization"
-          "custom/gpu-temperature"
         ];
 
         clock = {
@@ -44,53 +41,6 @@ in
         "river/tags" = {
           "num-tags" = 10;
           "hide-vacant" = true;
-        };
-
-        disk = {
-          format = " {used} / {total}";
-        };
-
-        cpu = {
-          format = " {usage} %";
-          tooltip = false;
-          interval = 1;
-        };
-
-        memory = {
-          format = " {used:0.1f}G / {total:0.1f}G";
-          interval = 1;
-        };
-
-        temperature = {
-          "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
-          interval = 1;
-          "critical-threshold" = 80;
-          format = " {icon} {temperatureC}°C";
-          "format-icons" = [
-            ""
-            ""
-            ""
-            ""
-          ];
-        };
-
-        "custom/gpu-utilization" = {
-          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
-          format = "⚙ {}";
-          interval = 1;
-        };
-
-        "custom/gpu-temperature" = {
-          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
-          format = "⚙{icon} {text}°C";
-          interval = 1;
-          "critical-threshold" = 80;
-          "format-icons" = [
-            ""
-            ""
-            ""
-            ""
-          ];
         };
 
         "custom/lan-mouse" = {
@@ -145,12 +95,67 @@ in
         name = "bottom-bar";
         layer = "top";
         position = "bottom";
-        height = 35;
 
         modules-left = [
+          "disk"
+          "memory"
+          "cpu"
+          "temperature"
+          "custom/gpu-utilization"
+          "custom/gpu-temperature"
+        ];
+
+        modules-right = [
           "custom/system"
           "custom/primary"
         ];
+
+        disk = {
+          format = " {used} / {total}";
+        };
+
+        cpu = {
+          format = " {usage} %";
+          tooltip = false;
+          interval = 1;
+        };
+
+        memory = {
+          format = " {used:0.1f}G / {total:0.1f}G";
+          interval = 1;
+        };
+
+        temperature = {
+          "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
+          interval = 1;
+          "critical-threshold" = 80;
+          format = " {icon} {temperatureC}°C";
+          "format-icons" = [
+            ""
+            ""
+            ""
+            ""
+          ];
+        };
+
+        "custom/gpu-utilization" = {
+          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
+          format = "⚙ {}";
+          interval = 1;
+        };
+
+        "custom/gpu-temperature" = {
+          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
+          format = "⚙{icon} {text}°C";
+          interval = 1;
+          "critical-threshold" = 80;
+          "format-icons" = [
+            ""
+            ""
+            ""
+            ""
+          ];
+        };
 
         "custom/system-label" = {
           format = "System: ";

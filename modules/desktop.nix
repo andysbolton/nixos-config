@@ -35,11 +35,13 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    brightnessctl
     lxqt.lxqt-policykit
     pavucontrol
     swaylock
     wl-clipboard
     wlopm
+    wlr-randr
     xdpyinfo
     xrandr
   ];
