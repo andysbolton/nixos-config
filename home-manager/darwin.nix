@@ -66,6 +66,7 @@ in
     jira-cli-go
     maccy
     moonlight-qt
+    pngpaste
     powershell
     powershell-editor-services
     sketchybarBottom

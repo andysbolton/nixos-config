@@ -1,6 +1,18 @@
 { pkgs, ... }:
 let
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
+
+  # Print the most recent entry of the cliphist db given as $1, decoded.
+  # Image entries are stored as binary, so show "(image)" rather than
+  # dumping raw bytes into the bar.
+  clipLatest = pkgs.writeShellScript "clip-latest" ''
+    db="$1"
+    line=$(cliphist -db-path "$db" list | sort -nr | head -1)
+    case "$line" in
+      *"binary data"*) echo "(image)" ;;
+      *) printf '%s' "$line" | cliphist -db-path "$db" decode ;;
+    esac
+  '';
 in
 {
   programs.waybar = {
@@ -164,8 +176,7 @@ in
         "custom/system" = {
           exec = pkgs.writeShellScript "clipboard-system-check" ''
             db="$HOME/.cache/cliphist/system-db"
-            echo "$db" |
-              entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
+            echo "$db" | entr -n -s "${clipLatest} $db"
           '';
           max-length = 30;
           min-length = 30;
@@ -177,8 +188,7 @@ in
         "custom/primary" = {
           exec = pkgs.writeShellScript "clipboard-primary-check" ''
             db="$HOME/.cache/cliphist/primary-db"
-            echo "$db" |
-              entr -n -s "cliphist -db-path $db list | sort -nr | head -1 | cliphist -db-path $db decode"
+            echo "$db" | entr -n -s "${clipLatest} $db"
           '';
           max-length = 30;
           min-length = 30;

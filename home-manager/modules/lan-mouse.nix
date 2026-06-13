@@ -27,7 +27,15 @@ let
 
     trap '"${karabiner}" --select-profile work' EXIT
 
-    pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=) wl-copy >/dev/null 2>&1" &
+    # Forward the clipboard to portable: an image if one is present, else text.
+    (
+      remote="env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=)"
+      if ${pkgs.pngpaste}/bin/pngpaste - >/dev/null 2>&1; then
+        ${pkgs.pngpaste}/bin/pngpaste - | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy --type image/png >/dev/null 2>&1"
+      else
+        pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy >/dev/null 2>&1"
+      fi
+    ) &
 
     "${karabiner}" --select-profile linux || exit 0
 
@@ -37,7 +45,14 @@ let
   linuxEnterHook = ''
     cursor=$(journalctl --user -u lan-mouse.service -n1 --show-cursor -o cat 2>/dev/null | sed -n 's/^-- cursor: *//p')
 
-    ${pkgs.wl-clipboard}/bin/wl-paste | ssh -o BatchMode=yes -o ConnectTimeout=3 work "pbcopy" &
+    # Forward the clipboard to work: an image if one is present, else text.
+    (
+      if ${pkgs.wl-clipboard}/bin/wl-paste -l | grep -q '^image/png$'; then
+        ${pkgs.wl-clipboard}/bin/wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work 'f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png); cat > "$f"; osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1; rm -f "$f"'
+      else
+        ${pkgs.wl-clipboard}/bin/wl-paste | ssh -o BatchMode=yes -o ConnectTimeout=3 work "pbcopy"
+      fi
+    ) &
 
     input=$(${pkgs.river-classic}/bin/riverctl list-inputs | grep -i "pointer.*mx_anywhere") || exit 0
 
