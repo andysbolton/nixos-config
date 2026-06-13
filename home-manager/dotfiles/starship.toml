@@ -1,0 +1,48 @@
+[directory]
+format = '[ ](bold yellow)[$path]($style)[$read_only]($read_only_style) '
+
+[[battery.display]]
+threshold = 30
+style = "bold red"
+
+[memory_usage]
+format = "[${ram} @ $ram_pct]($style) "
+threshold = 50
+disabled = false
+
+[hostname]
+ssh_only = false
+format = "<[$hostname]($style)>"
+trim_at = "-"
+style = "bold dimmed white"
+disabled = false
+
+[os]
+disabled = false
+
+[os.symbols]
+Linux = ""
+Macos = ""
+
+[shell]
+fish_indicator = '><>'
+powershell_indicator = ''
+bash_indicator = '\$_ '
+style = 'cyan bold'
+disabled = false
+
+[git_commit]
+commit_hash_length = 7
+only_detached = false
+tag_disabled = false
+style = 'underline blue'
+format = '[$hash$tag]($style) '
+
+[git_metrics]
+disabled = false
+
+[azure]
+disabled = false
+format = 'on [$symbol($subscription)]($style) '
+symbol = '󰠅 '
+style = 'blue bold'

@@ -17,7 +17,12 @@ config.front_end = "OpenGL"
 config.default_prog = { "fish" }
 
 config.color_scheme = "TokyoNight (Gogh)"
-config.font = wezterm.font("CaskaydiaCove Nerd Font")
+config.font = wezterm.font_with_fallback({
+	"CaskaydiaCove Nerd Font",
+	"Symbols Nerd Font Mono",
+	"Noto Color Emoji",
+	"Last Resort High-Efficiency",
+})
 config.font_size = wezterm.hostname() == "main" and 13 or 15
 config.line_height = 1.1
 config.window_decorations = "RESIZE"

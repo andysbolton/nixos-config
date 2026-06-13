@@ -50,6 +50,7 @@ in
       nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
       "opencode/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
+      "starship.toml".source = ./dotfiles/starship.toml;
     };
   };
 
