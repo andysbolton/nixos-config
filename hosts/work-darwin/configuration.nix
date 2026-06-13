@@ -64,67 +64,66 @@
 
     skhd = {
       enable = true;
-      skhdConfig = ''
-        # focus window
-        ctrl + shift - h : yabai -m window --focus west  || yabai -m display --focus west
-        ctrl + shift - j : yabai -m window --focus south || yabai -m display --focus south
-        ctrl + shift - k : yabai -m window --focus north || yabai -m display --focus north
-        ctrl + shift - l : yabai -m window --focus east  || yabai -m display --focus east
+      skhdConfig =
+        let
+          spaceQuery = n: ''
+            yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[${toString (n - 1)}].index // empty';
+          '';
 
-        # focus space
-        cmd - 1 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 2 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[1].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 3 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[2].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 4 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[3].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 5 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[4].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 6 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[5].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 7 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[6].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 8 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[7].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
-        cmd - 9 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[8].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
+          focusSpace = n: ''
+            cmd - ${toString n} : set i (${spaceQuery n}); test -n "$i"; and yabai -m space --focus "$i"
+          '';
 
-        # move to space
-        shift + cmd - 1 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[0].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
-        shift + cmd - 2 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[1].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
-        shift + cmd - 3 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[2].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
-        shift + cmd - 4 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[3].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
-        shift + cmd - 5 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[4].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
-        shift + cmd - 6 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[5].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
-        shift + cmd - 7 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[6].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
-        shift + cmd - 8 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[7].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
-        shift + cmd - 9 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[8].index // empty'); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"
+          moveToSpace = n: ''
+            "shift + cmd - ${toString n} : set i (${spaceQuery n}); test -n $i; and yabai -m window --space $i; and yabai -m space --focus $i
+          '';
 
-        # swap managed window
-        ctrl + shift + alt - h : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap west || { yabai -m window --display west && yabai -m window --focus "$id" }
-        ctrl + shift + alt - j : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap south || { yabai -m window --display south && yabai -m window --focus "$id" }
-        ctrl + shift + alt - k : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap north|| { yabai -m window --display north && yabai -m window --focus "$id" }
-        ctrl + shift + alt - l : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap east || { yabai -m window --display east && yabai -m window --focus "$id" }
+          mkBindings = f: lib.concatMapStrings (n: "        ${f n}\n") (lib.range 1 9);
+        in
+        ''
+          # focus window
+          ctrl + shift - h : yabai -m window --focus west  || yabai -m display --focus west
+          ctrl + shift - j : yabai -m window --focus south || yabai -m display --focus south
+          ctrl + shift - k : yabai -m window --focus north || yabai -m display --focus north
+          ctrl + shift - l : yabai -m window --focus east  || yabai -m display --focus east
 
-        # balance size of windows
-        shift + alt - 0 : yabai -m space --balance
+          # focus space
+          ${mkBindings focusSpace}
+          # move to space
+          ${mkBindings moveToSpace}
 
-        shift + ctrl - o : yabai -m window --focus recent
-        shift + ctrl - i : yabai -m window --focus next
+          # swap managed window
+          ctrl + shift + alt - h : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap west || { yabai -m window --display west && yabai -m window --focus "$id" }
+          ctrl + shift + alt - j : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap south || { yabai -m window --display south && yabai -m window --focus "$id" }
+          ctrl + shift + alt - k : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap north|| { yabai -m window --display north && yabai -m window --focus "$id" }
+          ctrl + shift + alt - l : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap east || { yabai -m window --display east && yabai -m window --focus "$id" }
 
-        # fast focus desktop
-        cmd + alt - 1 : yabai -m space --focus 1
-        cmd + alt - 2 : yabai -m space --focus 2
-        cmd + alt - 3 : yabai -m space --focus 3
+          # balance size of windows
+          shift + alt - 0 : yabai -m space --balance
 
-        # expand window to the left OR shrink from the right
-        alt + shift - h : yabai -m window --resize left:-20:0 || yabai -m window --resize right:-20:0
-        # expand window down OR shrink from the top
-        alt + shift - j : yabai -m window --resize bottom:0:20 || yabai -m window --resize top:0:20
-        # expand window up OR shrink from the bottom
-        alt + shift - k : yabai -m window --resize top:0:-20 || yabai -m window --resize bottom:0:-20
-        # expand window to the right OR shrink from the left
-        alt + shift - l : yabai -m window --resize right:20:0 || yabai -m window --resize left:20:0
+          shift + ctrl - o : yabai -m window --focus recent
+          shift + ctrl - i : yabai -m window --focus next
 
-        cmd - return : wezterm-gui start --always-new-process &
+          # fast focus desktop
+          cmd + alt - 1 : yabai -m space --focus 1
+          cmd + alt - 2 : yabai -m space --focus 2
+          cmd + alt - 3 : yabai -m space --focus 3
 
-        cmd - t : wezterm-launch.sh &
+          # expand window to the left OR shrink from the right
+          alt + shift - h : yabai -m window --resize left:-20:0 || yabai -m window --resize right:-20:0
+          # expand window down OR shrink from the top
+          alt + shift - j : yabai -m window --resize bottom:0:20 || yabai -m window --resize top:0:20
+          # expand window up OR shrink from the bottom
+          alt + shift - k : yabai -m window --resize top:0:-20 || yabai -m window --resize bottom:0:-20
+          # expand window to the right OR shrink from the left
+          alt + shift - l : yabai -m window --resize right:20:0 || yabai -m window --resize left:20:0
 
-        cmd - d : yabai -m space --focus --display 1
-      '';
+          cmd - return : wezterm-gui start --always-new-process &
+
+          cmd - t : wezterm-launch.sh &
+
+          cmd - d : yabai -m space --focus --display 1
+        '';
     };
 
     # karabiner-elements = {
