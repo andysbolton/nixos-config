@@ -104,6 +104,7 @@ in
     sops # secrets editor/manager
     starship # cross-shell prompt
     speedtest-cli
+    tmux
     tokyonight-extras
     tree # recursive directory listing
     unzip
