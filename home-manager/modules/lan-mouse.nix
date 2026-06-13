@@ -25,7 +25,10 @@ let
     log=/tmp/lan-mouse.err.log
     off=$(stat -f%z "$log" 2>/dev/null || echo 0)
 
-    trap '"${karabiner}" --select-profile work' EXIT
+    uid=$(/usr/bin/id -u)
+    skhd_plist="$HOME/Library/LaunchAgents/org.nixos.skhd.plist"
+
+    trap '/bin/launchctl bootstrap "gui/$uid" "$skhd_plist" 2>/dev/null; "${karabiner}" --select-profile work' EXIT
 
     # Forward the clipboard to portable: an image if one is present, else text.
     (
@@ -36,6 +39,8 @@ let
         pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy >/dev/null 2>&1"
       fi
     ) &
+
+    /bin/launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
 
     "${karabiner}" --select-profile linux || exit 0
 
