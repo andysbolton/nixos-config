@@ -21,10 +21,6 @@ let
 
   karabiner = "/opt/homebrew/bin/karabiner_cli";
 
-  # Hooks run via `sh -c` (no bashisms) and must not miss a "releasing capture"
-  # logged before the log follower attaches, so each snapshots its position in
-  # the log first thing. The follower is killed from inside the pipeline once
-  # grep matches; otherwise the shell waits for its next (SIGPIPE) write.
   darwinEnterHook = ''
     log=/tmp/lan-mouse.err.log
     off=$(stat -f%z "$log" 2>/dev/null || echo 0)
@@ -52,10 +48,6 @@ let
     if [ -n "$cursor" ]; then set -- --after-cursor "$cursor"; else set -- -n0; fi
     journalctl --user -u lan-mouse.service "$@" -f -o cat | { grep -m1 -E "releasing capture"; pkill -P $$ -x journalctl; }
   '';
-
-  # darwinToLinuxCopy = ''
-  #   pbpaste | ssh
-  # '';
 
   topology = {
     main = [
