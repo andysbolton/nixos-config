@@ -92,6 +92,7 @@
   };
 
   services.openssh.enable = true;
+  services.eternal-terminal.enable = true;
 
   programs._1password.enable = true;
   programs._1password-gui = {

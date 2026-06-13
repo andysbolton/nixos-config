@@ -5,12 +5,20 @@
   inputs,
   ...
 }:
+let
+  headlessSetRes = pkgs.writeShellScript "sunshine-headless-set-res" ''
+    if ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gnugrep}/bin/grep -q '^HEADLESS-1'; then
+      ${pkgs.wlr-randr}/bin/wlr-randr --output HEADLESS-1 \
+        --custom-mode "''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}Hz"
+    fi
+  '';
+in
 {
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
     ../../modules/desktop.nix
-    ../../modules/hardware.nix
+    ../../modules/nvidia4070.nix
     ../../modules/arrs.nix
     ../../modules/torrenting.nix
     ../../modules/steam.nix
@@ -39,6 +47,7 @@
 
   users.users.andy.extraGroups = [
     "docker"
+    "uinput" # virtual mouse/keyboard
     "wheel"
     "wpa_supplicant"
   ];
@@ -78,9 +87,6 @@
     ))
   ];
 
-  # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = [ "nvidia" ];
-
   # Revisit, this may all be set by programs.river.enable = true;
   # xdg.portal = {
   #   enable = true;
@@ -109,11 +115,27 @@
   services.sunshine = {
     enable = true;
     openFirewall = true;
-    capSysAdmin = true;
     settings = {
-      capture = "kms";
+      capture = "wlr";
       encoder = "nvenc";
+      global_prep_cmd = builtins.toJSON [
+        {
+          do = "${headlessSetRes}";
+          undo = "";
+          elevated = false;
+        }
+      ];
     };
+    applications.apps = [
+      {
+        name = "Desktop";
+      }
+      {
+        name = "Steam Big Picture";
+        cmd = "${config.programs.steam.package}/bin/steam steam://open/bigpicture";
+        "auto-detach" = "true";
+      }
+    ];
   };
 
   services.printing.enable = true;

@@ -25,9 +25,16 @@
   border-bottom: none;
 }
 
-.top-bar label,
+.top-bar label {
+  padding-top: 8px;
+}
+
 .bottom-bar label {
   padding-top: 10px;
+}
+
+.top-bar label,
+.bottom-bar label {
   padding-bottom: 7px;
 }
 
