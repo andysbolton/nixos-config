@@ -51,7 +51,12 @@
     ];
   };
 
-  fonts.packages = with pkgs; [ nerd-fonts.caskaydia-cove ];
+  fonts.packages = with pkgs; [
+    nerd-fonts.caskaydia-cove
+    nerd-fonts.symbols-only
+    noto-fonts-color-emoji
+    last-resort
+  ];
 
   services = {
     tailscale.enable = true;
