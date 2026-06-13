@@ -207,12 +207,9 @@
           yabai -m rule --add app="^GatherV2$" display=1 space=3
           yabai -m rule --add app="^Proton VPN$" display=1 space=7
 
-          yabai -m signal --add label="float_wezterm" event=window_created app="^WezTerm\$" action='
-              title=$(yabai -m query --windows --window $YABAI_WINDOW_ID | jq -r .title)
-              if [ "$title" = "launch.sh" ]; then
-                  yabai -m window $YABAI_WINDOW_ID --toggle float
-                  yabai -m window $YABAI_WINDOW_ID --grid 4:4:1:1:2:2
-              fi
+          yabai -m rule --add app="^WezTerm\$" title="^launch\.sh\$" manage=off grid=4:4:1:1:2:2
+
+          yabai -m signal --add label="wezterm_created" event=window_created app="^WezTerm\$" action='
               yabai -m window $YABAI_WINDOW_ID --focus
           '
 
