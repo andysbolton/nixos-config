@@ -21,26 +21,36 @@ let
 
   karabiner = "/opt/homebrew/bin/karabiner_cli";
 
+  # Hooks run via `sh -c` (no bashisms) and must not miss a "releasing capture"
+  # logged before the log follower attaches, so each snapshots its position in
+  # the log first thing. The follower is killed from inside the pipeline once
+  # grep matches; otherwise the shell waits for its next (SIGPIPE) write.
   darwinEnterHook = ''
-    pbpaste | ssh portable "env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=) wl-copy >/dev/null 2>&1"
-
-    "${karabiner}" --select-profile empty || exit 0
+    log=/tmp/lan-mouse.err.log
+    off=$(stat -f%z "$log" 2>/dev/null || echo 0)
 
     trap '"${karabiner}" --select-profile work' EXIT
 
-    tail -n0 -F /tmp/lan-mouse.err.log | grep -m1 -E "releasing capture"
+    pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=) wl-copy >/dev/null 2>&1" &
+
+    "${karabiner}" --select-profile empty || exit 0
+
+    tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
   '';
 
   linuxEnterHook = ''
-    ${pkgs.wl-clipboard}/bin/wl-paste | ssh work "pbcopy"
+    cursor=$(journalctl --user -u lan-mouse.service -n1 --show-cursor -o cat 2>/dev/null | sed -n 's/^-- cursor: *//p')
 
-    input=$(${pkgs.river-classic}/bin/riverctl list-inputs | grep -i "pointer.*mx_anywhere")
+    ${pkgs.wl-clipboard}/bin/wl-paste | ssh -o BatchMode=yes -o ConnectTimeout=3 work "pbcopy" &
 
-    ${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll enabled
+    input=$(${pkgs.river-classic}/bin/riverctl list-inputs | grep -i "pointer.*mx_anywhere") || exit 0
 
     trap '${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll disabled' EXIT
 
-    journalctl --user -u lan-mouse.service -n0 -f -o cat | grep -m1 -E "releasing capture"
+    ${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll enabled
+
+    if [ -n "$cursor" ]; then set -- --after-cursor "$cursor"; else set -- -n0; fi
+    journalctl --user -u lan-mouse.service "$@" -f -o cat | { grep -m1 -E "releasing capture"; pkill -P $$ -x journalctl; }
   '';
 
   # darwinToLinuxCopy = ''
