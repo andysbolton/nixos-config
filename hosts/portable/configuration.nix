@@ -33,6 +33,13 @@
   environment.systemPackages = with pkgs; [
     moonlight-qt
     waypipe
+    (writeShellScriptBin "stream-main" ''
+      exec ${moonlight-qt}/bin/moonlight stream \
+        --video-codec HEVC \
+        --video-decoder hardware \
+        --fps 60 \
+        main "Desktop"
+    '')
   ];
 
   hardware.bluetooth = {
