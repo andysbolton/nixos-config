@@ -29,7 +29,7 @@ let
 
     pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=) wl-copy >/dev/null 2>&1" &
 
-    "${karabiner}" --select-profile empty || exit 0
+    "${karabiner}" --select-profile linux || exit 0
 
     tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
   '';
@@ -97,8 +97,7 @@ in
         "KeyF"
       ];
       port = 4242;
-      frontend = "cli";
-      authorized_fingerprints = lib.mapAttrs' (n: v: lib.nameValuePair v n) others;
+authorized_fingerprints = lib.mapAttrs' (n: v: lib.nameValuePair v n) others;
       clients = topology.${me} or [ ];
     };
   };

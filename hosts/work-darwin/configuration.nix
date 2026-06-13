@@ -69,6 +69,7 @@
         # focus space
         cmd - 1 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 2 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[1].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
+        cmd - 3 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[2].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 4 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[3].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 5 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[4].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
         cmd - 6 : set i (yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[5].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
