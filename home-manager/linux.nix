@@ -63,7 +63,7 @@ in
 
   xdg.configFile."uwsm/env-river".text = ''
     export WLR_NO_HARDWARE_CURSORS=1
-    export WLR_RENDERER=vulkan
+    export WLR_RENDERER=gles2
 
     monitor_connected=0
     for status in /sys/class/drm/*/status; do
