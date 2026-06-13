@@ -55,6 +55,7 @@
 
   services = {
     tailscale.enable = true;
+    eternal-terminal.enable = true;
 
     skhd = {
       enable = true;

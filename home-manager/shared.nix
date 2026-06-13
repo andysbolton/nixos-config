@@ -171,6 +171,9 @@ in
     enableDefaultConfig = false;
     extraConfig = ''
       Include ~/.ssh/config.local
+      ServerAliveInterval 15
+      ServerAliveCountMax 4
+      TCPKeepAlive yes
     '';
     settings = {
       "*" = { };
