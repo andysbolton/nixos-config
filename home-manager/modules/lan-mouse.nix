@@ -22,6 +22,8 @@ let
   karabiner = "/opt/homebrew/bin/karabiner_cli";
 
   darwinEnterHook = ''
+    pbpaste | ssh portable "env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=) wl-copy >/dev/null 2>&1"
+
     "${karabiner}" --select-profile empty || exit 0
 
     trap '"${karabiner}" --select-profile work' EXIT
@@ -30,6 +32,8 @@ let
   '';
 
   linuxEnterHook = ''
+    ${pkgs.wl-clipboard}/bin/wl-paste | ssh work "pbcopy"
+
     input=$(${pkgs.river-classic}/bin/riverctl list-inputs | grep -i "pointer.*mx_anywhere")
 
     ${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll enabled

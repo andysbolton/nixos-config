@@ -98,6 +98,22 @@ battery_plug=(
   --set battery_spacer width="$GAP" background.drawing=off \
   icon.drawing=off label.drawing=off
 
+microphone=(
+  icon="$MIC"
+  script="$PLUGIN_DIR/microphone.sh"
+  update_freq=5
+  "${block[@]}"
+  "${icon_only[@]}"
+)
+
+"$BAR_NAME" --add item microphone right \
+  --set microphone "${microphone[@]}" \
+  --subscribe microphone mouse.clicked
+
+"$BAR_NAME" --add item microphone_spacer right \
+  --set microphone_spacer width="$GAP" background.drawing=off \
+  icon.drawing=off label.drawing=off
+
 volume=(
   script="$PLUGIN_DIR/volume.sh"
   click_script="$PLUGIN_DIR/mute.sh"

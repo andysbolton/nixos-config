@@ -62,3 +62,31 @@ vpn=(
 
 "$BAR_NAME" --add item vpn right \
   --set vpn "${vpn[@]}"
+
+# "$BAR_NAME" --add item clipboard_spacer right \
+#   --set clipboard_spacer width="$GAP" background.drawing=off \
+#   icon.drawing=off label.drawing=off
+
+clipboard=(
+  icon="$CLIPBOARD"
+  script="$PLUGIN_DIR/clipboard.sh"
+  "${block[@]}"
+  "${icon_with_label[@]}"
+  popup.background.color="$SURFACE"
+  popup.background.border_color="$OVERLAY"
+  popup.background.border_width=1
+  popup.background.corner_radius=8
+  popup.align=right
+  popup.height=22
+)
+
+"$BAR_NAME" --add item clipboard right \
+  --set clipboard "${clipboard[@]}" \
+  --subscribe clipboard mouse.entered mouse.exited
+
+for i in $(seq 0 13); do
+  "$BAR_NAME" --add item clipboard.line."$i" popup.clipboard
+  "$BAR_NAME" --set clipboard.line."$i" drawing=off width=440 align=left \
+    label.font="CaskaydiaCove Nerd Font:Regular:13.0" \
+    label.padding_left="$GAP" label.padding_right="$GAP"
+done

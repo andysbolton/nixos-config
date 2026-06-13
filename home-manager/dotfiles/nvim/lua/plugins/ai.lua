@@ -105,7 +105,7 @@ return {
             agents = {
               claude_code = {
                 cmd = "claude",
-                args = {},
+                args = { "--model", "fable" },
                 description = "Claude Code CLI",
                 provider = "terminal",
               },

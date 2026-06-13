@@ -212,7 +212,7 @@ in
         mode = "0600";
       };
       sshEd25519 = {
-        reference = "op://nix/andy-ssh-ed25519/private key";
+        reference = "op://nix/andy-ssh-ed25519/private key?ssh-format=openssh";
         path = ".ssh/id_ed25519";
         mode = "0600";
       };
