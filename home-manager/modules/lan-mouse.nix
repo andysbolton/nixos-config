@@ -25,9 +25,14 @@ let
     log=/tmp/lan-mouse.err.log
     off=$(stat -f%z "$log" 2>/dev/null || echo 0)
 
-    trap '"${karabiner}" --select-profile work' EXIT
+    uid=$(/usr/bin/id -u)
+    skhd_plist="$HOME/Library/LaunchAgents/org.nixos.skhd.plist"
+
+    trap '/bin/launchctl bootstrap "gui/$uid" "$skhd_plist" 2>/dev/null; "${karabiner}" --select-profile work' EXIT
 
     pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=) wl-copy >/dev/null 2>&1" &
+
+    /bin/launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
 
     "${karabiner}" --select-profile linux || exit 0
 
