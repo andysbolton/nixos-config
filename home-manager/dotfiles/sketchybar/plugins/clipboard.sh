@@ -9,9 +9,7 @@ PIDFILE="/tmp/sketchybar_clipboard_watch.pid"
 
 render() {
   local full short folded i line
-  # An image on the pasteboard has no useful text form; show "(image)".
-  if osascript -l JavaScript \
-    -e 'ObjC.import("AppKit"); $.NSPasteboard.generalPasteboard.canReadObjectForClassesOptions([$.NSImage], $()) ? "y" : "n"' 2>/dev/null | grep -q y; then
+  if pngpaste - >/dev/null 2>&1; then
     full="(image)"
   else
     full="$(pbpaste 2>/dev/null | iconv -f UTF-8 -t UTF-8//IGNORE)"

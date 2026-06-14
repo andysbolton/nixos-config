@@ -36,7 +36,9 @@ let
       if ${pkgs.pngpaste}/bin/pngpaste - >/dev/null 2>&1; then
         ${pkgs.pngpaste}/bin/pngpaste - | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy --type image/png >/dev/null 2>&1"
       else
-        pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy >/dev/null 2>&1"
+        # pbpaste defaults to MacRoman without a UTF-8 locale (none under
+        # launchd), mangling multibyte chars; force UTF-8.
+        env LC_CTYPE=UTF-8 pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy >/dev/null 2>&1"
       fi
     ) &
 
@@ -59,7 +61,9 @@ let
       if ${pkgs.wl-clipboard}/bin/wl-paste -l | grep -q '^image/png$'; then
         ${pkgs.wl-clipboard}/bin/wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work 'sh -c "${linuxCopyImageToDarwin}"'
       else
-        ${pkgs.wl-clipboard}/bin/wl-paste | ssh -o BatchMode=yes -o ConnectTimeout=3 work "pbcopy"
+        # pbcopy defaults to MacRoman without a UTF-8 locale (none over ssh),
+        # mangling multibyte chars; force UTF-8.
+        ${pkgs.wl-clipboard}/bin/wl-paste | ssh -o BatchMode=yes -o ConnectTimeout=3 work "env LC_CTYPE=UTF-8 pbcopy"
       fi
     ) &
 
