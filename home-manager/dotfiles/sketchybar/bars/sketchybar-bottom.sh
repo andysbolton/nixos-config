@@ -46,7 +46,7 @@ clock_props=(
 
 "$BAR_NAME" --add item clock.time center \
   --set clock.time "${clock_props[@]}" \
-  frequency=0 \
+  update_freq=0 \
   --subscribe clock.time mouse.clicked
 
 # Right

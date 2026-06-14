@@ -1,10 +1,11 @@
 {
-  lib,
-  writeShellScriptBin,
-  jq,
   ifstat-legacy,
-  sketchybar,
+  jq,
+  lib,
   pkgs-unstable,
+  pngpaste,
+  sketchybar,
+  writeShellScriptBin,
 }:
 
 writeShellScriptBin "sketchybar-bottom" ''
@@ -13,7 +14,9 @@ writeShellScriptBin "sketchybar-bottom" ''
       jq
       ifstat-legacy
       pkgs-unstable.yabai
+      pngpaste
     ]
   }:${placeholder "out"}/bin:$PATH
+  export LC_CTYPE=UTF-8
   exec -a sketchybar-bottom ${sketchybar}/bin/sketchybar "$@"
 ''
