@@ -48,7 +48,7 @@ let
   '';
 
   linuxCopyImageToDarwin = ''
-    f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png); cat > "$f"; osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNG»)" >/dev/null 2>&1; rm -f "$f"
+    f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png); cat > "$f"; osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1; rm -f "$f"
   '';
 
   linuxEnterHook = ''

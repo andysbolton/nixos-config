@@ -61,7 +61,7 @@ riverctl map-pointer normal Super BTN_MIDDLE toggle-float
 for i in $(seq 1 9); do
     tags=$((1 << (i - 1)))
     riverctl map normal Super "$i" set-focused-tags $tags
-    riverctl map normal Super+Shift "$i" "sh -c \"riverctl set-view-tags $tags && riverctl set-focused-tags $tags\""
+    riverctl map normal Super+Shift "$i" spawn "riverctl set-view-tags $tags && riverctl set-focused-tags $tags"
     riverctl map normal Super+Control "$i" toggle-focused-tags $tags
     riverctl map normal Super+Shift+Control "$i" toggle-view-tags $tags
 done
@@ -70,9 +70,9 @@ bluetooth_tag=$((1 << 9))
 riverctl rule-add -title "Bluetooth Devices" tags $bluetooth_tag
 riverctl map normal Super B set-focused-tags $bluetooth_tag
 
-discord_tag=$((1 << 8))
-riverctl rule-add -title "Discord" tags $discord_tag
-riverctl map normal Super D set-focused-tags $discord_tag
+vesktop_tag=$((1 << 8))
+riverctl rule-add -title "Discord" tags $vesktop_tag
+riverctl map normal Super D set-focused-tags $vesktop_tag
 
 games_tag=$((1 << 7))
 riverctl rule-add -app-id "*steam*" tags $games_tag
@@ -133,11 +133,11 @@ uwsm finalize
 uwsm app -- wezterm &
 uwsm app -- blueman-applet &
 uwsm app -- blueman-manager &
-uwsm app -- discord.desktop &
+uwsm app -- vesktop.desktop &
 uwsm app -- 1password &
 uwsm app -- steam -silent &
 uwsm app -- lxqt-policykit-agent &
 
 # Clipboard management
-uwsm app -- wl-paste --watch cliphist -db-path $HOME/.cache/cliphist/system-db store &
-uwsm app -- wl-paste --primary --watch cliphist -db-path $HOME/.cache/cliphist/primary-db store &
+uwsm app -- wl-paste --watch cliphist -db-path "$HOME"/.cache/cliphist/system-db store &
+uwsm app -- wl-paste --primary --watch cliphist -db-path "$HOME"/.cache/cliphist/primary-db store &

@@ -9,8 +9,8 @@ let
     db="$1"
     line=$(cliphist -db-path "$db" list | sort -nr | head -1)
     case "$line" in
-      "") echo "(empty)" ;;
-      *"binary data"*) echo "(image)" ;;
+      "") printf '%s' "(empty)" ;;
+      *"binary data"*) printf '%s' "(image)" ;;
       *) printf '%s' "$line" | cliphist -db-path "$db" decode ;;
     esac
   '';
@@ -114,8 +114,8 @@ in
           "memory"
           "cpu"
           "temperature"
-          "custom/gpu-utilization"
-          "custom/gpu-temperature"
+          # "custom/gpu-utilization"
+          # "custom/gpu-temperature"
         ];
 
         modules-right = [
@@ -151,33 +151,33 @@ in
           ];
         };
 
-        "custom/gpu-utilization" = {
-          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
-          format = "⚙ {}";
-          interval = 1;
-        };
-
-        "custom/gpu-temperature" = {
-          exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
-          format = "⚙{icon} {text}°C";
-          interval = 1;
-          "critical-threshold" = 80;
-          "format-icons" = [
-            ""
-            ""
-            ""
-            ""
-          ];
-        };
+        # "custom/gpu-utilization" = {
+        #   exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
+        #   format = "⚙ {}";
+        #   interval = 1;
+        # };
+        #
+        # "custom/gpu-temperature" = {
+        #   exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
+        #   format = "⚙{icon} {text}°C";
+        #   interval = 1;
+        #   "critical-threshold" = 80;
+        #   "format-icons" = [
+        #     ""
+        #     ""
+        #     ""
+        #     ""
+        #   ];
+        # };
 
         "custom/system-label" = {
           format = "System: ";
         };
 
         "custom/system" = {
+          interval = 1;
           exec = pkgs.writeShellScript "clipboard-system-check" ''
-            db="$HOME/.cache/cliphist/system-db"
-            echo "$db" | entr -n -s "${clipLatest} $db"
+            ${clipLatest} "$HOME/.cache/cliphist/system-db"
           '';
           max-length = 30;
           min-length = 30;
@@ -187,15 +187,14 @@ in
         };
 
         "custom/primary" = {
+          interval = 1;
           exec = pkgs.writeShellScript "clipboard-primary-check" ''
-            db="$HOME/.cache/cliphist/primary-db"
-            echo "$db" | entr -n -s "${clipLatest} $db"
+            ${clipLatest} "$HOME/.cache/cliphist/primary-db"
           '';
           max-length = 30;
           min-length = 30;
           align = 0;
           format = "Primary: {}";
-          tooltip = false;
           escape = true;
         };
       }

@@ -106,6 +106,7 @@ in
     starship # cross-shell prompt
     speedtest-cli
     tokyonight-extras
+    tinyxxd
     tree # recursive directory listing
     unzip
     vesktop

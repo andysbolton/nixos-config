@@ -10,6 +10,7 @@
     ./hardware-configuration.nix
     ./disko.nix
     ../../modules/desktop.nix
+    ../../modules/steam.nix
     ../../modules/wireless.nix
     inputs.sops-nix.nixosModules.sops
   ];
