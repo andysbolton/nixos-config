@@ -9,6 +9,7 @@ let
     db="$1"
     line=$(cliphist -db-path "$db" list | sort -nr | head -1)
     case "$line" in
+      "") echo "(empty)" ;;
       *"binary data"*) echo "(image)" ;;
       *) printf '%s' "$line" | cliphist -db-path "$db" decode ;;
     esac
