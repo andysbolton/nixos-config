@@ -319,7 +319,14 @@ in
           };
         }
       else
-        { }
+        {
+          env_of_ps = {
+            argumentNames = [ "process" ];
+            body = ''
+              tr '\0' '\n' < "/proc/$(pgrep -i $process)/environ" | sort
+            '';
+          };
+        }
     );
 
     shellAliases = {

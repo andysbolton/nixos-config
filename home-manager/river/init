@@ -139,5 +139,5 @@ uwsm app -- steam -silent &
 uwsm app -- lxqt-policykit-agent &
 
 # Clipboard management
-uwsm app -- wl-paste --watch sh -c "echo \$(cat) | cliphist -db-path $HOME/.cache/cliphist/system-db store" &
-uwsm app -- wl-paste --primary --watch sh -c "echo \$(cat) | cliphist -db-path $HOME/.cache/cliphist/primary-db store" &
+uwsm app -- wl-paste --watch cliphist -db-path $HOME/.cache/cliphist/system-db store &
+uwsm app -- wl-paste --primary --watch cliphist -db-path $HOME/.cache/cliphist/primary-db store &

@@ -49,13 +49,17 @@ let
     tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
   '';
 
+  linuxCopyImageToDarwin = ''
+    f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png); cat > "$f"; osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNG»)" >/dev/null 2>&1; rm -f "$f"
+  '';
+
   linuxEnterHook = ''
     cursor=$(journalctl --user -u lan-mouse.service -n1 --show-cursor -o cat 2>/dev/null | sed -n 's/^-- cursor: *//p')
 
     # Forward the clipboard to work: an image if one is present, else text.
     (
       if ${pkgs.wl-clipboard}/bin/wl-paste -l | grep -q '^image/png$'; then
-        ${pkgs.wl-clipboard}/bin/wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work 'f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png); cat > "$f"; osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1; rm -f "$f"'
+        ${pkgs.wl-clipboard}/bin/wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work 'sh -c "${linuxCopyImageToDarwin}"'
       else
         # pbcopy defaults to MacRoman without a UTF-8 locale (none over ssh),
         # mangling multibyte chars; force UTF-8.
@@ -121,9 +125,14 @@ in
         "KeyF"
       ];
       port = 4242;
-authorized_fingerprints = lib.mapAttrs' (n: v: lib.nameValuePair v n) others;
+      authorized_fingerprints = lib.mapAttrs' (n: v: lib.nameValuePair v n) others;
       clients = topology.${me} or [ ];
     };
+  };
+
+  systemd.user.services.lan-mouse = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+    Unit.After = [ "graphical-session.target" ];
+    Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
   };
 
   launchd.agents.lan-mouse.config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
