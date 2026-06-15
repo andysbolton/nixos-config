@@ -54,11 +54,17 @@ let
     }
   );
 
-  linuxCopyImageToDarwin =
-    # bash
-    ''
-      f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png); cat > "$f"; osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1; rm -f "$f"
+  darwinSetClipScript = pkgs.writeShellApplication {
+    name = "lan-mouse-set-clip";
+    runtimeInputs = [ pkgs.coreutils ];
+    bashOptions = [ ];
+    text = ''
+      f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png)
+      cat > "$f"
+      /usr/bin/osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1
+      rm -f "$f"
     '';
+  };
 
   linuxEnterHook = lib.getExe (
     pkgs.writeShellApplication {
@@ -74,7 +80,7 @@ let
         # Forward the clipboard to work: an image if one is present, else text.
         (
           if wl-paste -l | grep -q '^image/png$'; then
-            wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work 'sh -c "placeholder"'
+            wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work lan-mouse-set-clip
           else
             # pbcopy defaults to MacRoman without a UTF-8 locale (none over ssh),
             # mangling multibyte chars; force UTF-8.
@@ -143,6 +149,8 @@ in
       clients = topology.${me} or [ ];
     };
   };
+
+  home.packages = lib.optional pkgs.stdenv.hostPlatform.isDarwin darwinSetClipScript;
 
   systemd.user.services.lan-mouse = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     Unit.After = [ "graphical-session.target" ];
