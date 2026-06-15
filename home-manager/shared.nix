@@ -107,7 +107,6 @@ in
     speedtest-cli
     tinyxxd
     tokyonight-extras
-    tinyxxd
     tree # recursive directory listing
     unzip
     vesktop

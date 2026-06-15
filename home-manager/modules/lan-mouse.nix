@@ -63,7 +63,7 @@ let
       else
         # pbcopy defaults to MacRoman without a UTF-8 locale (none over ssh),
         # mangling multibyte chars; force UTF-8.
-        ${pkgs.wl-clipboard}/bin/wl-paste | ssh -o BatchMode=yes -o ConnectTimeout=3 work "env LC_CTYPE=UTF-8 pbcopy"
+        ${pkgs.wl-clipboard}/bin/wl-paste --no-newline | ssh -o BatchMode=yes -o ConnectTimeout=3 work "env LC_CTYPE=UTF-8 pbcopy"
       fi
     ) &
 
