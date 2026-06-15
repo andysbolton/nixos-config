@@ -121,16 +121,56 @@ in
     sideloadInitLua = true;
     withRuby = false;
     withPython3 = false;
+    # All language servers, formatters, linters and debug adapters are
+    # managed here via nix (previously a mix of nix and mason.nvim).
     extraPackages = with pkgs; [
+      # Runtimes / build tooling needed by various servers & plugins
       cargo
-      clang-tools
-      fennel-ls
-      fnlfmt
-      lua-language-server
       luaPackages.luarocks
       nodejs_24
-      stylua
       tree-sitter
+
+      # Language servers
+      bash-language-server # bashls
+      clang-tools # clangd (also provides clang-format)
+      clojure-lsp
+      dockerfile-language-server # dockerls (docker-langserver)
+      fennel-ls # fennel_ls
+      fsautocomplete
+      gopls
+      jq-lsp # jqls
+      lua-language-server # lua_ls
+      marksman
+      nil # nil_ls
+      omnisharp-roslyn # omnisharp
+      pyright
+      terraform-ls # terraformls
+      typescript # tsserver, required by ts_ls
+      typescript-language-server # ts_ls
+      vscode-langservers-extracted # cssls, html, jsonls
+      yaml-language-server # yamlls
+
+      # Formatters
+      black
+      csharpier
+      fantomas
+      fixjson
+      fnlfmt
+      gofumpt
+      nixfmt
+      prettierd
+      shfmt
+      stylua
+      zprint
+
+      # Linters
+      cpplint
+      markdownlint-cli # markdownlint
+      shellcheck
+      stylelint
+
+      # Debug adapters
+      delve # dlv, used by nvim-dap-go
     ];
   };
 

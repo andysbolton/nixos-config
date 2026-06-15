@@ -1,21 +1,15 @@
 return {
   "mfussenegger/nvim-lint",
-  dependencies = { "williamboman/mason.nvim", "WhoIsSethDaniel/mason-tool-installer.nvim" },
   config = function()
+    -- Linters are provided by nix (see programs.neovim.extraPackages).
     local linters = require("configs.util").get_linters()
 
-    local linter_names = {}
     local filetype_linters = {}
     for _, linter in pairs(linters) do
-      table.insert(linter_names, linter.name)
       for _, filetype in pairs(linter.filetypes or {}) do
         filetype_linters[filetype] = { linter.name }
       end
     end
-
-    require("mason-tool-installer").setup {
-      ensure_installed = { table.unpack(linter_names) },
-    }
 
     require("lint").linters_by_ft = filetype_linters
 

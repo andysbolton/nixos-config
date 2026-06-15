@@ -10,10 +10,6 @@ return {
     branch = "master",
   },
   {
-    "williamboman/mason.nvim",
-    config = true,
-  },
-  {
     "numToStr/Comment.nvim",
     config = function()
       require("Comment").setup()

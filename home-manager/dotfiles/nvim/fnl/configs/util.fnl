@@ -15,8 +15,7 @@
   (when (utils.empty language-servers)
     (each [_ lang (pairs (M.get_configs))]
       (when lang.ls
-        (tset language-servers lang.ls.name lang.ls)
-        (tset language-servers autoinstall lang.autoinstall))))
+        (tset language-servers lang.ls.name lang.ls))))
   language-servers)
 
 (fn M.get_formatters []
