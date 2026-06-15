@@ -28,10 +28,10 @@ let
         log=/tmp/lan-mouse.err.log
         off=$(stat -f%z "$log" 2>/dev/null || echo 0)
 
-        uid=$(/usr/bin/id -u)
+        uid=$(id -u)
         skhd_plist="$HOME/Library/LaunchAgents/org.nixos.skhd.plist"
 
-        trap '/bin/launchctl bootstrap "gui/$uid" "$skhd_plist"; /usr/bin/open "hammerspoon://work"' EXIT
+        trap 'launchctl bootstrap "gui/$uid" "$skhd_plist"; open "hammerspoon://work"' EXIT
 
         # Forward the clipboard to portable: an image if one is present, else text.
         (
@@ -45,26 +45,14 @@ let
           fi
         ) &
 
-        /bin/launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
+        launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
 
-        /usr/bin/open "hammerspoon://linux" || exit 0
+        open "hammerspoon://linux" || exit 0
 
         tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
       '';
     }
   );
-
-  darwinSetClipScript = pkgs.writeShellApplication {
-    name = "lan-mouse-set-clip";
-    runtimeInputs = [ pkgs.coreutils ];
-    bashOptions = [ ];
-    text = ''
-      f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png)
-      cat > "$f"
-      /usr/bin/osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1
-      rm -f "$f"
-    '';
-  };
 
   linuxEnterHook = lib.getExe (
     pkgs.writeShellApplication {
@@ -80,7 +68,8 @@ let
         # Forward the clipboard to work: an image if one is present, else text.
         (
           if wl-paste -l | grep -q '^image/png$'; then
-            wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work lan-mouse-set-clip
+            # Remote login shell is fish, so write the body in fish
+            wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work 'set f (mktemp /tmp/lan-mouse-clip.XXXXXX); cat > $f; /usr/bin/osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1; rm -f $f'
           else
             # pbcopy defaults to MacRoman without a UTF-8 locale (none over ssh),
             # mangling multibyte chars; force UTF-8.
@@ -149,8 +138,6 @@ in
       clients = topology.${me} or [ ];
     };
   };
-
-  home.packages = lib.optional pkgs.stdenv.hostPlatform.isDarwin darwinSetClipScript;
 
   systemd.user.services.lan-mouse = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     Unit.After = [ "graphical-session.target" ];
