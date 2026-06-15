@@ -26,7 +26,8 @@ let
     uid=$(/usr/bin/id -u)
     skhd_plist="$HOME/Library/LaunchAgents/org.nixos.skhd.plist"
 
-    trap '/bin/launchctl bootstrap "gui/$uid" "$skhd_plist" 2>/dev/null; /usr/bin/open "hammerspoon://lanmouse-on"' EXIT
+    trap '/bin/launchctl bootstrap "gui/$uid" "$skhd_plist"; /usr/bin/open "hammerspoon://work"' EXIT
+    # trap '/usr/bin/open "hammerspoon://work"' EXIT
 
     # Forward the clipboard to portable: an image if one is present, else text.
     (
@@ -42,7 +43,7 @@ let
 
     /bin/launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
 
-    /usr/bin/open "hammerspoon://lanmouse-off" || exit 0
+    /usr/bin/open "hammerspoon://linux" || exit 0
 
     tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
   '';

@@ -1,4 +1,8 @@
-local t, p, K = hs.eventtap.event.types, hs.eventtap.event.properties, hs.keycodes.map
+require("hs.ipc")
+
+Profile = "(none)"
+
+local t, p, k = hs.eventtap.event.types, hs.eventtap.event.properties, hs.keycodes.map
 
 -- App sets (bundle IDs), from the old karabiner.edn :applications
 local BROWSERS = { ["org.mozilla.firefox"] = true, ["org.nixos.firefox"] = true }
@@ -13,10 +17,10 @@ local NO_REMAP = {
 local TERMS = { ["com.apple.Terminal"] = true, ["com.github.wez.wezterm"] = true, ["dev.vencord.vesktop"] = true } -- no-remap minus Teams (for Ctrl+Z)
 local EDIT = { c = 1, v = 1, x = 1, a = 1, s = 1, t = 1, f = 1, r = 1 } -- Ctrl+key -> Cmd+key
 
-local HOME, END = K.home, K["end"]
-local LEFT, RIGHT, UP, DOWN = K.left, K.right, K.up, K.down
-local BACKSPACE, FWDDELETE = K.delete, K.forwarddelete
-local F5 = K.f5
+local HOME, END = k.home, k["end"]
+local LEFT, RIGHT, UP, DOWN = k.left, k.right, k.up, k.down
+local BACKSPACE, FWDDELETE = k.delete, k.forwarddelete
+local F5 = k.f5
 local NOMOD = { [HOME] = 1, [END] = 1, [BACKSPACE] = 1, [FWDDELETE] = 1, [F5] = 1 } -- act w/o a modifier
 
 -- A text box is focused (Finder rename / search field, etc.) -- don't treat keys
@@ -31,7 +35,7 @@ end
 local function to(e, mods, key)
 	e:setFlags(mods)
 	if key then
-		e:setKeyCode(K[key])
+		e:setKeyCode(k[key])
 	end
 	return false
 end
@@ -85,7 +89,7 @@ keyTap = hs.eventtap.new({ t.keyDown, t.keyUp }, function(e)
 	if not f.ctrl then
 		return false
 	end -- everything below is a Ctrl chord
-	local name = K[code]
+	local name = k[code]
 	if name == "l" and BROWSERS[bid] then
 		return to(e, { cmd = true })
 	end -- address bar
@@ -108,30 +112,37 @@ scrollTap = hs.eventtap.new({ t.scrollWheel }, function(e)
 	if e:getProperty(p.scrollWheelEventIsContinuous) ~= 0 then
 		return false
 	end -- trackpad: skip
-	if e:getProperty(p.eventSourceUnixProcessID) ~= 0 then
-		return false
-	end -- injected: skip
-	for _, ax in ipairs({
-		p.scrollWheelEventDeltaAxis1,
-		p.scrollWheelEventFixedPtDeltaAxis1,
-		p.scrollWheelEventPointDeltaAxis1,
-	}) do
-		local v = e:getProperty(ax)
-		if v ~= 0 then
-			e:setProperty(ax, -v)
-		end
-	end
+	-- if e:getProperty(p.eventSourceUnixProcessID) ~= 0 then
+	-- 	return false
+	-- end -- injected: skip
+	-- for _, ax in ipairs({
+	-- 	p.scrollWheelEventDeltaAxis1,
+	-- 	p.scrollWheelEventFixedPtDeltaAxis1,
+	-- 	p.scrollWheelEventPointDeltaAxis1,
+	-- }) do
+	-- 	local v = e:getProperty(ax)
+	-- 	if v ~= 0 then
+	-- 		e:setProperty(ax, -v)
+	-- 	end
+	-- end
+	e:setProperty(p.scrollWheelEventDeltaAxis1, -e:getProperty(p.scrollWheelEventDeltaAxis1))
+
 	return false
 end)
 
-keyTap:start()
-scrollTap:start()
-
-hs.urlevent.bind("lanmouse-off", function()
-	keyTap:stop()
-	scrollTap:stop()
-end)
-hs.urlevent.bind("lanmouse-on", function()
+local function work()
 	keyTap:start()
 	scrollTap:start()
-end)
+	Profile = "work"
+end
+
+local function linux()
+	keyTap:stop()
+	scrollTap:stop()
+	Profile = "linux"
+end
+
+work()
+
+hs.urlevent.bind("linux", linux)
+hs.urlevent.bind("work", work)
