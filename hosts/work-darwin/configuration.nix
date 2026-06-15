@@ -45,7 +45,7 @@
     ];
     casks = [
       # "bot-framework-emulator"
-      "karabiner-elements"
+      "hammerspoon"
       "microsoft-teams"
       "protonvpn"
     ];
@@ -116,20 +116,6 @@
           cmd - d : yabai -m space --focus --display 1
         '';
     };
-
-    # karabiner-elements = {
-    #   enable = false;
-    #   package = pkgs.karabiner-elements.overrideAttrs (old: {
-    #     version = "14.13.0";
-    #
-    #     src = pkgs.fetchurl {
-    #       inherit (old.src) url;
-    #       hash = "sha256-gmJwoht/Tfm5qMecmq1N6PSAIfWOqsvuHU8VDJY8bLw=";
-    #     };
-    #
-    #     dontFixup = true;
-    #   });
-    # };
 
     yabai =
       let

@@ -23,34 +23,14 @@ in
   home.homeDirectory = "/Users/andybolton";
 
   xdg.configFile = {
-    # This is likely redundant, let's remove it sometime.
-    "karabiner.edn".source =
-      config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/karabiner/karabiner.edn";
     "skhd/home-manager.skhdrc".source =
       config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/skhd/home-manager.skhdrc";
     sketchybar.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
     sketchybar-bottom.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/sketchybar";
   };
 
-  home.activation.runGoku = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    kbjson="$HOME/.config/karabiner/karabiner.json"
-    if [ -f "$HOME/.config/karabiner.edn" ] && [ -f "$kbjson" ]; then
-      # goku can't create profiles or set per-device options. Reconcile karabiner.json
-      # to our canonical set: drop any profile that is not ours (e.g. the auto-created
-      # "Default profile") and inject any of ours that are missing, so goku's
-      # "profile must exist" check passes and the Logitech stays grabbed across the
-      # lan-mouse work<->empty switch.
-      ${pkgs.jq}/bin/jq --argjson want "$(cat ${./dotfiles/karabiner/profiles.json})" '
-        ($want | map(.name)) as $names                                    # our canonical profile names
-        | .profiles |= map(select(.name | IN($names[])))                  # drop profiles that are not ours
-        | [.profiles[].name] as $have                                     # of ours, which already exist
-        | .profiles += [ $want[] | select((.name | IN($have[])) | not) ]  # append the missing ones
-      ' "$kbjson" | ${pkgs.moreutils}/bin/sponge "$kbjson"
-
-      run ${pkgs.goku}/bin/goku
-      run --quiet "${osConfig.services.karabiner-elements.package}/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli" --select-profile work
-    fi
-  '';
+  home.file.".hammerspoon/init.lua".source =
+    config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/hammerspoon/init.lua";
 
   home.packages = with pkgs; [
     _1password-cli
@@ -62,7 +42,6 @@ in
     ])
     desktoppr
     gatherv2
-    goku
     jira-cli-go
     maccy
     moonlight-qt
