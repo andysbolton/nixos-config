@@ -182,4 +182,10 @@ return {
       }
     end,
   },
+
+  {
+    "jmbuhr/otter.nvim",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = {},
+  },
 }
