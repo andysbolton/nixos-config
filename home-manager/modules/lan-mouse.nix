@@ -19,8 +19,6 @@ let
   me = osConfig.networking.hostName;
   others = lib.filterAttrs (n: _: n != me) fingerprints;
 
-  karabiner = "/opt/homebrew/bin/karabiner_cli";
-
   darwinEnterHook = ''
     log=/tmp/lan-mouse.err.log
     off=$(stat -f%z "$log" 2>/dev/null || echo 0)
@@ -28,7 +26,8 @@ let
     uid=$(/usr/bin/id -u)
     skhd_plist="$HOME/Library/LaunchAgents/org.nixos.skhd.plist"
 
-    trap '/bin/launchctl bootstrap "gui/$uid" "$skhd_plist" 2>/dev/null; "${karabiner}" --select-profile work' EXIT
+    trap '/bin/launchctl bootstrap "gui/$uid" "$skhd_plist"; /usr/bin/open "hammerspoon://work"' EXIT
+    # trap '/usr/bin/open "hammerspoon://work"' EXIT
 
     # Forward the clipboard to portable: an image if one is present, else text.
     (
@@ -44,7 +43,7 @@ let
 
     /bin/launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
 
-    "${karabiner}" --select-profile linux || exit 0
+    /usr/bin/open "hammerspoon://linux" || exit 0
 
     tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
   '';
@@ -67,11 +66,8 @@ let
       fi
     ) &
 
-    input=$(${pkgs.river-classic}/bin/riverctl list-inputs | grep -i "pointer.*mx_anywhere") || exit 0
-
-    trap '${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll disabled' EXIT
-
-    ${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll enabled
+    trap '${pkgs.river-classic}/bin/riverctl enter-mode normal' EXIT
+    ${pkgs.river-classic}/bin/riverctl enter-mode passthrough
 
     if [ -n "$cursor" ]; then set -- --after-cursor "$cursor"; else set -- -n0; fi
     journalctl --user -u lan-mouse.service "$@" -f -o cat | { grep -m1 -E "releasing capture"; pkill -P $$ -x journalctl; }
