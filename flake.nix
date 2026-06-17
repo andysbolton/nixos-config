@@ -136,7 +136,10 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
-              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
+              home-manager.sharedModules = [
+                opnix.homeManagerModules.default
+                stylix.homeModules.stylix
+              ];
             }
           ];
         };
@@ -163,7 +166,10 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
-              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
+              home-manager.sharedModules = [
+                opnix.homeManagerModules.default
+                stylix.homeModules.stylix
+              ];
             }
           ];
         };
@@ -189,7 +195,10 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
-              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
+              home-manager.sharedModules = [
+                opnix.homeManagerModules.default
+                stylix.homeModules.stylix
+              ];
             }
             nix-homebrew.darwinModules.nix-homebrew
             {

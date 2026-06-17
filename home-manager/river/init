@@ -114,7 +114,7 @@ for mode in normal locked; do
     riverctl map $mode None XF86MonBrightnessDown spawn 'brightnessctl set 5%-'
 done
 
-riverctl background-color 0x002b36
+riverctl background-color 0x1a1b26
 riverctl border-color-focused 0x93a1a1
 riverctl border-color-unfocused 0x586e75
 riverctl border-width 3
@@ -124,7 +124,7 @@ riverctl rule-add -app-id 'float*' -title 'foo' float
 riverctl rule-add -app-id "bar" csd
 
 riverctl default-layout "$layout_generator"
-$layout_generator -view-padding 6 -outer-padding 6 &
+$layout_generator -view-padding 18 -outer-padding 18 &
 
 # It makes sure WAYLAND_DISPLAY is shared and unblocks graphical-session.target.
 uwsm finalize

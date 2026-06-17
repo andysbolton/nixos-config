@@ -35,4 +35,23 @@ km_set("n", "<leader>gb", ":Git blame<CR>")
 km_set("n", "<leader>gm", ":Git mergetool<CR>")
 km_set("t", "<M-Space>", "<Esc>b\\<Esc>ei", {desc = "Fish help abbreviation bypass.", silent = true})
 vim.opt.diffopt:append("algorithm:patience")
-return vim.opt.diffopt:append("indent-heuristic")
+vim.opt.diffopt:append("indent-heuristic")
+local function _3_()
+  local function _4_(input)
+    if ((input ~= "") and (input ~= nil)) then
+      local _let_5_ = vim.api.nvim_exec2(input, {output = true})
+      local output = _let_5_.output
+      vim.fn.setreg(vim.v.register, output)
+      vim.fn.histadd("cmd", input)
+      vim.api.nvim_echo({{output, "IncSearch"}}, true, {})
+      local function _6_()
+        return vim.api.nvim_echo({{output, "Normal"}}, true, {})
+      end
+      return vim.defer_fn(_6_, 200)
+    else
+      return nil
+    end
+  end
+  return vim.ui.input({prompt = ":", completion = "command"}, _4_)
+end
+return vim.keymap.set("n", "y:", _3_)
