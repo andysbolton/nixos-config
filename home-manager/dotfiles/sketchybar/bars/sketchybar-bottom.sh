@@ -63,10 +63,6 @@ vpn=(
 "$BAR_NAME" --add item vpn right \
   --set vpn "${vpn[@]}"
 
-# "$BAR_NAME" --add item clipboard_spacer right \
-#   --set clipboard_spacer width="$GAP" background.drawing=off \
-#   icon.drawing=off label.drawing=off
-
 clipboard=(
   icon="$CLIPBOARD"
   script="$PLUGIN_DIR/clipboard.sh"

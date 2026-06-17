@@ -1,0 +1,1 @@
+/nix/store/3b7902wqjv1w6yi06wycb9nq8yrsc045-home-manager-files/.config/sketchybar/colors.sh
