@@ -20,12 +20,24 @@ let
 
   mkSymLink = config.lib.file.mkOutOfStoreSymlink;
 
-  sketchybarLinks = lib.mapAttrs' (
-    name: _:
-    lib.nameValuePair "sketchybar/${name}" {
-      source = mkSymLink "${config.dotfilesPath}/sketchybar/${name}";
-    }
-  ) (builtins.readDir ./dotfiles/sketchybar);
+  sketchybarInstances = [
+    "sketchybar"
+    "sketchybar-bottom"
+  ];
+
+  mkSketchybarLinks =
+    instance:
+    (lib.mapAttrs' (
+      file: _:
+      lib.nameValuePair "${instance}/${file}" {
+        source = mkSymLink "${config.dotfilesPath}/sketchybar/${file}";
+      }
+    ) (builtins.readDir ./dotfiles/sketchybar))
+    // {
+      "${instance}/colors.sh".source = colorsScript;
+    };
+
+  sketchybarLinks = lib.foldl' (acc: instance: acc // mkSketchybarLinks instance) { } sketchybarInstances;
 in
 {
   imports = [
@@ -41,7 +53,6 @@ in
 
   xdg.configFile = sketchybarLinks // {
     "skhd/home-manager.skhdrc".source = mkSymLink "${config.dotfilesPath}/skhd/home-manager.skhdrc";
-    "sketchybar/colors.sh".source = colorsScript;
   };
 
   home.file.".hammerspoon/init.lua".source = mkSymLink "${config.dotfilesPath}/hammerspoon/init.lua";
