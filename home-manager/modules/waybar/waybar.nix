@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 let
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
 
@@ -14,6 +14,8 @@ let
       *) printf '%s' "$line" | cliphist -db-path "$db" decode ;;
     esac
   '';
+
+  colorWrap = color: item: ''<span color="${color}">${item}</span>'';
 in
 {
   programs.waybar = {
@@ -26,6 +28,7 @@ in
       {
         name = "top-bar";
         layer = "top";
+        spacing = 0;
 
         modules-left = [
           "river/tags"
@@ -42,9 +45,9 @@ in
         ];
 
         clock = {
-          interval = 1;
-          format = "{:%A, %B %d | %I:%M:%S %Z}";
           tooltip-format = "<tt><small>{calendar}</small></tt>";
+          interval = 1;
+          format = "${colorWrap config.palette.hex.OVERLAY "{0:%A, %B %d}"} | ${colorWrap config.palette.hex.TEXT "{0:%I:%M:%S %Z}"}";
         };
 
         "river/window" = {
@@ -108,6 +111,7 @@ in
         name = "bottom-bar";
         layer = "top";
         position = "bottom";
+        spacing = 0;
 
         modules-left = [
           "disk"
@@ -199,6 +203,8 @@ in
         };
       }
     ];
-    style = ./style.css;
+    style = pkgs.runCommand "waybar-style.css" { nativeBuildInputs = [ pkgs.lessc ]; } ''
+      lessc ${./style.less} > $out
+    '';
   };
 }

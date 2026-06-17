@@ -1,0 +1,155 @@
+// Waybar — Tokyo Night, sketchybar-style per-item pills.
+
+@colors: {
+  base: #1a1b26;
+  surface: #24283b;
+  overlay: #414868;
+  text: #c0caf5;
+  subtext: #565f89;
+  blue: #7aa2f7;
+  cyan: #7dcfff;
+  red: #f7768e;
+  green: #9ece6a;
+  yellow: #e0af68;
+};
+
+@pill-pad: 6px 14px; // padding inside each pill
+@pill-gap: 4px 3px; // margin around each pill (vertical float + gap between pills)
+@edge: 8px; // extra space at the screen-edge sides
+@radius: 8px; // corner radius
+@border-width: 3px; // pill / divider border width
+
+each(@colors, {
+  .@{key} { color: @value; }
+});
+
+* {
+  font-family: "CaskaydiaCove Nerd Font";
+  font-size: 18px;
+  font-weight: bold;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+// transparent bar — gaps reveal river's background-color
+window#waybar {
+  background: transparent;
+  color: @colors[text];
+}
+window#waybar > box {
+  background: transparent;
+}
+
+// groups are transparent rails; just a little edge breathing room
+window#waybar .modules-left {
+  padding-left: @edge;
+}
+window#waybar .modules-right {
+  padding-right: @edge;
+}
+
+// the pill — every module is its own floating island
+#tags,
+#window,
+#custom-lan-mouse,
+#systemd-failed-units,
+// #clock,
+#pulseaudio,
+#pulseaudio-slider,
+#disk,
+#memory,
+#cpu,
+#temperature,
+#custom-system,
+#custom-primary {
+  background-color: @colors[surface];
+  border: @border-width solid @colors[overlay];
+  border-radius: @radius;
+  color: @colors[text];
+  padding: @pill-pad;
+  margin: @pill-gap;
+}
+
+// tags — pill hugs its buttons; focused tag is an inset chip
+#tags {
+  padding: 1px 2px;
+}
+#tags button {
+  padding: 0 7px;
+  margin: 2px 1px;
+  border-radius: @radius;
+  color: @colors[subtext];
+  background: transparent;
+}
+#tags button.occupied {
+  color: @colors[text];
+}
+#tags button.focused {
+  color: @colors[base];
+  background-color: @colors[blue];
+}
+#tags button.urgent {
+  color: @colors[base];
+  background-color: @colors[red];
+}
+#tags button:hover {
+  color: @colors[text];
+  background-color: @colors[overlay];
+}
+
+#window {
+  font-weight: normal;
+}
+#systemd-failed-units {
+  color: @colors[red];
+} // alert state
+#clock {
+  color: @colors[subtext];
+  font-weight: normal;
+} // the date — the one dimmed item
+#temperature.critical {
+  color: @colors[red];
+} // alert state
+#custom-system {
+  font-weight: normal;
+}
+#custom-primary {
+  font-weight: normal;
+}
+
+// volume slider — GtkScale subnodes: trough / highlight / knob
+#pulseaudio-slider {
+  min-width: 140px;
+}
+#pulseaudio-slider trough {
+  background-color: @colors[overlay];
+  border-radius: 3px;
+  min-height: 6px;
+}
+#pulseaudio-slider highlight {
+  background-color: @colors[cyan];
+  border-radius: 3px;
+  min-height: 6px;
+}
+#pulseaudio-slider slider {
+  background-color: @colors[text];
+  border-radius: 6px;
+  min-height: 12px;
+  min-width: 12px;
+  margin: -3px 0; // centre knob over the thin trough
+}
+
+// tooltips on-theme
+tooltip {
+  background-color: @colors[surface];
+  border: @border-width solid @colors[overlay];
+  border-radius: @radius;
+}
+tooltip label {
+  color: @colors[text];
+}

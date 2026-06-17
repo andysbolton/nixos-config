@@ -11,5 +11,10 @@
       default = "${config.home.homeDirectory}/${config.repoName}/home-manager/dotfiles";
       description = "Base path for shared dotfiles";
     };
+    palette = lib.mkOption {
+      type = lib.types.attrs;
+      default = import ../colors.nix config.lib.stylix.colors;
+      description = "Color pallette for system.";
+    };
   };
 }

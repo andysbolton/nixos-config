@@ -1,11 +1,10 @@
 return {
   name = "css",
-  ft = { "css" },
+  ft = { "css", "less" },
   ls = {
     name = "cssls",
     settings = {},
   },
-  linter = { name = "stylelint" },
   formatter = {
     name = "prettierd",
     actions = {

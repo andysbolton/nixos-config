@@ -3,7 +3,6 @@
   lib,
   pkgs,
   pkgs-unstable,
-  inputs,
   ...
 }:
 let
@@ -19,7 +18,6 @@ in
     ./options/shared.nix
     ./modules/fish.nix
     ./modules/lan-mouse.nix
-    inputs.stylix.homeModules.stylix
   ];
 
   home.stateVersion = "25.05";
@@ -167,7 +165,6 @@ in
       cpplint
       markdownlint-cli # markdownlint
       shellcheck
-      stylelint
 
       # Debug adapters
       delve # dlv, used by nvim-dap-go

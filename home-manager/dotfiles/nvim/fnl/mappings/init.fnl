@@ -66,3 +66,21 @@
 ; Improve diff experience (move me)
 (vim.opt.diffopt:append "algorithm:patience")
 (vim.opt.diffopt:append :indent-heuristic)
+
+; Yank command
+(vim.keymap.set :n "y:"
+                (fn []
+                  (vim.ui.input {:prompt ":" :completion :command}
+                                (fn [input]
+                                  (when (and (not= input "") (not= input nil))
+                                    (let [{: output} (vim.api.nvim_exec2 input
+                                                                         {:output true})]
+                                      (vim.fn.setreg vim.v.register output)
+                                      (vim.fn.histadd :cmd input)
+                                      (vim.api.nvim_echo [[output :IncSearch]]
+                                                         true {})
+                                      (vim.defer_fn (fn []
+                                                      (vim.api.nvim_echo [[output
+                                                                           :Normal]]
+                                                                         true {}))
+                                        200)))))))
