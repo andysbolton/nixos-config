@@ -141,7 +141,7 @@ in
       jq-lsp # jqls
       lua-language-server # lua_ls
       marksman
-      nil # nil_ls
+      nixd
       omnisharp-roslyn # omnisharp
       pyright
       terraform-ls # terraformls

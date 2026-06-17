@@ -66,9 +66,15 @@
       enable = true;
       skhdConfig =
         let
-          spaceQuery = n: "yabai -m query --spaces --display | jq -r 'map(select(.\"is-native-fullscreen\" == false))[${toString (n - 1)}].index // empty'";
-          focusSpace = n: "cmd - ${toString n} : set i (${spaceQuery n}); test -n \"$i\"; and yabai -m space --focus \"$i\"";
-          moveToSpace = n: "shift + cmd - ${toString n} : set i (${spaceQuery n}); test -n \"$i\"; and yabai -m window --space \"$i\"; and yabai -m space --focus \"$i\"";
+          spaceQuery =
+            n:
+            "yabai -m query --spaces --display | jq -r 'map(select(.\"is-native-fullscreen\" == false))[${toString (n - 1)}].index // empty'";
+          focusSpace =
+            n:
+            "cmd - ${toString n} : set i (${spaceQuery n}); test -n \"$i\"; and yabai -m space --focus \"$i\"";
+          moveToSpace =
+            n:
+            "shift + cmd - ${toString n} : set i (${spaceQuery n}); test -n \"$i\"; and yabai -m window --space \"$i\"; and yabai -m space --focus \"$i\"";
           mkBindings = f: lib.concatMapStrings (n: "${f n}\n") (lib.range 1 9);
         in
         ''
@@ -114,6 +120,8 @@
           cmd - t : wezterm-launch.sh &
 
           cmd - d : yabai -m space --focus --display 1
+
+          cmd - s : screencapture -ic
         '';
     };
 

@@ -17,6 +17,7 @@ bar=(
   padding_left=50
   padding_right=50
 )
+
 default=(
   background.height=$((HEIGHT - GAP))
   padding_left="$PAD"
