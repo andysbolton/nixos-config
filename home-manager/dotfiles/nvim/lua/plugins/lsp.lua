@@ -16,6 +16,13 @@ vim.lsp.buf.signature_help = function()
   }
 end
 
+vim.api.nvim_create_user_command("LspRestart", function()
+  for _, c in ipairs(vim.lsp.get_clients()) do
+    c:stop(true)
+  end
+  vim.cmd.edit()
+end, { desc = "Stop all LSP clients and reattach to the current buffer" })
+
 return {
   {
     "neovim/nvim-lspconfig",
@@ -24,11 +31,6 @@ return {
       {
         "j-hui/fidget.nvim",
         tag = "legacy",
-        config = true,
-      },
-
-      {
-        "folke/neodev.nvim",
         config = true,
       },
 
@@ -181,6 +183,12 @@ return {
         },
       }
     end,
+  },
+
+  {
+    "folke/lazydev.nvim",
+    ft = "lua",
+    opts = {},
   },
 
   {

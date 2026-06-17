@@ -104,6 +104,7 @@ in
       pkgs.entr
       pkgs.ifstat-legacy
       pkgs.jq
+      pkgs.jankyborders
     ];
   };
 
