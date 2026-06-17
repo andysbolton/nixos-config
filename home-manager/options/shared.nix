@@ -14,7 +14,7 @@
     palette = lib.mkOption {
       type = lib.types.attrs;
       default = import ../colors.nix config.lib.stylix.colors;
-      description = "Color pallette for system.";
+      description = "Color palette for system.";
     };
   };
 }
