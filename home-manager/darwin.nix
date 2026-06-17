@@ -3,8 +3,6 @@
   lib,
   pkgs,
   pkgs-unstable,
-  self,
-  osConfig,
   ...
 }:
 let
@@ -37,7 +35,9 @@ let
       "${instance}/colors.sh".source = colorsScript;
     };
 
-  sketchybarLinks = lib.foldl' (acc: instance: acc // mkSketchybarLinks instance) { } sketchybarInstances;
+  sketchybarLinks = lib.foldl' (
+    acc: instance: acc // mkSketchybarLinks instance
+  ) { } sketchybarInstances;
 in
 {
   imports = [

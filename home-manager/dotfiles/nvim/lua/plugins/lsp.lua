@@ -23,6 +23,30 @@ vim.api.nvim_create_user_command("LspRestart", function()
   vim.cmd.edit()
 end, { desc = "Stop all LSP clients and reattach to the current buffer" })
 
+-- Evaluate lua code -- move me to fennel!
+local function eval(code)
+  local chunk, err = load("return " .. code) -- try as an expression
+  if not chunk then
+    chunk, err = load(code)
+  end -- fall back to a statement
+  if not chunk then
+    vim.notify(err, vim.log.levels.ERROR)
+    return
+  end
+  local ok, res = pcall(chunk)
+  vim.notify(ok and vim.inspect(res) or tostring(res), ok and vim.log.levels.INFO or vim.log.levels.ERROR)
+end
+
+vim.keymap.set("n", "<leader>x", function() eval(vim.api.nvim_get_current_line()) end, { desc = "Eval line as Lua" })
+
+vim.keymap.set("x", "<leader>x", function()
+  local s, e = vim.fn.getpos("v")[2], vim.fn.getpos(".")[2]
+  if s > e then
+    s, e = e, s
+  end
+  eval(table.concat(vim.api.nvim_buf_get_lines(0, s - 1, e, false), "\n"))
+end, { desc = "Eval selection as Lua" })
+
 return {
   {
     "neovim/nvim-lspconfig",
@@ -195,5 +219,16 @@ return {
     "jmbuhr/otter.nvim",
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     opts = {},
+    config = function(_, opts)
+      require("otter").setup(opts)
+
+      local preambles = { bash = { "# shellcheck shell=bash", "# shellcheck disable=SC2215" } }
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "nix",
+        group = vim.api.nvim_create_augroup("otter_nix", { clear = true }),
+        callback = function() require("otter").activate(nil, nil, true, nil, preambles) end,
+      })
+    end,
   },
 }
