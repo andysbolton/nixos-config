@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ pkgs, config, osConfig, ... }:
 let
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
 
@@ -47,7 +47,7 @@ in
         clock = {
           tooltip-format = "<tt><small>{calendar}</small></tt>";
           interval = 1;
-          format = "${colorWrap config.palette.hex.OVERLAY "{0:%A, %B %d}"} | ${colorWrap config.palette.hex.TEXT "{0:%I:%M:%S %Z}"}";
+          format = "${colorWrap osConfig.palette.hex.OVERLAY "{0:%A, %B %d}"} | ${colorWrap osConfig.palette.hex.TEXT "{0:%I:%M:%S %Z}"}";
         };
 
         "river/window" = {

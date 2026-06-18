@@ -6,6 +6,10 @@
   ...
 }:
 {
+  imports = [
+    ../../modules/theme.nix
+  ];
+
   networking.hostName = "work";
 
   users.users.andybolton = {
@@ -300,7 +304,7 @@
       user = config.system.primaryUser;
       wallpaper = pkgs.runCommand "wallpaper.png" {
         nativeBuildInputs = [ pkgs.imagemagick ];
-      } "magick -size 1x1 xc:\"#1a1b26ff\" $out";
+      } "magick -size 1x1 xc:\"${osConfig.palette.hex.BASE}\" $out";
     in
     ''
       sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr scale stretch

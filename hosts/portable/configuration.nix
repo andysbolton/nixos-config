@@ -9,6 +9,7 @@
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ../../modules/theme.nix
     ../../modules/desktop.nix
     ../../modules/steam.nix
     ../../modules/wireless.nix
