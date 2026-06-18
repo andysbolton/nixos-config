@@ -121,7 +121,15 @@
 
           cmd - return : wezterm-gui start --always-new-process &
 
-          cmd - t : wezterm-launch.sh &
+          cmd - t : open -na WezTerm --args \
+            --config "enable_tab_bar=false" \
+            --config "window_decorations='RESIZE'" \
+            start --always-new-process -- 'launcher.sh' &
+
+          cmd - n : open -na WezTerm --args \
+            --config "enable_tab_bar=false" \
+            --config "window_decorations='RESIZE'" \
+            start --always-new-process -- 'search-nix-pkgs.sh' &
 
           cmd - d : yabai -m space --focus --display 1
 
@@ -187,11 +195,11 @@
                 split_ratio 0.50 \
                 split_type auto \
                 auto_balance off \
-                top_padding 15 \
-                bottom_padding 15 \
-                left_padding 15 \
-                right_padding 15 \
-                window_gap 15 \
+                top_padding 17 \
+                bottom_padding 17 \
+                left_padding 17 \
+                right_padding 17 \
+                window_gap 17 \
                 layout bsp \
                 mouse_modifier fn \
                 mouse_action1 move \
@@ -204,8 +212,7 @@
             yabai -m rule --add app="^GatherV2$" display=1 space=3
             yabai -m rule --add app="^Proton VPN$" display=1 space=7
 
-            yabai -m rule --add app="^WezTerm\$" title="^launch\.sh\$" manage=off grid=4:4:1:1:2:2
-
+            yabai -m rule --add app="^WezTerm\$" title="^(launcher|search-nix-pkgs)$" manage=off sub-layer=above
             yabai -m signal --add label="wezterm_created" event=window_created app="^WezTerm\$" action="
                 yabai -m window $YABAI_WINDOW_ID --focus
             "
@@ -304,7 +311,7 @@
       user = config.system.primaryUser;
       wallpaper = pkgs.runCommand "wallpaper.png" {
         nativeBuildInputs = [ pkgs.imagemagick ];
-      } "magick -size 1x1 xc:\"${osConfig.palette.hex.BASE}\" $out";
+      } "magick -size 1x1 xc:\"${config.palette.hex.BASE}\" $out";
     in
     ''
       sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr scale stretch

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change title so yabai can track
-echo -ne "\033]0;launch.sh\007" >/dev/tty
+echo -ne "\033]0;launcher\007" >/dev/tty
 
 bookmarks=$(bookmarks.sh &)
 apps=$(apps.sh &)
