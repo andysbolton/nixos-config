@@ -93,6 +93,7 @@ in
     extraConfig = {
       markup-rows = true;
       kb-cancel = "Escape,Control+c";
+      kb-secondary-copy = "Control,Shfit+c";
     };
   };
 

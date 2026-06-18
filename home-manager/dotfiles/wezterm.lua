@@ -58,19 +58,6 @@ local tab_title = function(tab_info)
 	return baseexe .. " @ " .. fmt_dir
 end
 
-wezterm.on("window-config-reloaded", function(window, pane)
-	-- Safely fetch display metrics inside the event hook
-	local screen = wezterm.gui.screens().active
-
-	local desired_width = screen.width * 0.60
-	local desired_height = screen.height * 0.60
-
-	local center_x = (screen.width - desired_width) / 2
-	local center_y = (screen.height - desired_height) / 2
-
-	window:set_position(center_x, center_y)
-	window:set_inner_size(desired_width, desired_height)
-end)
 wezterm.on("format-tab-title", function(tab, tabs)
 	local mux_window = wezterm.mux.get_window(tab.window_id)
 	local mux_tab = mux_window:active_tab()
