@@ -58,7 +58,6 @@
 
   programs.river-classic = {
     enable = true;
-    extraPackages = [ ];
   };
 
   programs.uwsm = {

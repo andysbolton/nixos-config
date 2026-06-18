@@ -11,5 +11,5 @@ return {
       function() return require("formatter.filetypes.json").fixjson() end,
     },
   },
-  treesitter = "jsonc",
+  treesitter = "json",
 }

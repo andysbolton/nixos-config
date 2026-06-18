@@ -92,7 +92,13 @@ in
     };
     extraConfig = {
       markup-rows = true;
+      kb-cancel = "Escape,Control+c";
     };
+  };
+
+  programs.foot = {
+    enable = true;
+    settings.main.font = lib.mkForce "CaskaydiaCove Nerd Font:size=14";
   };
 
   programs.git = {
