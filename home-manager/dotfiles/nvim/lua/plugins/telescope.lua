@@ -15,11 +15,6 @@ return {
         desc = "[?] Find recently opened files",
       },
       {
-        "<leader><space>",
-        function() require("telescope.builtin").buffers() end,
-        desc = "[ ] Find existing buffers",
-      },
-      {
         "<leader>gf",
         function() require("telescope.builtin").git_files() end,
         desc = "Search [G]it [F]iles",

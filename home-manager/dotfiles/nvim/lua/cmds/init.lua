@@ -13,4 +13,8 @@ local function view_lsp_logs()
   vim.api.nvim_set_option_value("readonly", true, {buf = bufnr})
   return vim.keymap.set("n", "q", ("<cmd>bdelete! " .. bufnr .. " | tabclose" .. tabnr .. tabnr .. "cr<cr>"), {buffer = bufnr, silent = true, desc = "Close LSP log tab buffer."})
 end
-return vim.api.nvim_create_user_command("LspLog", view_lsp_logs, {desc = "View LSP logs"})
+vim.api.nvim_create_user_command("LspLog", view_lsp_logs, {desc = "View LSP logfile."})
+local function _2_()
+  return vim.cmd(("!rm " .. vim.lsp.log.get_filename()))
+end
+return vim.api.nvim_create_user_command("LspLogClear", _2_, {desc = "Clear LSP logfile."})

@@ -1,21 +1,3 @@
-local hover = vim.lsp.buf.hover
----@diagnostic disable-next-line: duplicate-set-field
-vim.lsp.buf.hover = function()
-  return hover {
-    max_height = math.floor(vim.o.lines * 0.5),
-    max_width = math.floor(vim.o.columns * 0.4),
-  }
-end
-
-local signature_help = vim.lsp.buf.signature_help
----@diagnostic disable-next-line: duplicate-set-field
-vim.lsp.buf.signature_help = function()
-  return signature_help {
-    max_height = math.floor(vim.o.lines * 0.5),
-    max_width = math.floor(vim.o.columns * 0.4),
-  }
-end
-
 vim.api.nvim_create_user_command("LspRestart", function()
   for _, c in ipairs(vim.lsp.get_clients()) do
     c:stop(true)
@@ -79,35 +61,52 @@ return {
         nmap("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
         nmap("<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[W]orkspace [S]ymbols")
 
-        nmap("K", vim.lsp.buf.hover, "Hover Documentation")
+        nmap(
+          "K",
+          function()
+            vim.lsp.buf.hover {
+              max_height = math.floor(vim.o.lines * 0.5),
+              max_width = math.floor(vim.o.columns * 0.4),
+            }
+          end,
+          "Hover Documentation"
+        )
 
         nmap("<leader>wra", vim.lsp.buf.add_workspace_folder, "[W]orkspace [A]dd Folder")
         nmap("<leader>wrr", vim.lsp.buf.remove_workspace_folder, "[W]orkspace [R]emove Folder")
         nmap("<leader>wrl", vim.lsp.buf.list_workspace_folders, "[W]orkspace [L]ist Folders")
 
         if client.supports_method "textDocument/codeAction" then
-          vim.keymap.set({ "n", "v" }, "<leader>ca", function()
-            if vim.fn.has "win32" == 1 then
-              vim.lsp.buf.code_action()
-            else
-              -- This has a dependency on mkfifo at the moment,
-              -- so it can't be used on Windows.
+          vim.keymap.set(
+            { "n", "v" },
+            "<leader>ca",
+            function()
               require("fzf-lua").lsp_code_actions {
                 winopts = {
                   relative = "cursor",
-                  width = 0.6,
-                  height = 0.6,
+                  width = 1,
+                  height = 1,
                   row = 1,
                 },
               }
-            end
-          end, { buffer = bufnr, desc = "[C]ode [A]ction" })
+            end,
+            { buffer = bufnr, desc = "[C]ode [A]ction" }
+          )
 
-          require("cmds.lsp").setup_codeactions(bufnr)
+          require("cmds.lsp").setup_codeactions(client, bufnr)
         end
 
         if client.supports_method "textDocument/signatureHelp" then
-          nmap("<C-s>", vim.lsp.buf.signature_help, "Signature Help")
+          nmap(
+            "<C-s>",
+            function()
+              vim.lsp.buf.signature_help {
+                max_height = math.floor(vim.o.lines * 0.5),
+                max_width = math.floor(vim.o.columns * 0.4),
+              }
+            end,
+            "Signature Help"
+          )
         end
       end
 
@@ -172,8 +171,6 @@ return {
         capabilities = capabilities,
         on_attach = on_attach,
       })
-
-      -- vim.lsp.set_log_level "debug"
 
       require("lspkind").init {
         mode = "symbol_text",

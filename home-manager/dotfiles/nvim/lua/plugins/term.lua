@@ -35,19 +35,58 @@ return {
       -- This interfers when navigating 'less' in the integrated terminal.
       -- vim.keymap.set("t", "jk", [[<C-\><C-n>]], { silent = true })
 
-      vim.keymap.set(
-        { "n", "t" },
-        "<leader>tf",
-        "<cmd>ToggleTerm direction=float<cr>",
-        { silent = true, desc = "[T]oggle [f]oating terminal" }
-      )
+      -- When a bottom terminal is open, force it full-width along the bottom so neo-tree
+      -- can't keep full height, then reclaim the CodeCompanion CLI's full-height right
+      -- column. No-op when no bottom terminal is open.
+      local function realign_bottom()
+        local term
+        for _, t in ipairs(require("toggleterm.terminal").get_all()) do
+          if t:is_open() and t.direction == "horizontal" then -- by direction, not id
+            term = t.window
+            break
+          end
+        end
+        if not term then return end
+        vim.api.nvim_win_call(term, function() vim.cmd "wincmd J" end)
+        local cli = require("codecompanion.interactions.cli").get_visible()
+        if cli then vim.api.nvim_win_call(cli.ui.winnr, function() vim.cmd "wincmd L" end) end
+      end
 
-      vim.keymap.set(
-        { "n", "t" },
-        "<leader>tb",
-        "<cmd>ToggleTerm size=10 direction=horizontal<cr>",
-        { silent = true, desc = "[T]oggle [b]ottom terminal" }
-      )
+      -- Work around neovim's terminal redraw bug: resizing a window that holds a
+      -- running TUI can leave stale/blank rows that :redraw! won't clear. A real
+      -- resize round-trip after the layout settles forces a clean repaint.
+      local function repaint_cli()
+        local ok, cli_mod = pcall(require, "codecompanion.interactions.cli")
+        if not ok then return end
+        local cli = cli_mod.get_visible()
+        if not cli then return end
+        local win = cli.ui.winnr
+        if not (win and vim.api.nvim_win_is_valid(win)) then return end
+        local w = vim.api.nvim_win_get_width(win)
+        if w <= 2 then return end
+        vim.api.nvim_win_set_width(win, w - 1)
+        vim.schedule(function()
+          if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_set_width(win, w) end
+        end)
+      end
+
+      vim.keymap.set({ "n", "t" }, "<leader>tb", function()
+        vim.cmd "ToggleTerm size=10 direction=horizontal"
+        realign_bottom()
+        vim.schedule(repaint_cli)
+      end, { silent = true, desc = "[T]oggle [b]ottom terminal" })
+
+      -- Opening/re-toggling neo-tree while the terminal is up would let it reclaim full
+      -- height; re-align after it settles.
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "neo-tree",
+        callback = function()
+          vim.schedule(function()
+            realign_bottom()
+            repaint_cli()
+          end)
+        end,
+      })
 
       vim.keymap.set(
         { "v" },

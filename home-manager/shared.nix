@@ -3,6 +3,7 @@
   lib,
   pkgs,
   pkgs-unstable,
+  inputs,
   ...
 }:
 let
@@ -50,6 +51,9 @@ in
         config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
       "starship.toml".source = ./dotfiles/starship.toml;
     };
+    # fennel-ls docset: hover docs + completion for the vim/nvim API.
+    # Pinned via the flake input; `nix flake update fennel-ls-nvim-docs` to bump.
+    dataFile."fennel-ls/docsets/nvim.lua".source = "${inputs.fennel-ls-nvim-docs}/nvim.lua";
   };
 
   home.file = {
@@ -134,6 +138,7 @@ in
       clojure-lsp
       dockerfile-language-server # dockerls (docker-langserver)
       fennel-ls # fennel_ls
+      fish-lsp
       fsautocomplete
       gopls
       jq-lsp # jqls

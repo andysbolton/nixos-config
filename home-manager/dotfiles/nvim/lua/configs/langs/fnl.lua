@@ -1,8 +1,8 @@
-vim.filetype.add({
+vim.filetype.add {
   extension = {
     fnlm = "fennel",
   },
-})
+}
 
 return {
   name = "fennel",

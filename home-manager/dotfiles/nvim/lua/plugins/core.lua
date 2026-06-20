@@ -90,17 +90,11 @@ return {
     -- optional for icon support
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
-      -- lsp = {
-      --   code_actions = {
-      --     previewer = "codeaction_native",
-      --     preview_pager = "delta --side-by-side --width=$FZF_PREVIEW_COLUMNS --hunk-header-style='omit' --file-style='omit'",
-      --   },
-      -- },
+      lsp = {
+        code_actions = {
+          previewer = "codeaction_native",
+        },
+      },
     },
   },
-
-  -- {
-  --   "stevearc/dressing.nvim",
-  --   opts = {},
-  -- },
 }

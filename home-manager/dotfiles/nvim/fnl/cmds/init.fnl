@@ -21,4 +21,10 @@
                      :silent true
                      :desc "Close LSP log tab buffer."})))
 
-(vim.api.nvim_create_user_command :LspLog view-lsp-logs {:desc "View LSP logs"})
+(vim.api.nvim_create_user_command :LspLog view-lsp-logs
+                                  {:desc "View LSP logfile."})
+
+(vim.api.nvim_create_user_command :LspLogClear
+                                  #(vim.cmd (.. "!rm "
+                                                (vim.lsp.log.get_filename)))
+                                  {:desc "Clear LSP logfile."})

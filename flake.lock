@@ -124,6 +124,22 @@
         "type": "github"
       }
     },
+    "fennel-ls-nvim-docs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1777640939,
+        "narHash": "sha256-DpLNcaH3JRrXO8Ds0ZlzoBQFSaOD8xK5+iYZSICBqao=",
+        "owner": "~micampe",
+        "repo": "fennel-ls-nvim-docs",
+        "rev": "a072d3f5d2dd98cf0411cd16446a0f3c96ee7938",
+        "type": "sourcehut"
+      },
+      "original": {
+        "owner": "~micampe",
+        "repo": "fennel-ls-nvim-docs",
+        "type": "sourcehut"
+      }
+    },
     "firefox-gnome-theme": {
       "flake": false,
       "locked": {
@@ -444,6 +460,7 @@
       "inputs": {
         "claude-code": "claude-code",
         "disko": "disko",
+        "fennel-ls-nvim-docs": "fennel-ls-nvim-docs",
         "home-manager": "home-manager",
         "lan-mouse": "lan-mouse",
         "nix-darwin": "nix-darwin",

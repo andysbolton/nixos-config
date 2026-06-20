@@ -3,7 +3,7 @@ return {
   name = "fish",
   ft = { "fish" },
   ls = {
-    name = "fish-lsp",
+    name = "fish_lsp",
     settings = {},
   },
   formatter = {

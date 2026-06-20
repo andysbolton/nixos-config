@@ -13,7 +13,6 @@ M.get_language_servers = function()
     for _, lang in pairs(M.get_configs()) do
       if lang.ls then
         language_servers[lang.ls.name] = lang.ls
-        language_servers[lang.ls.name] = lang.ls
       else
       end
     end
