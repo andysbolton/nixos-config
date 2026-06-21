@@ -96,5 +96,13 @@ return {
         },
       },
     },
+    config = function(_, opts)
+      local fzf = require "fzf-lua"
+      fzf.setup(opts)
+      -- route vim.ui.select (incl. code actions) through fzf-lua
+      fzf.register_ui_select {
+        winopts = { relative = "cursor", width = 1, height = 1, row = 1 },
+      }
+    end,
   },
 }

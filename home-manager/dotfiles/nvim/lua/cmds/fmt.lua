@@ -5,7 +5,7 @@ local utils = require("utils")
 local formatters_by_ft = {}
 for _, lang in pairs(config_utils.get_configs()) do
   if lang.formatter then
-    local or_1_ = utils.empty(lang.ft)
+    local or_1_ = utils["empty?"](lang.ft)
     if not or_1_ then
       local function _2_()
         return lang.ft

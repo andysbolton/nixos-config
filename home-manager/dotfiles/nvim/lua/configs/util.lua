@@ -9,7 +9,7 @@ M.get_configs = function()
   return require("configs")
 end
 M.get_language_servers = function()
-  if utils.empty(language_servers) then
+  if utils["empty?"](language_servers) then
     for _, lang in pairs(M.get_configs()) do
       if lang.ls then
         language_servers[lang.ls.name] = lang.ls
@@ -21,7 +21,7 @@ M.get_language_servers = function()
   return language_servers
 end
 M.get_formatters = function()
-  if utils.empty(formatters) then
+  if utils["empty?"](formatters) then
     for _, lang in pairs(M.get_configs()) do
       if lang.formatter then
         local formatter = lang.formatter
@@ -35,7 +35,7 @@ M.get_formatters = function()
   return formatters
 end
 M.get_linters = function()
-  if utils.empty(linters) then
+  if utils["empty?"](linters) then
     for _, lang in pairs(M.get_configs()) do
       if lang.linter then
         local linter = lang.linter
@@ -49,7 +49,7 @@ M.get_linters = function()
   return linters
 end
 M.get_treesitters = function()
-  if utils.empty(treesitters) then
+  if utils["empty?"](treesitters) then
     for _, lang in pairs(M.get_configs()) do
       if lang.treesitter then
         table.insert(treesitters, lang.treesitter)

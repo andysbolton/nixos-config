@@ -5,7 +5,6 @@ return {
     name = "bashls",
     settings = {},
   },
-  linter = { name = "shellcheck" },
   formatter = {
     name = "shfmt",
     actions = {

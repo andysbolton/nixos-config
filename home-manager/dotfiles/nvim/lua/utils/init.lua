@@ -1,6 +1,6 @@
 -- [nfnl] fnl/utils/init.fnl
 local M = {}
-M.empty = function(table)
+M["empty?"] = function(table)
   return ((nil == table) or (nil == next(table)))
 end
 local debug_log = (vim.fn.stdpath("data") .. "/debug.txt")
@@ -56,6 +56,14 @@ M.log = function(...)
     return _G.xpcall(_3_, or_10_.traceback)
   end
   return close_handlers_13_(_2_(...))
+end
+M["any?"] = function(pred, list)
+  local found_3f = false
+  for _, x in ipairs(list) do
+    if found_3f then break end
+    found_3f = pred(x)
+  end
+  return found_3f
 end
 local function _12_()
   return vim.cmd(("vsp " .. debug_log))

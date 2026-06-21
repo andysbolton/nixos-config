@@ -12,14 +12,14 @@
 (fn M.get_configs [] (require :configs))
 
 (fn M.get_language_servers []
-  (when (utils.empty language-servers)
+  (when (utils.empty? language-servers)
     (each [_ lang (pairs (M.get_configs))]
       (when lang.ls
         (tset language-servers lang.ls.name lang.ls))))
   language-servers)
 
 (fn M.get_formatters []
-  (when (utils.empty formatters)
+  (when (utils.empty? formatters)
     (each [_ lang (pairs (M.get_configs))]
       (when lang.formatter
         (let [formatter lang.formatter]
@@ -28,7 +28,7 @@
   formatters)
 
 (fn M.get_linters []
-  (when (utils.empty linters)
+  (when (utils.empty? linters)
     (each [_ lang (pairs (M.get_configs))]
       (when lang.linter
         (let [linter lang.linter]
@@ -37,7 +37,7 @@
   linters)
 
 (fn M.get_treesitters []
-  (when (utils.empty treesitters)
+  (when (utils.empty? treesitters)
     (each [_ lang (pairs (M.get_configs))]
       (when lang.treesitter
         (table.insert treesitters lang.treesitter))))

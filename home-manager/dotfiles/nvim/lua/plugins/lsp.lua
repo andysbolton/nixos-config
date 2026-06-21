@@ -31,6 +31,18 @@ end, { desc = "Eval selection as Lua" })
 
 return {
   {
+    "kosayoda/nvim-lightbulb",
+    config = function()
+      require("nvim-lightbulb").setup {
+        autocmd = { enabled = true },
+        priority = 5,
+        code_lenses = true,
+        statustext = { enabled = true },
+        -- number = { enabled = true },
+      }
+    end,
+  },
+  {
     "neovim/nvim-lspconfig",
     dependencies = {
       -- Useful status updates for LSP
@@ -77,19 +89,23 @@ return {
         nmap("<leader>wrl", vim.lsp.buf.list_workspace_folders, "[W]orkspace [L]ist Folders")
 
         if client.supports_method "textDocument/codeAction" then
+          -- normal mode: offer actions for the whole current line (matches the lightbulb)
+          vim.keymap.set("n", "<leader>ca", function()
+            local row = vim.api.nvim_win_get_cursor(0)[1]
+            local line = vim.api.nvim_get_current_line()
+            vim.lsp.buf.code_action {
+              context = {
+                diagnostics = require("cmds.lsp").line_diagnostics(0, row),
+                triggerKind = 1,
+              },
+            }
+          end, { buffer = bufnr, desc = "[C]ode [A]ction" })
+
+          -- visual mode: use the selection (builtin default)
           vim.keymap.set(
-            { "n", "v" },
+            "v",
             "<leader>ca",
-            function()
-              require("fzf-lua").lsp_code_actions {
-                winopts = {
-                  relative = "cursor",
-                  width = 1,
-                  height = 1,
-                  row = 1,
-                },
-              }
-            end,
+            function() vim.lsp.buf.code_action() end,
             { buffer = bufnr, desc = "[C]ode [A]ction" }
           )
 
@@ -111,39 +127,25 @@ return {
       end
 
       local signs = {
-        ERROR = " ",
-        WARN = " ",
-        HINT = " ",
-        INFO = " ",
+        [vim.diagnostic.severity.ERROR] = " ",
+        [vim.diagnostic.severity.WARN] = " ",
+        [vim.diagnostic.severity.INFO] = " ",
+        [vim.diagnostic.severity.HINT] = " ",
       }
 
-      for type, icon in pairs(signs) do
-        local hl = "DiagnosticSign" .. type:sub(1, 1) .. type:sub(2):lower()
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-      end
-
       vim.diagnostic.config {
-        virtual_text = {
-          prefix = "",
-          format = function(diagnostic)
-            return signs[vim.diagnostic.severity[diagnostic.severity]:upper()] .. diagnostic.message
-          end,
-        },
-        -- Is this doing anything?
         virtual_lines = {
-          prefix = "",
-          format = function(diagnostic)
-            return signs[vim.diagnostic.severity[diagnostic.severity]:upper()] .. diagnostic.message
-          end,
+          format = function(diagnostic) return signs[diagnostic.severity] .. diagnostic.message end,
         },
+        signs = { text = signs },
         float = {
           border = "rounded",
           source = "if_many",
           -- Show severity icons as prefixes.
-          prefix = function(diag)
-            local level = vim.diagnostic.severity[diag.severity]:upper()
-            local prefix = string.format(" %s ", signs[level])
-            return prefix, "Diagnostic" .. level:gsub("^%l", string.upper)
+          prefix = function(diagnostic)
+            local severity = vim.diagnostic.severity[diagnostic.severity]
+            return signs[diagnostic.severity],
+              "Diagnostic" .. severity:gsub("(%u)(%u+)", function(first, rest) return first .. string.lower(rest) end)
           end,
         },
       }

@@ -41,7 +41,7 @@
         {:desc "Go to next diagnostic message"})
 
 (km-set :n :<leader>d vim.diagnostic.open_float
-        {:desc "Open floating diagnostic message"})
+        {:desc "Open floating [d]iagnostic message"})
 
 ; Copy current buffer name
 (km-set :n :<leader>c ":let @+=expand('%')<cr>"
@@ -70,7 +70,7 @@
 ; Yank command
 (vim.keymap.set :n "y:"
                 (fn []
-                  (vim.ui.input {:prompt ":" :completion :command}
+                  (vim.ui.input {:prompt "sup:" :completion :command}
                                 (fn [input]
                                   (when (and (not= input "") (not= input nil))
                                     (let [{: output} (vim.api.nvim_exec2 input
@@ -83,4 +83,21 @@
                                                       (vim.api.nvim_echo [[output
                                                                            :Normal]]
                                                                          true {}))
-                                        200)))))))
+                                        200))))))
+                {:desc "Yank in command mode."})
+
+; vim.keymap.set('n', '<leader>f\\', function())
+;   -- Fetch clipboard text
+;   local text = vim.fn.getreg('+')
+;
+;   -- Manually escape backslashes first, then forward slashes
+;   local escaped = vim.fn.escape(text, '\\/')
+;
+;   -- Apply Very Nomagic to protect all other special characters
+;   local pattern = '\\V' .. escaped
+;
+;   -- Set search register and execute
+;   vim.fn.setreg('/', pattern)
+;   vim.fn.histadd('/', pattern)
+;   vim.cmd('normal! n')
+; end, { desc = "Search text with literal backslashes safely"}

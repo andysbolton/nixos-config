@@ -1,4 +1,4 @@
-(import-macros {: tx} :utils.macros)
+(import-macros {: tx} :macros)
 
 [:gpanders/fennel-repl.nvim
  :gpanders/nvim-parinfer

@@ -9,6 +9,7 @@
 - [ ] client.supports_method is deprecated
 - [ ] look at default code companion cli key maps
 - [ ] move out the stuff at the top of plugins/lsp.lua
+- [ ] move diagnostics out of plugins/lsp.lua
 - [ ] send diagnostics with code actions
   ```lua
     local nvim_diagnostics = vim.diagnostic.get(bufnr, {
@@ -17,12 +18,14 @@
     })
   ```
 - [ ] move temp ui2 out of metrics.lua
+- [ ] folds
+- [ ] neorg
 
 ## rofi
 
 - [ ] search mozilla bookmarks
-- [ ] query river windows
 - [ ] cliphist
+- [ ] query river windows
 
 ## mac
 
@@ -36,3 +39,4 @@
 ## general
 
 - [ ] check out lazygit
+- [ ] fzf fish

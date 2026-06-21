@@ -124,7 +124,7 @@ return {
       vim.keymap.set(
         { "n" },
         "<leader>at",
-        require("codecompanion").toggle,
+        function() require("codecompanion").toggle() end,
         { silent = true, desc = "[A]I: [T]oggle Code Companion" }
       )
 

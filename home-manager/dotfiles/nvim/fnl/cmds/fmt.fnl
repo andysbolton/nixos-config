@@ -6,7 +6,7 @@
 
 (each [_ lang (pairs (config_utils.get_configs))]
   (when lang.formatter
-    (if (or (utils.empty lang.ft) (= #lang.ft 0))
+    (if (or (utils.empty? lang.ft) (= #lang.ft 0))
         (vim.notify (.. "No filetypes specified for " lang.name ".")
                     vim.log.levels.WARN)
         (each [_ ft (pairs lang.ft)]

@@ -32,9 +32,9 @@ return {
         desc = "[S]earch [R]esume",
       },
       {
-        "<leader>sb",
+        "<leader><leader>",
         function() require("telescope.builtin").buffers() end,
-        desc = "[S]earch [B]uffers",
+        desc = "Search Buffers",
       },
       {
         "<leader>sg",
