@@ -5,6 +5,7 @@ local group_by = _local_1_["group-by"]
 local head = _local_1_.head
 local empty_3f = _local_1_["empty?"]
 local debounce = _local_1_.debounce
+local tail = _local_1_.tail
 local nvim_buf_clear_namespace = vim.api.nvim_buf_clear_namespace
 local nvim_buf_get_lines = vim.api.nvim_buf_get_lines
 local nvim_buf_is_valid = vim.api.nvim_buf_is_valid
@@ -43,35 +44,40 @@ local function make_range_params(context, offset_encoding)
   tmp_9_["context"] = context
   return tmp_9_
 end
+local function range_builder(context, bufnr, start_pos, end_pos)
+  if (((bufnr == start_pos) and (start_pos == end_pos) and (end_pos == nil)) or (tail(end_pos) == 0)) then
+    local function _2_(offset)
+      return make_range_params(context, offset)
+    end
+    return _2_
+  else
+    local function _3_(offset)
+      return make_given_range_params(context, bufnr, start_pos, end_pos, offset)
+    end
+    return _3_
+  end
+end
 local function request_code_actions(client, bufnr, params, cb)
-  local function _2_(err, result, context)
+  local function _5_(err, result, context)
     if err then
-      nvim_echo({{("LSP client request failed: " .. err.message), "ErrorMsg", true, {err = true}}})
+      nvim_echo({{("LSP client request failed: " .. err.message), "ErrorMsg"}}, true, {err = true})
     else
     end
     return cb((result or {}), context)
   end
-  return client:request("textDocument/codeAction", params, _2_, bufnr)
+  return client:request("textDocument/codeAction", params, _5_, bufnr)
 end
-local function request_all(_4_)
-  local clients = _4_.clients
-  local bufnr = _4_.bufnr
-  local context = _4_.context
-  local on_actions = _4_["on-actions"]
-  local on_done = _4_["on-done"]
-  local start_pos = _4_["start-pos"]
-  local end_pos = _4_["end-pos"]
+local function request_all(_7_)
+  local clients = _7_.clients
+  local bufnr = _7_.bufnr
+  local make_params = _7_["make-params"]
+  local on_actions = _7_["on-actions"]
+  local on_done = _7_["on-done"]
   local pending = #clients
   for _, client in ipairs(clients) do
-    local offset = client.offset_encoding
-    local params
-    if not (start_pos and end_pos) then
-      params = make_range_params(context, offset)
-    else
-      params = make_given_range_params(context, bufnr, start_pos, end_pos, offset)
-    end
-    local function _6_(actions, context0)
-      on_actions(actions, context0)
+    local params = make_params(client.offset_encoding)
+    local function _8_(actions, context)
+      on_actions(actions, context)
       pending = (pending - 1)
       if (pending == 0) then
         if on_done then
@@ -83,19 +89,16 @@ local function request_all(_4_)
         return nil
       end
     end
-    request_code_actions(client, bufnr, params, _6_)
+    request_code_actions(client, bufnr, params, _8_)
   end
   return nil
 end
-local function quickfix_3f(a)
-  return vim.startswith((a.kind or ""), "quickfix")
-end
-local function apply_action(action, _9_)
-  local client_id = _9_.client_id
-  local bufnr = _9_.bufnr
+local function apply_action(action, _11_)
+  local client_id = _11_.client_id
+  local bufnr = _11_.bufnr
   local client = vim.lsp.get_client_by_id(client_id)
   local do_apply
-  local function _10_(act)
+  local function _12_(act)
     if act.edit then
       vim.lsp.util.apply_workspace_edit(act.edit, client.offset_encoding)
     else
@@ -112,60 +115,60 @@ local function apply_action(action, _9_)
       return nil
     end
   end
-  do_apply = _10_
+  do_apply = _12_
   if (not action.edit and client:supports_method("codeAction/resolve")) then
-    local function _14_(err, resolved)
-      local function _15_()
+    local function _16_(err, resolved)
+      local function _17_()
         if (err or not resolved) then
           return action
         else
           return resolved
         end
       end
-      return do_apply(_15_())
+      return do_apply(_17_())
     end
-    return client:request("codeAction/resolve", action, _14_, bufnr)
+    return client:request("codeAction/resolve", action, _16_, bufnr)
   else
     return do_apply(action)
   end
 end
 local function select_and_apply(items)
-  local function _17_(item)
+  local function _19_(item)
     local a = item.action
-    local _18_
+    local _20_
     if a.kind then
-      _18_ = ("  [" .. a.kind .. "]")
+      _20_ = ("  [" .. a.kind .. "]")
     else
-      _18_ = ""
+      _20_ = ""
     end
-    return ((a.title or "") .. _18_)
+    return ((a.title or "") .. _20_)
   end
-  local function _20_(choice)
+  local function _22_(choice)
     if choice then
       return apply_action(choice.action, choice.context)
     else
       return nil
     end
   end
-  return vim.ui.select(items, {prompt = "Code action:", format_item = _17_}, _20_)
+  return vim.ui.select(items, {prompt = "Code action:", format_item = _19_}, _22_)
 end
 local function action_lines(actions, buf_uri)
   local seen = {}
   local lines = {}
   local add
-  local function _22_(range)
+  local function _24_(range)
     local line
     do
-      local t_23_ = range
-      if (nil ~= t_23_) then
-        t_23_ = t_23_.start
+      local t_25_ = range
+      if (nil ~= t_25_) then
+        t_25_ = t_25_.start
       else
       end
-      if (nil ~= t_23_) then
-        t_23_ = t_23_.line
+      if (nil ~= t_25_) then
+        t_25_ = t_25_.line
       else
       end
-      line = t_23_
+      line = t_25_
     end
     if (line and not seen[line]) then
       table.insert(lines, line)
@@ -175,29 +178,29 @@ local function action_lines(actions, buf_uri)
       return nil
     end
   end
-  add = _22_
+  add = _24_
   for _, a in ipairs(actions) do
-    local _28_
+    local _30_
     do
-      local t_27_ = a
-      if (nil ~= t_27_) then
-        t_27_ = t_27_.kind
+      local t_29_ = a
+      if (nil ~= t_29_) then
+        t_29_ = t_29_.kind
       else
       end
-      _28_ = t_27_
+      _30_ = t_29_
     end
-    if (_28_ == "quickfix") then
+    if (_30_ == "quickfix") then
       local diagnostics
-      local _31_
+      local _33_
       do
-        local t_30_ = a
-        if (nil ~= t_30_) then
-          t_30_ = t_30_.diagnostics
+        local t_32_ = a
+        if (nil ~= t_32_) then
+          t_32_ = t_32_.diagnostics
         else
         end
-        _31_ = t_30_
+        _33_ = t_32_
       end
-      diagnostics = (_31_ or {})
+      diagnostics = (_33_ or {})
       if (#diagnostics > 0) then
         for _0, d in ipairs(diagnostics) do
           add(d.range)
@@ -205,64 +208,64 @@ local function action_lines(actions, buf_uri)
       else
         local edit
         do
-          local t_33_ = a
-          if (nil ~= t_33_) then
-            t_33_ = t_33_.edit
+          local t_35_ = a
+          if (nil ~= t_35_) then
+            t_35_ = t_35_.edit
           else
           end
-          edit = t_33_
+          edit = t_35_
         end
         if edit then
-          local _36_
+          local _38_
           do
-            local t_35_ = edit
-            if (nil ~= t_35_) then
-              t_35_ = t_35_.changes
+            local t_37_ = edit
+            if (nil ~= t_37_) then
+              t_37_ = t_37_.changes
             else
             end
-            if (nil ~= t_35_) then
-              t_35_ = t_35_[buf_uri]
+            if (nil ~= t_37_) then
+              t_37_ = t_37_[buf_uri]
             else
             end
-            _36_ = t_35_
+            _38_ = t_37_
           end
-          for _0, te in ipairs((_36_ or {})) do
+          for _0, te in ipairs((_38_ or {})) do
             add(te.range)
           end
-          local _40_
+          local _42_
           do
-            local t_39_ = edit
-            if (nil ~= t_39_) then
-              t_39_ = t_39_.documentChanges
+            local t_41_ = edit
+            if (nil ~= t_41_) then
+              t_41_ = t_41_.documentChanges
             else
             end
-            _40_ = t_39_
+            _42_ = t_41_
           end
-          for _0, dc in ipairs((_40_ or {})) do
-            local _43_
+          for _0, dc in ipairs((_42_ or {})) do
+            local _45_
             do
-              local t_42_ = dc
-              if (nil ~= t_42_) then
-                t_42_ = t_42_.textDocument
+              local t_44_ = dc
+              if (nil ~= t_44_) then
+                t_44_ = t_44_.textDocument
               else
               end
-              if (nil ~= t_42_) then
-                t_42_ = t_42_.uri
+              if (nil ~= t_44_) then
+                t_44_ = t_44_.uri
               else
               end
-              _43_ = t_42_
+              _45_ = t_44_
             end
-            if (_43_ == buf_uri) then
-              local _47_
+            if (_45_ == buf_uri) then
+              local _49_
               do
-                local t_46_ = dc
-                if (nil ~= t_46_) then
-                  t_46_ = t_46_.edits
+                local t_48_ = dc
+                if (nil ~= t_48_) then
+                  t_48_ = t_48_.edits
                 else
                 end
-                _47_ = t_46_
+                _49_ = t_48_
               end
-              for _1, te in ipairs((_47_ or {})) do
+              for _1, te in ipairs((_49_ or {})) do
                 add(te.range)
               end
             else
@@ -276,7 +279,7 @@ local function action_lines(actions, buf_uri)
   end
   return lines
 end
-local function codeaction_line_callback(bufnr)
+local function codeaction_viewport_callback(bufnr)
   do
     local clients = code_action_clients(bufnr)
     if (#clients > 0) then
@@ -285,19 +288,19 @@ local function codeaction_line_callback(bufnr)
       local ll_cols = line_length_0_indexed(bufnr, ll)
       local buf_uri = vim.uri_from_bufnr(bufnr)
       local context
-      local function _53_(d)
-        local _54_ = d.lnum
-        return (((first_line - 1) <= _54_) and (_54_ <= (ll - 1)))
+      local function _55_(d)
+        local _56_ = d.lnum
+        return (((first_line - 1) <= _56_) and (_56_ <= (ll - 1)))
       end
-      context = {diagnostics = vim.lsp.diagnostic.from(vim.tbl_filter(_53_, vim.diagnostic.get(bufnr))), only = {"quickfix"}, triggerKind = 1}
+      context = {diagnostics = vim.lsp.diagnostic.from(vim.tbl_filter(_55_, vim.diagnostic.get(bufnr))), only = {"quickfix"}, triggerKind = 1}
       local seen = {}
-      local function _55_(actions)
+      local function _57_(actions)
         for _, line in ipairs(action_lines(actions, buf_uri)) do
           seen[line] = true
         end
         return nil
       end
-      local function _56_()
+      local function _58_()
         if nvim_buf_is_valid(bufnr) then
           nvim_buf_clear_namespace(bufnr, ns, 0, -1)
           for line, _ in pairs(seen) do
@@ -308,7 +311,7 @@ local function codeaction_line_callback(bufnr)
           return nil
         end
       end
-      request_all({clients = clients, bufnr = bufnr, context = context, ["start-pos"] = {first_line, 0}, ["end-pos"] = {ll, ll_cols}, ["on-actions"] = _55_, ["on-done"] = _56_})
+      request_all({clients = clients, bufnr = bufnr, ["make-params"] = range_builder(context, bufnr, {first_line, 0}, {ll, ll_cols}), ["on-actions"] = _57_, ["on-done"] = _58_})
     else
     end
   end
@@ -317,97 +320,95 @@ end
 local kind_styles = {{prefix = "quickfix", icon = "\239\130\173", hl = "Warn"}, {prefix = "source", icon = "\239\128\147", hl = "Hint"}, {prefix = "refactor", icon = "\238\171\169", hl = "Info"}, {prefix = "gopls", icon = "\238\152\166", hl = "Hint"}}
 local default_kind_style = {icon = "\238\169\188", hl = "Warning", rank = (1 + #kind_styles)}
 local function kind_style(kind)
-  local _59_
+  local _61_
   do
-    local match1 = nil
-    for i, _60_ in ipairs(kind_styles) do
-      local prefix = _60_.prefix
-      local icon = _60_.icon
-      local hl = _60_.hl
-      if match1 then break end
+    local found = nil
+    for i, _62_ in ipairs(kind_styles) do
+      local prefix = _62_.prefix
+      local icon = _62_.icon
+      local hl = _62_.hl
+      if found then break end
       if vim.startswith((kind or ""), prefix) then
-        match1 = {icon = icon, hl = hl, rank = i}
+        found = {icon = icon, hl = hl, rank = i}
       else
-        match1 = nil
+        found = nil
       end
     end
-    _59_ = match1
+    _61_ = found
   end
-  return (_59_ or default_kind_style)
+  return (_61_ or default_kind_style)
 end
 local function set_winbar_count(bufnr, actions_by_kind)
-  if not empty_3f(actions_by_kind) then
-    local win = nvim_get_current_win()
-    if (nvim_win_get_buf(win) == bufnr) then
-      local entries
-      do
-        local tbl_26_ = {}
-        local i_27_ = 0
-        for kind, actions in pairs(actions_by_kind) do
-          local val_28_ = {n = #actions, style = kind_style(kind)}
-          if (nil ~= val_28_) then
-            i_27_ = (i_27_ + 1)
-            tbl_26_[i_27_] = val_28_
-          else
-          end
+  local win = nvim_get_current_win()
+  if (not empty_3f(actions_by_kind) and (nvim_win_get_buf(win) == bufnr)) then
+    local entries
+    do
+      local tbl_26_ = {}
+      local i_27_ = 0
+      for kind, actions in pairs(actions_by_kind) do
+        local val_28_ = {count = #actions, style = kind_style(kind)}
+        if (nil ~= val_28_) then
+          i_27_ = (i_27_ + 1)
+          tbl_26_[i_27_] = val_28_
+        else
         end
-        entries = tbl_26_
       end
-      local function _63_(_241, _242)
-        return (_241.style.rank < _242.style.rank)
-      end
-      table.sort(entries, _63_)
-      local _64_
-      do
-        local s = ""
-        for _, entry in ipairs(entries) do
-          local n = entry.n
-          local _let_65_ = entry.style
-          local icon = _let_65_.icon
-          local hl = _let_65_.hl
-          s = (s .. "%#DiagnosticSign" .. hl .. "#" .. icon .. " " .. n .. "%* ")
-        end
-        _64_ = s
-      end
-      return nvim_set_option_value("winbar", _64_, {win = win})
-    else
-      return nil
+      entries = tbl_26_
     end
+    local function _65_(_241, _242)
+      return (_241.style.rank < _242.style.rank)
+    end
+    table.sort(entries, _65_)
+    local _66_
+    do
+      local s = ""
+      for _, entry in ipairs(entries) do
+        local count = entry.count
+        local _let_67_ = entry.style
+        local icon = _let_67_.icon
+        local hl = _let_67_.hl
+        s = (s .. "%#DiagnosticSign" .. hl .. "#" .. icon .. " " .. count .. "%* ")
+      end
+      _66_ = s
+    end
+    return nvim_set_option_value("winbar", _66_, {win = win})
   else
-    return nil
+    return nvim_set_option_value("winbar", "", {win = win})
   end
 end
-local function codeaction_position_callback(bufnr)
+local function codeaction_line_callback(bufnr)
   if (nvim_win_get_buf(0) == bufnr) then
     local clients = code_action_clients(bufnr)
     if (#clients == 0) then
       set_winbar_count(bufnr, {})
     else
       local row = current_line()
+      local row_cols = line_length_0_indexed(bufnr, row)
+      local context = {triggerKind = 1, diagnostics = M.line_diagnostics(bufnr, row)}
       local actions = {}
-      local function _68_(as)
+      local function _69_(as)
         for _, a in ipairs(as) do
           table.insert(actions, a)
         end
         return nil
       end
-      local function _69_()
+      local function _70_()
         if nvim_buf_is_valid(bufnr) then
-          local function _70_(action)
-            local case_71_ = string.match(action.kind, "^([^.]*)")
-            if (nil ~= case_71_) then
-              local key = case_71_
+          local function _71_(action)
+            local case_72_ = string.match((action.kind or ""), "^([^.]*)")
+            if (nil ~= case_72_) then
+              local key = case_72_
               return key
             else
               return nil
             end
           end
-          return set_winbar_count(bufnr, group_by(_70_, actions))
+          return set_winbar_count(bufnr, group_by(_71_, actions))
         else
           return nil
         end
       end
-      request_all({clients = clients, bufnr = bufnr, context = {triggerKind = 1, diagnostics = M.line_diagnostics(bufnr, row)}, ["on-actions"] = _68_, ["on-done"] = _69_})
+      request_all({clients = clients, bufnr = bufnr, ["make-params"] = range_builder(context, bufnr, {row, 0}, {row, row_cols}), ["on-actions"] = _69_, ["on-done"] = _70_})
     end
   else
   end
@@ -423,63 +424,38 @@ M.code_action = function()
   local context = {triggerKind = 1, diagnostics = M.line_diagnostics(bufnr, row)}
   local items = {}
   local row_cols = line_length_0_indexed(bufnr, row)
-  local gather
-  local function _76_(result, context0, keep)
-    for _, action in ipairs(result) do
-      if keep(action) then
-        table.insert(items, {action = action, context = context0})
-      else
-      end
+  local function _77_(actions, context0)
+    for _, action in ipairs(actions) do
+      table.insert(items, {action = action, context = context0})
     end
     return nil
   end
-  gather = _76_
-  local pending = (#clients * 2)
-  local done
   local function _78_()
-    pending = (pending - 1)
-    if (pending == 0) then
-      if (#items == 0) then
-        return vim.notify("No code actions available", vim.log.levels.INFO)
-      else
-        return select_and_apply(items)
-      end
+    if (#items == 0) then
+      return vim.notify("No code actions available", vim.log.levels.INFO)
     else
-      return nil
+      return select_and_apply(items)
     end
   end
-  done = _78_
-  local function _81_(actions, context0)
-    gather(actions, context0, quickfix_3f)
-    return done()
-  end
-  request_all({clients = clients, bufnr = bufnr, context = context, ["start-pos"] = {row, 0}, ["end-pos"] = {row, row_cols}, ["on-actions"] = _81_})
-  local function _82_(actions, context0)
-    local function _83_(_241)
-      return not quickfix_3f(_241)
-    end
-    gather(actions, context0, _83_)
-    return done()
-  end
-  return request_all({clients = clients, bufnr = bufnr, context = context, ["on-actions"] = _82_})
+  return request_all({clients = clients, bufnr = bufnr, ["make-params"] = range_builder(context, bufnr, {row, 0}, {row, row_cols}), ["on-actions"] = _77_, ["on-done"] = _78_})
 end
 M.setup_codeactions = function(bufnr)
   if not vim.b[bufnr].code_action_setup then
     vim.b[bufnr]["code_action_setup"] = true
     local group = nvim_create_augroup(("code_action_bufnr_" .. bufnr), {clear = true})
-    local function _84_()
+    local function _80_()
+      return codeaction_viewport_callback(bufnr)
+    end
+    nvim_create_autocmd({"DiagnosticChanged", "WinScrolled"}, {group = group, buffer = bufnr, callback = debounce(100, _80_)})
+    local function _81_()
       return codeaction_line_callback(bufnr)
     end
-    nvim_create_autocmd({"DiagnosticChanged", "WinScrolled"}, {group = group, buffer = bufnr, callback = debounce(100, _84_)})
-    local function _85_()
-      return codeaction_position_callback(bufnr)
-    end
-    nvim_create_autocmd({"CursorHold", "BufEnter", "InsertLeave", "DiagnosticChanged"}, {group = group, buffer = bufnr, callback = _85_})
-    local function _86_()
+    nvim_create_autocmd({"CursorHold", "BufEnter", "InsertLeave", "DiagnosticChanged"}, {group = group, buffer = bufnr, callback = _81_})
+    local function _82_()
       set_winbar_count(bufnr, {})
       return nil
     end
-    return nvim_create_autocmd({"BufLeave"}, {group = group, buffer = bufnr, callback = _86_})
+    return nvim_create_autocmd({"BufLeave"}, {group = group, buffer = bufnr, callback = _82_})
   else
     return nil
   end

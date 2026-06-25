@@ -1,6 +1,6 @@
 (local M {})
 
-(local {: group-by : head : empty? : debounce} (require :utils))
+(local {: group-by : head : empty? : debounce : tail} (require :utils))
 (local {: nvim_buf_clear_namespace
         : nvim_buf_get_lines
         : nvim_buf_is_valid
@@ -39,40 +39,33 @@
   (doto (vim.lsp.util.make_range_params 0 offset-encoding)
     (tset :context context)))
 
+(fn range-builder [context bufnr start-pos end-pos]
+  (if (or (= bufnr start-pos end-pos nil) (= (tail end-pos) 0))
+      (fn [offset] (make-range-params context offset))
+      (fn [offset]
+        (make-given-range-params context bufnr start-pos end-pos offset))))
+
 (fn request-code-actions [client bufnr params cb]
   (client:request :textDocument/codeAction params
                   (fn [err result context]
                     (when err
                       (nvim_echo [[(.. "LSP client request failed: "
                                        (. err :message))
-                                   :ErrorMsg
-                                   true
-                                   {:err true}]]))
+                                   :ErrorMsg]]
+                                 true {:err true}))
                     (cb (or result []) context)) bufnr))
 
 ;; Fan a request out to every code-action client; `on-actions` runs per client response,
 ;; `on-done` runs once after all have replied.
-(fn request-all [{: clients
-                  : bufnr
-                  : context
-                  : on-actions
-                  : on-done
-                  : start-pos
-                  : end-pos}]
+(fn request-all [{: clients : bufnr : make-params : on-actions : on-done}]
   (var pending (length clients))
   (each [_ client (ipairs clients)]
-    (let [offset (. client :offset_encoding)
-          params (if (not (and start-pos end-pos))
-                     (make-range-params context offset)
-                     (make-given-range-params context bufnr start-pos end-pos
-                                              offset))]
+    (let [params (make-params (. client :offset_encoding))]
       (request-code-actions client bufnr params
                             (fn [actions context]
                               (on-actions actions context)
                               (set pending (- pending 1))
                               (when (= pending 0) (when on-done (on-done))))))))
-
-(fn quickfix? [a] (vim.startswith (or a.kind "") :quickfix))
 
 (fn apply-action [action {: client_id : bufnr}]
   (let [client (vim.lsp.get_client_by_id client_id)
@@ -130,7 +123,7 @@
 
 ;; Viewport quickfix sign: a bulb on every visible line that has a quickfix, unioned across
 ;; all clients.
-(fn codeaction-line-callback [bufnr]
+(fn codeaction-viewport-callback [bufnr]
   (let [clients (code-action-clients bufnr)]
     (when (> (length clients) 0)
       (let [first-line (first-viewport-line)
@@ -147,11 +140,11 @@
                      :only [:quickfix]
                      :triggerKind 1}
             seen {}]
+        ;; viewport request
         (request-all {: clients
                       : bufnr
-                      : context
-                      :start-pos [first-line 0]
-                      :end-pos [ll ll-cols]
+                      :make-params (range-builder context bufnr [first-line 0]
+                                                  [ll ll-cols])
                       :on-actions (fn [actions]
                                     (each [_ line (ipairs (action-lines actions
                                                                         buf-uri))]
@@ -176,45 +169,48 @@
        {:icon "" :hl :Warning :rank (+ 1 (length kind-styles))})
 
 (fn kind-style [kind]
-  (or (accumulate [match1 nil i {: prefix : icon : hl} (ipairs kind-styles)
-                   :until match1]
+  (or (accumulate [found nil i {: prefix : icon : hl} (ipairs kind-styles)
+                   :until found]
         (when (vim.startswith (or kind "") prefix)
           {: icon : hl :rank i})) default-kind-style))
 
 (fn set-winbar-count [bufnr actions-by-kind]
-  (when (not (empty? actions-by-kind))
-    (let [win (nvim_get_current_win)]
-      (when (= (nvim_win_get_buf win) bufnr)
+  (let [win (nvim_get_current_win)]
+    (if (and (not (empty? actions-by-kind)) (= (nvim_win_get_buf win) bufnr))
         (let [entries (icollect [kind actions (pairs actions-by-kind)]
-                        {:n (length actions) :style (kind-style kind)})]
+                        {:count (length actions) :style (kind-style kind)})]
           (table.sort entries #(< (. $1 :style :rank) (. $2 :style :rank)))
           (nvim_set_option_value :winbar
                                  (accumulate [s "" _ entry (ipairs entries)]
-                                   (let [{: n :style {: icon : hl}} entry]
-                                     (.. s "%#DiagnosticSign" hl "#" icon " " n
-                                         "%* ")))
-                                 {: win}))))))
+                                   (let [{: count :style {: icon : hl}} entry]
+                                     (.. s "%#DiagnosticSign" hl "#" icon " "
+                                         count "%* ")))
+                                 {: win}))
+        (nvim_set_option_value :winbar "" {: win}))))
 
-(fn codeaction-position-callback [bufnr]
-  ;; Guard to the focused buffer: keeps the cursor-point request correct and stops an
-  ;; unfocused DiagnosticChanged from building a request for the wrong buffer.
+(fn codeaction-line-callback [bufnr]
   (when (= (nvim_win_get_buf 0) bufnr)
     (let [clients (code-action-clients bufnr)]
       (if (= (length clients) 0)
           (set-winbar-count bufnr [])
           (let [row (current-line)
+                row-cols (line-length-0-indexed bufnr row)
+                context {:triggerKind 1
+                         :diagnostics (M.line_diagnostics bufnr row)}
                 actions []]
+            ;; line request
             (request-all {: clients
                           : bufnr
-                          :context {:triggerKind 1
-                                    :diagnostics (M.line_diagnostics bufnr row)}
+                          :make-params (range-builder context bufnr [row 0]
+                                                      [row row-cols])
                           :on-actions (fn [as]
                                         (each [_ a (ipairs as)]
                                           (table.insert actions a)))
                           :on-done #(when (nvim_buf_is_valid bufnr)
                                       (set-winbar-count bufnr
                                                         (group-by (fn [action]
-                                                                    (case (string.match action.kind
+                                                                    (case (string.match (or action.kind
+                                                                                            "")
                                                                                         "^([^.]*)")
                                                                       (key) key))
                                                                   actions)))})))))
@@ -223,41 +219,25 @@
 (fn M.line_diagnostics [bufnr row]
   (vim.lsp.diagnostic.from (vim.diagnostic.get bufnr {:lnum (- row 1)})))
 
-;; Whole-line quickfixes (matching the gutter sign) come from a line-range request; cursor
-;; refactors come from a zero-width request. The two are unioned, not filtered from one.
 (fn M.code_action []
   (let [bufnr 0
         row (current-line)
         clients (code-action-clients bufnr)
         context {:triggerKind 1 :diagnostics (M.line_diagnostics bufnr row)}
         items []
-        row-cols (line-length-0-indexed bufnr row)
-        gather (fn [result context keep]
-                 (each [_ action (ipairs result)]
-                   (when (keep action)
-                     (table.insert items {: action : context}))))]
-    (var pending (* (length clients) 2))
-    (let [done (fn []
-                 (set pending (- pending 1))
-                 (when (= pending 0)
-                   (if (= (length items) 0)
-                       (vim.notify "No code actions available"
-                                   vim.log.levels.INFO)
-                       (select-and-apply items))))]
-      (request-all {: clients
-                    : bufnr
-                    : context
-                    :start-pos [row 0]
-                    :end-pos [row row-cols]
-                    :on-actions (fn [actions context]
-                                  (gather actions context quickfix?)
-                                  (done))})
-      (request-all {: clients
-                    : bufnr
-                    : context
-                    :on-actions (fn [actions context]
-                                  (gather actions context #(not (quickfix? $)))
-                                  (done))}))))
+        row-cols (line-length-0-indexed bufnr row)]
+    (request-all {: clients
+                  : bufnr
+                  :make-params (range-builder context bufnr [row 0]
+                                              [row row-cols])
+                  :on-actions (fn [actions context]
+                                (each [_ action (ipairs actions)]
+                                  (table.insert items {: action : context})))
+                  :on-done (fn []
+                             (if (= (length items) 0)
+                                 (vim.notify "No code actions available"
+                                             vim.log.levels.INFO)
+                                 (select-and-apply items)))})))
 
 ;; Buffer-scoped (client-agnostic: the callbacks union all code-action clients themselves), so
 ;; register once per buffer no matter how many clients attach.
@@ -270,14 +250,14 @@
                            {: group
                             :buffer bufnr
                             :callback (debounce 100
-                                                #(codeaction-line-callback bufnr))})
+                                                #(codeaction-viewport-callback bufnr))})
       (nvim_create_autocmd [:CursorHold
                             :BufEnter
                             :InsertLeave
                             :DiagnosticChanged]
                            {: group
                             :buffer bufnr
-                            :callback #(codeaction-position-callback bufnr)})
+                            :callback #(codeaction-line-callback bufnr)})
       (nvim_create_autocmd [:BufLeave]
                            {: group
                             :buffer bufnr

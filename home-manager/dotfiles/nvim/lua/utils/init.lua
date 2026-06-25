@@ -105,7 +105,7 @@ local function _16_()
 end
 vim.api.nvim_create_user_command("DebugLogView", _16_, {desc = "View debug log."})
 local function _17_()
-  return vim.cmd(("!rm " .. debug_log))
+  return vim.cmd(("!rm -f " .. debug_log))
 end
 vim.api.nvim_create_user_command("DebugLogClear", _17_, {desc = "View debug log."})
 return M
