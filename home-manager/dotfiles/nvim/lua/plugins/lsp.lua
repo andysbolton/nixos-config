@@ -30,18 +30,28 @@ vim.keymap.set("x", "<leader>x", function()
 end, { desc = "Eval selection as Lua" })
 
 return {
+  -- Disabled: refactor/other code actions are now indicated by cmds.lsp's cursor sign
+  -- (wrench at eol + gutter bulb), quickfixes by its viewport sign. Restore to get the
+  -- bulb back (and code-lens re-skinning, which it only does atop an action anyway).
+  --[[
   {
     "kosayoda/nvim-lightbulb",
     config = function()
       require("nvim-lightbulb").setup {
         autocmd = { enabled = true },
-        priority = 5,
+        priority = 15,
         code_lenses = true,
-        statustext = { enabled = true },
-        -- number = { enabled = true },
+        filter = function(_, result)
+          -- quickfixes handled for current viewport by require("cmds.lsp").setup_codeactions
+          if result.kind == "quickfix" then return false end
+          -- lua parameter swap
+          if vim.startswith(result.title, "Change to parameter") then return false end
+          return true
+        end,
       }
     end,
   },
+  --]]
   {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -89,27 +99,12 @@ return {
         nmap("<leader>wrl", vim.lsp.buf.list_workspace_folders, "[W]orkspace [L]ist Folders")
 
         if client.supports_method "textDocument/codeAction" then
-          -- normal mode: offer actions for the whole current line (matches the lightbulb)
-          vim.keymap.set("n", "<leader>ca", function()
-            local row = vim.api.nvim_win_get_cursor(0)[1]
-            local line = vim.api.nvim_get_current_line()
-            vim.lsp.buf.code_action {
-              context = {
-                diagnostics = require("cmds.lsp").line_diagnostics(0, row),
-                triggerKind = 1,
-              },
-            }
-          end, { buffer = bufnr, desc = "[C]ode [A]ction" })
+          nmap("<leader>ca", require("cmds.lsp").code_action, "[C]ode [A]ction")
 
           -- visual mode: use the selection (builtin default)
-          vim.keymap.set(
-            "v",
-            "<leader>ca",
-            function() vim.lsp.buf.code_action() end,
-            { buffer = bufnr, desc = "[C]ode [A]ction" }
-          )
+          vim.keymap.set("v", "<leader>ca", vim.lsp.buf.code_action, { buffer = bufnr, desc = "[C]ode [A]ction" })
 
-          require("cmds.lsp").setup_codeactions(client, bufnr)
+          require("cmds.lsp").setup_codeactions(bufnr)
         end
 
         if client.supports_method "textDocument/signatureHelp" then

@@ -101,7 +101,7 @@ return {
       fzf.setup(opts)
       -- route vim.ui.select (incl. code actions) through fzf-lua
       fzf.register_ui_select {
-        winopts = { relative = "cursor", width = 1, height = 1, row = 1 },
+        winopts = { width = 0.6, height = 0.8 },
       }
     end,
   },

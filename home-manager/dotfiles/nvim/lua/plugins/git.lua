@@ -13,6 +13,7 @@ return {
         topdelete = { text = "‾" },
         changedelete = { text = "~" },
       },
+      sign_priority = 2,
     },
   },
   "APZelos/blamer.nvim",

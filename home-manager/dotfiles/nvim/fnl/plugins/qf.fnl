@@ -1,4 +1,4 @@
-(import-macros {: tx} :utils.macros)
+(import-macros {: tx} :macros)
 
 [(tx :stevearc/quicker.nvim
      {:config (fn []

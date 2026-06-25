@@ -19,8 +19,7 @@
 (set vim.o.ignorecase true)
 (set vim.o.smartcase true)
 
-;; Keep signcolumn on by defaul
-(set vim.wo.signcolumn :yes)
+(set vim.wo.signcolumn "auto:2")
 
 ;; Decrease update time
 (set vim.o.updatetime 250)

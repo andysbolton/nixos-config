@@ -1,4 +1,4 @@
-(import-macros {: tx} :utils.macros)
+(import-macros {: tx} :macros)
 
 [(tx :hrsh7th/nvim-cmp
      {:dependencies [:hrsh7th/cmp-nvim-lsp
@@ -46,6 +46,12 @@
                               :sources (cmp.config.sources [{:name :nvim_lsp}
                                                             {:name :luasnip}
                                                             {:name :path}
-                                                            {:name :cmdline}
                                                             {:name :codecompanion}]
-                                                           [{:name :buffer}])})))})]
+                                                           [{:name :buffer}])})
+                  (cmp.setup.cmdline ["/" "?"]
+                                     {:mapping (cmp.mapping.preset.cmdline)
+                                      :sources [{:name :buffer}]})
+                  (cmp.setup.cmdline ":"
+                                     {:mapping (cmp.mapping.preset.cmdline)
+                                      :sources (cmp.config.sources [{:name :path}]
+                                                                   [{:name :cmdline}])})))})]

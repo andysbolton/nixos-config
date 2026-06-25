@@ -53,13 +53,15 @@ let
           "wg-proton.service"
           "${name}.service"
         ];
-        serviceConfig.ExecStart = pkgs.writeShellScript "${name}-bridge" ''
-          exec ${pkgs.socat}/bin/socat \
-            TCP6-LISTEN:${toString arrPorts.${name}},fork,reuseaddr,ipv6only=0 \
-            EXEC:"${pkgs.iproute2}/bin/ip netns exec ${modules.vpn.netns} ${pkgs.socat}/bin/socat - TCP\:127.0.0.1\:${toString arrPorts.${name}}"
-        '';
-        serviceConfig.Restart = "on-failure";
-        serviceConfig.RestartSec = "5s";
+        serviceConfig = {
+          ExecStart = pkgs.writeShellScript "${name}-bridge" ''
+            exec ${pkgs.socat}/bin/socat \
+              TCP6-LISTEN:${toString arrPorts.${name}},fork,reuseaddr,ipv6only=0 \
+              EXEC:"${pkgs.iproute2}/bin/ip netns exec ${modules.vpn.netns} ${pkgs.socat}/bin/socat - TCP\:127.0.0.1\:${toString arrPorts.${name}}"
+          '';
+          Restart = "on-failure";
+          RestartSec = "5s";
+        };
       };
 
       networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ arrPorts.${name} ];

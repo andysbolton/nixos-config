@@ -41,8 +41,10 @@ in
 
   modules.wireless = {
     enable = true;
-    ssid = "Hammy 5 GHz";
-    secretsFile = config.sops.secrets."wireless.conf".path;
+    networks = {
+      ssid = "Hammy 5 GHz";
+      secretsFile = config.sops.secrets."wireless.conf".path;
+    };
   };
 
   users.users.andy.extraGroups = [

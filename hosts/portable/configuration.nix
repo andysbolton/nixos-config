@@ -27,8 +27,19 @@
 
   modules.wireless = {
     enable = true;
-    ssid = "Verizon_S9K9SF";
-    secretsFile = config.sops.secrets."wireless.sukh".path;
+    secretsFile = config.sops.secrets."wireless.conf".path;
+    networks = [
+      # clay
+      {
+        ssid = "Fios-Xj7tG";
+        pskRaw = "ext:psk_home";
+      }
+      # miller
+      {
+        ssid = "Verizon_S9K9SF";
+        pskRaw = "ext:psk_sukh";
+      }
+    ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -58,12 +69,7 @@
     defaultSopsFormat = "yaml";
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     gnupg.sshKeyPaths = [ ];
-    secrets."wireless.home" = {
-      owner = "wpa_supplicant";
-      group = "wpa_supplicant";
-      mode = "0440";
-    };
-    secrets."wireless.sukh" = {
+    secrets."wireless.conf" = {
       owner = "wpa_supplicant";
       group = "wpa_supplicant";
       mode = "0440";

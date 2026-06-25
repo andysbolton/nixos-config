@@ -1,16 +1,16 @@
 ## Neovim
 
 - [ ] visual mode indicator
-- [ ] get back diagnostic icons in gutter
+- [x] get back diagnostic icons in gutter
 - [ ] actually investigate codecompanioncli
-- [ ] register fzf as vim.ui.select
+- [x] register fzf as vim.ui.select
 - [ ] execute arbitrary lua (conjure?)
 - [ ] investigate trouble.nvim
 - [ ] client.supports_method is deprecated
 - [ ] look at default code companion cli key maps
 - [ ] move out the stuff at the top of plugins/lsp.lua
 - [ ] move diagnostics out of plugins/lsp.lua
-- [ ] send diagnostics with code actions
+- [x] send diagnostics with code actions
   ```lua
     local nvim_diagnostics = vim.diagnostic.get(bufnr, {
       lnum = start_line,
@@ -20,6 +20,9 @@
 - [ ] move temp ui2 out of metrics.lua
 - [ ] folds
 - [ ] neorg
+- [ ] prevent dupe diagnostic signs
+- [ ] fix yank command. also yank stderr
+- [ ] source code actions not doing anything
 
 ## rofi
 

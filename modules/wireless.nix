@@ -1,12 +1,28 @@
 { config, lib, ... }:
 {
-  options.modules.wireless = {
-    enable = lib.mkEnableOption "wireless networking";
-    ssid = lib.mkOption {
-      type = lib.types.str;
+  options.modules.wireless = with lib; {
+    enable = mkEnableOption "wireless networking";
+    secretsFile = mkOption {
+      type = types.str;
+      description = "Secrets file with PSK passphrase.";
     };
-    secretsFile = lib.mkOption {
-      type = lib.types.path;
+    networks = mkOption {
+      type = types.listOf (
+        types.submodule {
+          options = {
+            ssid = mkOption {
+              type = types.str;
+              description = "SSID of the network.";
+            };
+            pskRaw = mkOption {
+              type = types.str;
+              description = "Name of the PSK in the form of ext:{var_name}.";
+            };
+          };
+        }
+      );
+      default = [ ];
+      description = "List of networks.";
     };
   };
 
@@ -14,12 +30,15 @@
     networking.wireless = {
       enable = true;
       userControlled = true;
-      secretsFile = config.modules.wireless.secretsFile;
       extraConfig = "ctrl_interface=DIR=/run/wpa_supplicant GROUP=wpa_supplicant";
-      networks.${config.modules.wireless.ssid} = {
-        pskRaw = "ext:psk";
-        extraConfig = "disabled=0";
-      };
+      fallbackToWPA2 = false;
+      secretsFile = config.modules.wireless.secretsFile;
+      networks = lib.genAttrs' config.modules.wireless.networks (
+        nw:
+        lib.nameValuePair nw.ssid {
+          pskRaw = nw.pskRaw;
+        }
+      );
     };
   };
 }

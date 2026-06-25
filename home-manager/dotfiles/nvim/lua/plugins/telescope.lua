@@ -60,7 +60,9 @@ return {
       },
     },
     config = function()
+      local actions = require "telescope.actions"
       local lga_actions = require "telescope-live-grep-args.actions"
+
       require("telescope").setup {
         extensions = {
           live_grep_args = {
@@ -79,8 +81,7 @@ return {
         defaults = {
           mappings = {
             i = {
-              ["<C-u>"] = false,
-              ["<C-d>"] = false,
+              ["<C-s>"] = actions.select_vertical,
             },
           },
         },
