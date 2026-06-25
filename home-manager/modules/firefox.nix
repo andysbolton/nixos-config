@@ -61,7 +61,4 @@
       SkipTermsOfUse = true;
     };
   };
-
-  home.sessionSearchVariables = { "FIREFOX_BOOKMARKS_FOLDER"  = if
-  pkgs.stdenv.isDarwin "$HOME/Library/Application Support/Firefox/Profiles/home/" else "";  };
 }

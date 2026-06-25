@@ -40,7 +40,8 @@
     (tset :context context)))
 
 (fn range-builder [context bufnr start-pos end-pos]
-  (if (or (= bufnr start-pos end-pos nil) (= (tail end-pos) 0))
+  (if (or (= bufnr start-pos end-pos nil)
+          (and (= (head start-pos) (head end-pos)) (= (tail end-pos) 0)))
       (fn [offset] (make-range-params context offset))
       (fn [offset]
         (make-given-range-params context bufnr start-pos end-pos offset))))
@@ -188,56 +189,66 @@
                                  {: win}))
         (nvim_set_option_value :winbar "" {: win}))))
 
-(fn codeaction-line-callback [bufnr]
-  (when (= (nvim_win_get_buf 0) bufnr)
-    (let [clients (code-action-clients bufnr)]
-      (if (= (length clients) 0)
-          (set-winbar-count bufnr [])
-          (let [row (current-line)
-                row-cols (line-length-0-indexed bufnr row)
-                context {:triggerKind 1
-                         :diagnostics (M.line_diagnostics bufnr row)}
-                actions []]
-            ;; line request
+;; Fan a line-range and a zero-width cursor request out to every code-action client and union the results (deduped by kind+title).
+(fn request-code-actions-union [bufnr on-complete]
+  (let [clients (code-action-clients bufnr)
+        row (current-line)
+        row-cols (line-length-0-indexed bufnr row)
+        context {:triggerKind 1 :diagnostics (M.line_diagnostics bufnr row)}
+        seen {}
+        items []
+        gather (fn [actions context]
+                 (each [_ action (ipairs actions)]
+                   (let [key (.. (or action.kind "") (or action.title ""))]
+                     (when (not (. seen key))
+                       (tset seen key true)
+                       (table.insert items {: action : context})))))]
+    (if (= (length clients) 0)
+        (on-complete items)
+        (do
+          (var pending (* (length clients) 2))
+          (let [done (fn []
+                       (set pending (- pending 1))
+                       (when (= pending 0) (on-complete items)))
+                line-params (range-builder context bufnr [row 0] [row row-cols])
+                cursor-params (range-builder context)]
             (request-all {: clients
                           : bufnr
-                          :make-params (range-builder context bufnr [row 0]
-                                                      [row row-cols])
-                          :on-actions (fn [as]
-                                        (each [_ a (ipairs as)]
-                                          (table.insert actions a)))
-                          :on-done #(when (nvim_buf_is_valid bufnr)
-                                      (set-winbar-count bufnr
-                                                        (group-by (fn [action]
-                                                                    (case (string.match (or action.kind
-                                                                                            "")
-                                                                                        "^([^.]*)")
-                                                                      (key) key))
-                                                                  actions)))})))))
+                          :make-params line-params
+                          :on-actions (fn [actions context]
+                                        (gather actions context)
+                                        (done))})
+            (request-all {: clients
+                          : bufnr
+                          :make-params cursor-params
+                          :on-actions (fn [actions context]
+                                        (gather actions context)
+                                        (done))}))))))
+
+(fn codeaction-line-callback [bufnr]
+  (when (= (nvim_win_get_buf 0) bufnr)
+    (request-code-actions-union bufnr
+                                (fn [items]
+                                  (when (nvim_buf_is_valid bufnr)
+                                    (set-winbar-count bufnr
+                                                      (group-by (fn [item]
+                                                                  (case (string.match (or item.action.kind
+                                                                                          "")
+                                                                                      "^([^.]*)")
+                                                                    (key) key))
+                                                                items))))))
   nil)
 
 (fn M.line_diagnostics [bufnr row]
   (vim.lsp.diagnostic.from (vim.diagnostic.get bufnr {:lnum (- row 1)})))
 
 (fn M.code_action []
-  (let [bufnr 0
-        row (current-line)
-        clients (code-action-clients bufnr)
-        context {:triggerKind 1 :diagnostics (M.line_diagnostics bufnr row)}
-        items []
-        row-cols (line-length-0-indexed bufnr row)]
-    (request-all {: clients
-                  : bufnr
-                  :make-params (range-builder context bufnr [row 0]
-                                              [row row-cols])
-                  :on-actions (fn [actions context]
-                                (each [_ action (ipairs actions)]
-                                  (table.insert items {: action : context})))
-                  :on-done (fn []
-                             (if (= (length items) 0)
-                                 (vim.notify "No code actions available"
-                                             vim.log.levels.INFO)
-                                 (select-and-apply items)))})))
+  (request-code-actions-union 0
+                              (fn [items]
+                                (if (= (length items) 0)
+                                    (vim.notify "No code actions available"
+                                                vim.log.levels.INFO)
+                                    (select-and-apply items)))))
 
 ;; Buffer-scoped (client-agnostic: the callbacks union all code-action clients themselves), so
 ;; register once per buffer no matter how many clients attach.

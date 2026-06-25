@@ -45,7 +45,7 @@ local function make_range_params(context, offset_encoding)
   return tmp_9_
 end
 local function range_builder(context, bufnr, start_pos, end_pos)
-  if (((bufnr == start_pos) and (start_pos == end_pos) and (end_pos == nil)) or (tail(end_pos) == 0)) then
+  if (((bufnr == start_pos) and (start_pos == end_pos) and (end_pos == nil)) or ((head(start_pos) == head(end_pos)) and (tail(end_pos) == 0))) then
     local function _2_(offset)
       return make_range_params(context, offset)
     end
@@ -376,40 +376,73 @@ local function set_winbar_count(bufnr, actions_by_kind)
     return nvim_set_option_value("winbar", "", {win = win})
   end
 end
-local function codeaction_line_callback(bufnr)
-  if (nvim_win_get_buf(0) == bufnr) then
-    local clients = code_action_clients(bufnr)
-    if (#clients == 0) then
-      set_winbar_count(bufnr, {})
-    else
-      local row = current_line()
-      local row_cols = line_length_0_indexed(bufnr, row)
-      local context = {triggerKind = 1, diagnostics = M.line_diagnostics(bufnr, row)}
-      local actions = {}
-      local function _69_(as)
-        for _, a in ipairs(as) do
-          table.insert(actions, a)
-        end
+local function request_code_actions_union(bufnr, on_complete)
+  local clients = code_action_clients(bufnr)
+  local row = current_line()
+  local row_cols = line_length_0_indexed(bufnr, row)
+  local context = {triggerKind = 1, diagnostics = M.line_diagnostics(bufnr, row)}
+  local seen = {}
+  local items = {}
+  local gather
+  local function _69_(actions, context0)
+    for _, action in ipairs(actions) do
+      local key = ((action.kind or "") .. (action.title or ""))
+      if not seen[key] then
+        seen[key] = true
+        table.insert(items, {action = action, context = context0})
+      else
+      end
+    end
+    return nil
+  end
+  gather = _69_
+  if (#clients == 0) then
+    return on_complete(items)
+  else
+    local pending = (#clients * 2)
+    local done
+    local function _71_()
+      pending = (pending - 1)
+      if (pending == 0) then
+        return on_complete(items)
+      else
         return nil
       end
-      local function _70_()
-        if nvim_buf_is_valid(bufnr) then
-          local function _71_(action)
-            local case_72_ = string.match((action.kind or ""), "^([^.]*)")
-            if (nil ~= case_72_) then
-              local key = case_72_
-              return key
-            else
-              return nil
-            end
-          end
-          return set_winbar_count(bufnr, group_by(_71_, actions))
-        else
-          return nil
-        end
-      end
-      request_all({clients = clients, bufnr = bufnr, ["make-params"] = range_builder(context, bufnr, {row, 0}, {row, row_cols}), ["on-actions"] = _69_, ["on-done"] = _70_})
     end
+    done = _71_
+    local line_params = range_builder(context, bufnr, {row, 0}, {row, row_cols})
+    local cursor_params = range_builder(context)
+    local function _73_(actions, context0)
+      gather(actions, context0)
+      return done()
+    end
+    request_all({clients = clients, bufnr = bufnr, ["make-params"] = line_params, ["on-actions"] = _73_})
+    local function _74_(actions, context0)
+      gather(actions, context0)
+      return done()
+    end
+    return request_all({clients = clients, bufnr = bufnr, ["make-params"] = cursor_params, ["on-actions"] = _74_})
+  end
+end
+local function codeaction_line_callback(bufnr)
+  if (nvim_win_get_buf(0) == bufnr) then
+    local function _76_(items)
+      if nvim_buf_is_valid(bufnr) then
+        local function _77_(item)
+          local case_78_ = string.match((item.action.kind or ""), "^([^.]*)")
+          if (nil ~= case_78_) then
+            local key = case_78_
+            return key
+          else
+            return nil
+          end
+        end
+        return set_winbar_count(bufnr, group_by(_77_, items))
+      else
+        return nil
+      end
+    end
+    request_code_actions_union(bufnr, _76_)
   else
   end
   return nil
@@ -418,44 +451,32 @@ M.line_diagnostics = function(bufnr, row)
   return vim.lsp.diagnostic.from(vim.diagnostic.get(bufnr, {lnum = (row - 1)}))
 end
 M.code_action = function()
-  local bufnr = 0
-  local row = current_line()
-  local clients = code_action_clients(bufnr)
-  local context = {triggerKind = 1, diagnostics = M.line_diagnostics(bufnr, row)}
-  local items = {}
-  local row_cols = line_length_0_indexed(bufnr, row)
-  local function _77_(actions, context0)
-    for _, action in ipairs(actions) do
-      table.insert(items, {action = action, context = context0})
-    end
-    return nil
-  end
-  local function _78_()
+  local function _82_(items)
     if (#items == 0) then
       return vim.notify("No code actions available", vim.log.levels.INFO)
     else
       return select_and_apply(items)
     end
   end
-  return request_all({clients = clients, bufnr = bufnr, ["make-params"] = range_builder(context, bufnr, {row, 0}, {row, row_cols}), ["on-actions"] = _77_, ["on-done"] = _78_})
+  return request_code_actions_union(0, _82_)
 end
 M.setup_codeactions = function(bufnr)
   if not vim.b[bufnr].code_action_setup then
     vim.b[bufnr]["code_action_setup"] = true
     local group = nvim_create_augroup(("code_action_bufnr_" .. bufnr), {clear = true})
-    local function _80_()
+    local function _84_()
       return codeaction_viewport_callback(bufnr)
     end
-    nvim_create_autocmd({"DiagnosticChanged", "WinScrolled"}, {group = group, buffer = bufnr, callback = debounce(100, _80_)})
-    local function _81_()
+    nvim_create_autocmd({"DiagnosticChanged", "WinScrolled"}, {group = group, buffer = bufnr, callback = debounce(100, _84_)})
+    local function _85_()
       return codeaction_line_callback(bufnr)
     end
-    nvim_create_autocmd({"CursorHold", "BufEnter", "InsertLeave", "DiagnosticChanged"}, {group = group, buffer = bufnr, callback = _81_})
-    local function _82_()
+    nvim_create_autocmd({"CursorHold", "BufEnter", "InsertLeave", "DiagnosticChanged"}, {group = group, buffer = bufnr, callback = _85_})
+    local function _86_()
       set_winbar_count(bufnr, {})
       return nil
     end
-    return nvim_create_autocmd({"BufLeave"}, {group = group, buffer = bufnr, callback = _82_})
+    return nvim_create_autocmd({"BufLeave"}, {group = group, buffer = bufnr, callback = _86_})
   else
     return nil
   end
