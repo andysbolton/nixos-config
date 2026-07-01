@@ -42,7 +42,7 @@
                                   {:desc "View debug log."})
 
 (vim.api.nvim_create_user_command :DebugLogClear
-                                  #(vim.cmd (.. "!rm " debug-log))
+                                  #(vim.cmd (.. "!rm -f " debug-log))
                                   {:desc "View debug log."})
 
 M
