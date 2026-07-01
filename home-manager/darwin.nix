@@ -77,6 +77,53 @@ in
     sketchybarBottom
   ];
 
+  # Global context loaded into every Claude Code session (~/.claude/CLAUDE.md).
+  # Plain markdown; escape ''${ as '''${ and '' as ''' if you add code samples.
+  programs.claude-code.context = ''
+    # Global instructions
+
+    - Be concise and direct — skip preamble and flattery, don't overexplain. Applies equally to chat, Jira comments, and PR descriptions.
+    - Match the style and conventions of the surrounding code.
+    - Don't comment self-evident code; reserve comments for non-obvious logic, and keep any explanatory context short.
+  '';
+
+  programs.claude-code.mcpServers = {
+    atlassian = {
+      type = "sse";
+      url = "https://mcp.atlassian.com/v1/sse";
+    };
+
+    azure = {
+      type = "stdio";
+      command = "npx";
+      args = [
+        "-y"
+        "@azure/mcp@latest"
+        "server"
+        "start"
+      ];
+    };
+
+    azure-devops = {
+      type = "stdio";
+      command = "npx";
+      args = [
+        "-y"
+        "@azure-devops/mcp"
+        "smartwyre"
+      ];
+    };
+
+    terraform = {
+      type = "stdio";
+      command = "npx";
+      args = [
+        "-y"
+        "terraform-mcp-server"
+      ];
+    };
+  };
+
   home.sessionPath = [
     "${config.home.homeDirectory}/Applications/Home Manager Apps/WezTerm.app"
   ];

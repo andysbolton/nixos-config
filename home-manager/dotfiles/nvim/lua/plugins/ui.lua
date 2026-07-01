@@ -72,6 +72,12 @@ return {
   },
 
   {
+    "mvllow/modes.nvim",
+    tag = "v0.2.1",
+    config = function() require("modes").setup() end,
+  },
+
+  {
     "nvim-lualine/lualine.nvim",
     config = function()
       require("lualine").setup {
@@ -113,7 +119,7 @@ return {
     config = function()
       require("notify").setup {
         stages = "fade_in_slide_out",
-        timeout = 3000,
+        timeout = 2500,
         icons = {
           ERROR = "",
           WARN = "",
@@ -122,6 +128,7 @@ return {
           TRACE = "✎",
         },
         render = "wrapped-default",
+        merge_duplicates = true,
       }
       vim.notify = require "notify"
     end,

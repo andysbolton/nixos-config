@@ -189,7 +189,7 @@
                 window_opacity_duration 0.0 \
                 active_window_opacity 1.0 \
                 normal_window_opacity 0.90 \
-                window_animation_duration 0.3 \
+                window_animation_duration 0.0 \
                 window_opacity on \
                 insert_feedback_color 0xffd75f5f \
                 split_ratio 0.50 \
@@ -212,10 +212,11 @@
             yabai -m rule --add app="^GatherV2$" display=1 space=3
             yabai -m rule --add app="^Proton VPN$" display=1 space=7
 
-            yabai -m rule --add app="^WezTerm\$" title="^(launcher|search-nix-pkgs)$" manage=off sub-layer=above
-            yabai -m signal --add label="wezterm_created" event=window_created app="^WezTerm\$" action="
+            yabai -m rule --add app="^WezTerm\$" title="^(launcher|search-nix-pkgs)$" manage=off
+
+            yabai -m signal --add label="wezterm_created" event=window_created app="^WezTerm\$" action='
                 yabai -m window $YABAI_WINDOW_ID --focus
-            "
+            '
             ${ensureDisplays}
 
             for event in display_added display_removed system_woke; do

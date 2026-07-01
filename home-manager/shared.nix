@@ -68,7 +68,6 @@ in
     age # simple modern file encryption tool
     bat # cat replacement with syntax highlighting
     bat-extras.core
-    claude-code
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
     docker-compose
@@ -94,6 +93,7 @@ in
     nh # helper CLI for Nix/Home Manager workflows
     nix-tree
     nixfmt
+    nodejs_24 # Node.js runtime — npx for MCP servers & general tooling
     pkgs-unstable.gh
     pkgs-unstable.opencode
     postgresql
@@ -117,6 +117,41 @@ in
     whois
     zoxide # smarter cd command
   ];
+
+  programs.claude-code.enable = true;
+
+  # Merge a "notify when done" Stop hook into ~/.claude/settings.json without
+  # letting nix own the file (so interactive /model, /fast, etc. still persist).
+  home.activation.claudeStopNotifyHook =
+    let
+      notifyCommand =
+        if pkgs.stdenv.hostPlatform.isDarwin then
+          "/usr/bin/osascript -e 'display notification \"Finished working\" with title \"Claude Code\"' # hm-claude-stop-notify"
+        else
+          "${pkgs.libnotify}/bin/notify-send 'Claude Code' 'Finished working' # hm-claude-stop-notify";
+    in
+    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      settings="$HOME/.claude/settings.json"
+      ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+      [ -s "$settings" ] || echo '{}' > "$settings"
+
+      cmd=${lib.escapeShellArg notifyCommand}
+      new=$(${pkgs.jq}/bin/jq --arg cmd "$cmd" '
+        .hooks //= {}
+        | .hooks.Stop = [
+            (.hooks.Stop // [])[]
+            | select(((.hooks // []) | map(.command // "") | any(contains("hm-claude-stop-notify"))) | not)
+          ]
+        | .hooks.Stop += [ { hooks: [ { type: "command", command: $cmd } ] } ]
+      ' "$settings" 2>/dev/null) || {
+        echo "claude-code: settings.json is not valid JSON, skipping Stop-hook patch" >&2
+        new=""
+      }
+
+      if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
+        printf '%s\n' "$new" > "$settings"
+      fi
+    '';
 
   programs.neovim = {
     enable = true;
