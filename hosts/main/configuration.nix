@@ -145,10 +145,6 @@ in
   # but gutenprint provides extra compatibility if needed.
   services.printing.drivers = [ pkgs.gutenprint ];
 
-  virtualisation.docker = {
-    enable = true;
-  };
-
   systemd.settings.Manager = {
     ShowStatus = "Yes";
   };

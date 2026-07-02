@@ -17,7 +17,7 @@
   (accumulate [found? false _ x (ipairs list) :until found?]
     (pred x)))
 
-(fn M.tail [list]
+(fn M.last [list]
   (. list (length list)))
 
 (fn M.head [list] (. list 1))

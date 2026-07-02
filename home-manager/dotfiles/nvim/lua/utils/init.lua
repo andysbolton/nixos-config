@@ -72,7 +72,7 @@ M["any?"] = function(pred, list)
   end
   return found_3f
 end
-M.tail = function(list)
+M.last = function(list)
   return list[#list]
 end
 M.head = function(list)
