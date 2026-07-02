@@ -126,13 +126,13 @@ in
     let
       notifyCommand =
         if pkgs.stdenv.hostPlatform.isDarwin then
-          "/usr/bin/osascript -e 'display notification \"Finished working\" with title \"Claude Code\"' # hm-claude-stop-notify"
+          "/usr/bin/osascript -e 'display notification \"Finished working\" with title \"Claude Code\" sound name \"Glass\"' # hm-claude-stop-notify"
         else
-          "${pkgs.libnotify}/bin/notify-send 'Claude Code' 'Finished working' # hm-claude-stop-notify";
+          "${pkgs.libnotify}/bin/notify-send 'Claude Code' 'Finished working'; ${pkgs.libcanberra-gtk3}/bin/canberra-gtk-play -f ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga # hm-claude-stop-notify";
     in
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       settings="$HOME/.claude/settings.json"
-      ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+      ${pkgs.busybox}/bin/mkdir -p "$HOME/.claude"
       [ -s "$settings" ] || echo '{}' > "$settings"
 
       cmd=${lib.escapeShellArg notifyCommand}
@@ -148,7 +148,7 @@ in
         new=""
       }
 
-      if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
+      if [ -n "$new" ] && [ "$new" != "$(${pkgs.busybox}/bin/cat "$settings")" ]; then
         printf '%s\n' "$new" > "$settings"
       fi
     '';

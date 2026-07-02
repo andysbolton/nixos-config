@@ -82,9 +82,12 @@ in
   programs.claude-code.context = ''
     # Global instructions
 
-    - Be concise and direct — skip preamble and flattery, don't overexplain. Applies equally to chat, Jira comments, and PR descriptions.
-    - Match the style and conventions of the surrounding code.
+    - Be concise and direct — skip preamble and flattery. Applies to chat, Jira comments, and PR descriptions.
+    - State each fact once. Don't restate context or explain the same thing two ways.
     - Don't comment self-evident code; reserve comments for non-obvious logic, and keep any explanatory context short.
+    - Length must be earned by complexity or risk, not padding. When unsure, cut.
+    - PR descriptions: routine change → self-contained body. Risky or multi-step change → short body (what / why + links), with the runbook (ordered steps, timings, rollback) living in a Confluence document and linked from the PR.
+    - Make minimal changes. If something can be written better, bring it up but don't implement it immediately.
   '';
 
   programs.claude-code.mcpServers = {
