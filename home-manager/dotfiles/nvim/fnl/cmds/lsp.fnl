@@ -1,6 +1,6 @@
 (local M {})
 
-(local {: group-by : head : empty? : debounce : tail} (require :utils))
+(local {: group-by : head : empty? : debounce : last} (require :utils))
 (local {: nvim_buf_clear_namespace
         : nvim_buf_get_lines
         : nvim_buf_is_valid
@@ -21,11 +21,8 @@
 (fn current-line [] (head (nvim_win_get_cursor 0)))
 
 (fn line-length-0-indexed [bufnr line]
-  (-> (nvim_buf_get_lines bufnr (- line 1) line false)
-      head
-      length
-      (- 1)
-      (math.max 0)))
+  (let [[line] (nvim_buf_get_lines bufnr (- line 1) line false)]
+    (-> (length (or line "")) (- 1) (math.max 0))))
 
 (fn code-action-clients [bufnr]
   (vim.lsp.get_clients {: bufnr :method :textDocument/codeAction}))
@@ -41,7 +38,7 @@
 
 (fn range-builder [context bufnr start-pos end-pos]
   (if (or (= bufnr start-pos end-pos nil)
-          (and (= (head start-pos) (head end-pos)) (= (tail end-pos) 0)))
+          (and (= (head start-pos) (head end-pos)) (= (last end-pos) 0)))
       (fn [offset] (make-range-params context offset))
       (fn [offset]
         (make-given-range-params context bufnr start-pos end-pos offset))))

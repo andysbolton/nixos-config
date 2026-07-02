@@ -182,6 +182,7 @@ in
       nixd
       omnisharp-roslyn # omnisharp
       pyright
+      svelte-language-server
       terraform-ls # terraformls
       typescript # tsserver, required by ts_ls
       typescript-language-server # ts_ls

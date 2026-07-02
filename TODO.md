@@ -23,6 +23,7 @@
 - [ ] prevent dupe diagnostic signs
 - [ ] fix yank command. also yank stderr
 - [ ] source code actions not doing anything
+- [ ] codeactions: bring back diff
 
 ## rofi
 

@@ -10,9 +10,9 @@ end
 
 config.term = "xterm-256color"
 config.adjust_window_size_when_changing_font_size = false
-config.enable_wayland = false
+config.enable_wayland = true
 
-config.front_end = "OpenGL"
+config.front_end = "WebGpu"
 
 config.default_prog = { "fish" }
 
@@ -25,7 +25,7 @@ config.font = wezterm.font_with_fallback({
 })
 config.font_size = wezterm.hostname() == "main" and 13 or 15
 config.line_height = 1.1
-config.window_decorations = "RESIZE"
+config.window_decorations = "NONE"
 config.use_dead_keys = false
 config.colors = {
 	cursor_fg = "black",

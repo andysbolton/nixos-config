@@ -130,4 +130,9 @@
   services.blueman.enable = true;
   services.udisks2.enable = true;
   security.polkit.enable = true;
+
+  virtualisation.podman = {
+    enable = true;
+  };
+
 }
