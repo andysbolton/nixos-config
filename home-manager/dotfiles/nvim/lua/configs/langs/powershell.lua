@@ -11,4 +11,5 @@ return {
     },
     autoinstall = false,
   },
+  treesitter = { "powershell" },
 }

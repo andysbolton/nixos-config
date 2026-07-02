@@ -47,6 +47,12 @@ handle_selection() {
 		echo "spaces.sh"
 		return
 
+	elif [[ "$choice" =~ ^\?j ]]; then
+		# Extract everything after "?j "
+		rest=${choice//?j /}
+		open_app "Firefox.app" "\"https://smartwyre.atlassian.net/browse/$rest\"" -na
+		return
+
 	elif [[ "$choice" =~ ^\?gh ]]; then
 		# Extract everything after "?gh"
 		rest=${choice//?gh/}

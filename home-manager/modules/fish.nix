@@ -274,7 +274,18 @@ in
                   | (.key | sub("^legacyPackages\\\.[^.]+\\\.";"")) as $attr
                   | (.value.version // "") as $ver
                   | (.value.description // "" | gsub("[\n\t]";" ")) as $desc
-                  | "\($attr)\t\($ver)\t\u001b[2m\($desc)\u001b[0m\n"
+                  | "\($attr)\t\($ver)\t\($desc)\n"
+                ' |
+                awk -F'\t' '
+                  function substr_trim(string, trim_to) {
+                      if (length(string) > trim_to) {
+                          return substr(string, 1, trim_to - 1) "…" # only subtract 1 as "..." is a single ligature character
+                      }
+                      return string
+                  }
+                  {
+                      printf "%-25s %-12s %s\n", substr_trim($1, 25), substr_trim($2, 12), $3
+                  }
                 ' >"$tmp"
                 mv "$tmp" "$snapshot"
             end
@@ -293,32 +304,34 @@ in
       };
 
       unlock = {
-        body = ''
-          if [ (count $argv) -lt 2 ]
-            echo "Usage: unlock <sandbox> <prefix1> [prefix2] ... [prefixN]"
-            return 1
-          end
+        body =
+          # fish
+          ''
+            if [ (count $argv) -lt 2 ]
+              echo "Usage: unlock <sandbox> <prefix1> [prefix2] ... [prefixN]"
+              return 1
+            end
 
-          set sandbox $argv[1]
+            set sandbox $argv[1]
 
-          for prefix in $argv[2..-1]
-            set suffix "state.tfstateenv:$sandbox"
-            for blob in (az storage blob list \
-              --account-name sttfstatecusglobal \
-              --container-name tfstate \
-              --prefix $prefix \
-              --auth-mode login \
-              --query "[?ends_with(name, '$suffix')].name" \
-              -o tsv)
-              echo "Breaking lease on: $blob"
-              az storage blob lease break \
+            for prefix in $argv[2..-1]
+              set suffix "state.tfstateenv:$sandbox"
+              for blob in (az storage blob list \
                 --account-name sttfstatecusglobal \
                 --container-name tfstate \
-                --blob-name $blob \
-                --auth-mode login
+                --prefix $prefix \
+                --auth-mode login \
+                --query "[?ends_with(name, '$suffix')].name" \
+                -o tsv)
+                echo "Breaking lease on: $blob"
+                az storage blob lease break \
+                  --account-name sttfstatecusglobal \
+                  --container-name tfstate \
+                  --blob-name $blob \
+                  --auth-mode login
+              end
             end
-          end
-        '';
+          '';
       };
     }
     // (

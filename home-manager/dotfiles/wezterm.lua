@@ -33,6 +33,10 @@ config.colors = {
 config.window_close_confirmation = "NeverPrompt"
 config.window_background_opacity = 0.75
 
+local function is_mac()
+	return wezterm.target_triple:find("darwin") ~= nil
+end
+
 -- Equivalent to POSIX basename(3)
 -- Given "/foo/bar" returns "bar"
 -- Given "c:\\foo\\bar" returns "bar"
@@ -56,6 +60,30 @@ local tab_title = function(tab_info)
 	local baseexe = basename(tab_info.active_pane.foreground_process_name)
 	local fmt_dir = fmt_working_dir(tab_info.active_pane.current_working_dir)
 	return baseexe .. " @ " .. fmt_dir
+end
+
+wezterm.on("gui-startup", function(cmd)
+	if not is_mac() then
+		return
+	end
+
+	local _, _, window = wezterm.mux.spawn_window(cmd or {})
+	local gui = window:gui_window()
+
+	local screen = wezterm.gui.screens().active
+
+	local dims = gui:get_dimensions()
+
+	local center_x = screen.x + ((screen.width - dims.pixel_width) / 2)
+	local center_y = screen.y + ((screen.height - dims.pixel_height) / 2)
+
+	-- 4. Snap it into place before the first frame renders
+	gui:set_position(center_x, center_y)
+end)
+
+if is_mac() then
+	config.initial_rows = 30
+	config.initial_cols = 100
 end
 
 wezterm.on("format-tab-title", function(tab, tabs)
