@@ -66,6 +66,33 @@ in
       azure-cli-extensions.durabletask
       azure-cli-extensions.resource-graph
     ])
+    (pkgs.writeShellScriptBin "kvm-kiosk" ''
+      out=$(nix build ${config.repoPath}#nixosConfigurations.kvm-kiosk.config.system.build.images.qemu-efi --print-out-paths --no-link)
+      base=$(echo "$out"/*.qcow2)
+      overlay="${config.home.homeDirectory}/vms/kvm-kiosk-overlay.qcow2"
+      mkdir -p "${config.home.homeDirectory}/vms"
+      cur=$(${pkgs.qemu}/bin/qemu-img info --output=json "$overlay" 2>/dev/null | ${pkgs.jq}/bin/jq -r '."backing-filename" // empty')
+
+      if [ "$cur" != "$base" ]; then
+        echo "New base image, recreating overlay..."
+        ${pkgs.qemu}/bin/qemu-img create -f qcow2 -F qcow2 -b "$base" "$overlay"
+      fi
+
+      exec ${pkgs.qemu}/bin/qemu-system-aarch64 \
+        -machine virt \
+        -accel hvf \
+        -cpu host \
+        -m 2G \
+        -smp 2 \
+        -drive file="$overlay",if=virtio \
+        -drive if=pflash,format=raw,readonly=on,file=${pkgs.qemu}/share/qemu/edk2-aarch64-code.fd \
+        -device virtio-gpu-pci \
+        -display cocoa,full-grab=on,zoom-to-fit=on \
+        -device qemu-xhci \
+        -device usb-kbd \
+        -device usb-tablet \
+        "$@"
+    '')
     desktoppr
     gatherv2
     jira-cli-go

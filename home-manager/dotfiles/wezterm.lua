@@ -10,7 +10,7 @@ end
 
 config.term = "xterm-256color"
 config.adjust_window_size_when_changing_font_size = false
-config.enable_wayland = true
+-- config.enable_wayland = true
 
 config.front_end = "WebGpu"
 
@@ -25,7 +25,6 @@ config.font = wezterm.font_with_fallback({
 })
 config.font_size = wezterm.hostname() == "main" and 13 or 15
 config.line_height = 1.1
-config.window_decorations = "NONE"
 config.use_dead_keys = false
 config.colors = {
 	cursor_fg = "black",
@@ -57,6 +56,10 @@ local function fmt_working_dir(s)
 end
 
 local tab_title = function(tab_info)
+	if not tab_info.active_pane.current_working_dir then
+		return "no working dir"
+	end
+
 	local baseexe = basename(tab_info.active_pane.foreground_process_name)
 	local fmt_dir = fmt_working_dir(tab_info.active_pane.current_working_dir)
 	return baseexe .. " @ " .. fmt_dir
@@ -84,6 +87,10 @@ end)
 if is_mac() then
 	config.initial_rows = 30
 	config.initial_cols = 100
+
+	config.window_decorations = "RESIZE"
+else
+	config.window_decorations = "NONE"
 end
 
 wezterm.on("format-tab-title", function(tab, tabs)
@@ -132,7 +139,7 @@ wezterm.on("format-tab-title", function(tab, tabs)
 	end
 end)
 
-config.leader = { key = " ", mods = "ALT" }
+config.leader = { key = " ", mods = "CMD" }
 config.keys = {
 	{ key = "F", mods = "CTRL|SHIFT", action = act.Search("CurrentSelectionOrEmptyString") },
 	{ key = "X", mods = "CTRL|SHIFT", action = act.ActivateCopyMode },
@@ -140,18 +147,18 @@ config.keys = {
 	{
 		key = "h",
 		mods = "ALT|CTRL",
-		action = act.AdjustPaneSize({ "Left", 10 }),
+		action = act.AdjustPaneSize({ "Left", 5 }),
 	},
 	{
 		key = "j",
 		mods = "ALT|CTRL",
-		action = act.AdjustPaneSize({ "Down", 10 }),
+		action = act.AdjustPaneSize({ "Down", 5 }),
 	},
-	{ key = "k", mods = "ALT|CTRL", action = act.AdjustPaneSize({ "Up", 10 }) },
+	{ key = "k", mods = "ALT|CTRL", action = act.AdjustPaneSize({ "Up", 5 }) },
 	{
 		key = "l",
 		mods = "ALT|CTRL",
-		action = act.AdjustPaneSize({ "Right", 10 }),
+		action = act.AdjustPaneSize({ "Right", 5 }),
 	},
 	{
 		key = "h",
@@ -190,7 +197,7 @@ config.keys = {
 		mods = "LEADER",
 		action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
-	{ key = "v", mods = "CTRL", action = act.PasteFrom("Clipboard") },
+	{ key = "V", mods = "CTRL", action = act.PasteFrom("Clipboard") },
 	{
 		key = "Enter",
 		mods = "ALT",

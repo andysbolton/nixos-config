@@ -218,11 +218,11 @@ return {
 
       local preambles = { bash = { "# shellcheck shell=bash", "# shellcheck disable=SC2215" } }
 
-      vim.api.nvim_create_autocmd("FileType", {
-        pattern = "nix",
-        group = vim.api.nvim_create_augroup("otter_nix", { clear = true }),
-        callback = function() require("otter").activate(nil, nil, true, nil, preambles) end,
-      })
+      -- vim.api.nvim_create_autocmd("FileType", {
+      --   pattern = "nix",
+      --   group = vim.api.nvim_create_augroup("otter_nix", { clear = true }),
+      --   callback = function() require("otter").activate(nil, nil, true, nil, preambles) end,
+      -- })
     end,
   },
 }

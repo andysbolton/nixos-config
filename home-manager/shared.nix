@@ -126,32 +126,29 @@ in
     let
       notifyCommand =
         if pkgs.stdenv.hostPlatform.isDarwin then
-          "/usr/bin/osascript -e 'display notification \"Finished working\" with title \"Claude Code\" sound name \"Glass\"' # hm-claude-stop-notify"
+          "/usr/bin/osascript -e 'display notification \"Finished working\" with title \"Claude Code\" sound name \"Glass\"'"
         else
           "${pkgs.libnotify}/bin/notify-send 'Claude Code' 'Finished working'; ${pkgs.libcanberra-gtk3}/bin/canberra-gtk-play -f ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga # hm-claude-stop-notify";
     in
-    lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      settings="$HOME/.claude/settings.json"
-      ${pkgs.busybox}/bin/mkdir -p "$HOME/.claude"
-      [ -s "$settings" ] || echo '{}' > "$settings"
+    lib.hm.dag.entryAfter [ "writeBoundary" ]
+      # bash
+      ''
+        settings="$HOME/.claude/settings.json"
+        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+        [ -s "$settings" ] || echo '{}' > "$settings"
 
-      cmd=${lib.escapeShellArg notifyCommand}
-      new=$(${pkgs.jq}/bin/jq --arg cmd "$cmd" '
-        .hooks //= {}
-        | .hooks.Stop = [
-            (.hooks.Stop // [])[]
-            | select(((.hooks // []) | map(.command // "") | any(contains("hm-claude-stop-notify"))) | not)
-          ]
-        | .hooks.Stop += [ { hooks: [ { type: "command", command: $cmd } ] } ]
-      ' "$settings" 2>/dev/null) || {
-        echo "claude-code: settings.json is not valid JSON, skipping Stop-hook patch" >&2
-        new=""
-      }
+        cmd=${lib.escapeShellArg notifyCommand}
+        new=$(${pkgs.jq}/bin/jq --arg cmd "$cmd" '
+          .hooks.Stop |= [ { hooks: [ { type: "command", command: $cmd } ] } ]
+        ' "$settings" 2>/dev/null) || {
+          echo "claude-code: settings.json is not valid JSON, skipping hook patch" >&2
+          new=""
+        }
 
-      if [ -n "$new" ] && [ "$new" != "$(${pkgs.busybox}/bin/cat "$settings")" ]; then
-        printf '%s\n' "$new" > "$settings"
-      fi
-    '';
+        if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
+          printf '%s\n' "$new" > "$settings"
+        fi
+      '';
 
   programs.neovim = {
     enable = true;

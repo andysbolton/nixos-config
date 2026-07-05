@@ -9,4 +9,76 @@
           args)
         args)))
 
-{: tx}
+(fn has! [feature]
+  "vim.fn.has(feature) but return true|false"
+  `(= (vim.fn.has ,feature) 1))
+
+(fn map! [...]
+  :vim.keymap.set
+  `(vim.keymap.set ,...))
+
+(fn nmap! [...]
+  "vim.keymap.set :n"
+  `(vim.keymap.set :n ,...))
+
+(fn imap! [...]
+  "vim.keymap.set :i"
+  `(vim.keymap.set :i ,...))
+
+(fn cmap! [...]
+  "vim.keymap.set :c"
+  `(vim.keymap.set :c ,...))
+
+(fn vmap! [...]
+  "vim.keymap.set :v"
+  `(vim.keymap.set :v ,...))
+
+(fn nvmap! [...]
+  "vim.keymap.set [:n :v]"
+  `(vim.keymap.set [:n :v] ,...))
+
+(fn nvomap! [...]
+  "vim.keymap.set [:n :v :o]"
+  `(vim.keymap.set [:n :v :o] ,...))
+
+(fn tmap! [...]
+  "vim.keymap.set [:t]"
+  `(vim.keymap.set [:t] ,...))
+
+(fn on! [...]
+  :vim.api.nvim_create_autocmd
+  `(vim.api.nvim_create_autocmd ,...))
+
+(fn usercmd! [...]
+  :vim.api.nvim_create_user_command
+  `(vim.api.nvim_create_user_command ,...))
+
+(fn bufusercmd! [...]
+  :vim.api.nvim_buf_create_user_command
+  `(vim.api.nvim_buf_create_user_command ,...))
+
+(fn fn! [module ...]
+  "find function"
+  `(. (require ,module) ,...))
+
+(fn call! [module fn-paths ...]
+  "call function"
+  (if (= :table (type fn-paths))
+      `((. (require ,module) ,(unpack fn-paths)) ,...)
+      `((. (require ,module) ,fn-paths) ,...)))
+
+{: tx
+ : has!
+ : map!
+ : nmap!
+ : imap!
+ : cmap!
+ : vmap!
+ : nvmap!
+ : nvomap!
+ : tmap!
+ : on!
+ : usercmd!
+ : bufusercmd!
+ : fn!
+ : call!}
