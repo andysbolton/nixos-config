@@ -33,10 +33,18 @@
     enable = true;
     ephemeral = true; # fresh builder each start
     maxJobs = 4;
-    config.virtualisation = {
-      cores = 4;
-      memorySize = lib.mkForce (8 * 1024);
-      diskSize = lib.mkForce (40 * 1024);
+    config = {
+      virtualisation = {
+        cores = 4;
+        memorySize = lib.mkForce (8 * 1024);
+        diskSize = lib.mkForce (80 * 1024);
+      };
+      # Auto-GC inside the builder: disk-image builds eat ~9G each and
+      # otherwise fill the disk until the next daemon restart.
+      nix.settings = {
+        min-free = lib.mkForce (10 * 1024 * 1024 * 1024); # GC when <10G free
+        max-free = lib.mkForce (30 * 1024 * 1024 * 1024); # stop at 30G free
+      };
     };
   };
 
@@ -184,6 +192,9 @@
               ))
               (lib.concatStringsSep "\n\n")
             ]}
+
+            # jump to the jetkvm-kiosk native-fullscreen space (there's only ever one)
+            cmd + alt - q : set i (yabai -m query --spaces | jq -r 'map(select(."is-native-fullscreen"))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
           '';
       };
 

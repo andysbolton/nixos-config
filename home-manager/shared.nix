@@ -120,15 +120,52 @@ in
 
   programs.claude-code.enable = true;
 
-  # Merge a "notify when done" Stop hook into ~/.claude/settings.json without
-  # letting nix own the file (so interactive /model, /fast, etc. still persist).
-  home.activation.claudeStopNotifyHook =
+  # Companion to plan mode: keeps its read-only enforcement but defers the
+  # plan-drafting behaviour so the session stays conversational.
+  programs.claude-code.commands.discuss = ''
+    ---
+    description: Discussion mode — in plan mode, defer planning until asked
+    ---
+
+    Discussion mode: treat plan mode as read-only conversation. Explore the
+    codebase and answer questions conversationally. Defer drafting a plan, and do
+    not call ExitPlanMode or steer towards plan approval, until I explicitly ask
+    for a plan. If plan mode is not active, remind me to enable it (shift+tab)
+    before continuing.
+  '';
+
+  # Merge notification hooks (turn finished / waiting for input) into
+  # ~/.claude/settings.json without letting nix own the file (so interactive
+  # /model, /fast, etc. still persist).
+  home.activation.claudeNotifyHooks =
     let
-      notifyCommand =
-        if pkgs.stdenv.hostPlatform.isDarwin then
-          "/usr/bin/osascript -e 'display notification \"Finished working\" with title \"Claude Code\" sound name \"Glass\"'"
-        else
-          "${pkgs.libnotify}/bin/notify-send 'Claude Code' 'Finished working'; ${pkgs.libcanberra-gtk3}/bin/canberra-gtk-play -f ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga # hm-claude-stop-notify";
+      notifyScript = pkgs.writeShellScript "hm-claude-notify" (
+        ''
+          input=$(cat)
+          sid=$(${pkgs.jq}/bin/jq -r .session_id <<<"$input")
+          cwd=$(${pkgs.jq}/bin/jq -r .cwd <<<"$input")
+          msg=$(${pkgs.jq}/bin/jq -r '.message // "Needs your attention"' <<<"$input")
+          # Session name via the live-session registry (undocumented internals);
+          # fall back to the project directory name.
+          name=$(${pkgs.jq}/bin/jq -rs --arg sid "$sid" \
+            '[.[] | select(.sessionId == $sid) | .name] | first // empty' \
+            "$HOME"/.claude/sessions/*.json 2>/dev/null)
+          title="Claude Code - ''${name:-''${cwd##*/}}"
+        ''
+        + (
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            ''
+              # env vars sidestep AppleScript string escaping
+              MSG="$msg" TITLE="$title" /usr/bin/osascript -e \
+                'display notification (system attribute "MSG") with title (system attribute "TITLE") sound name "Glass"'
+            ''
+          else
+            ''
+              ${pkgs.libnotify}/bin/notify-send "$title" "$msg"
+              ${pkgs.libcanberra-gtk3}/bin/canberra-gtk-play -f ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga
+            ''
+        )
+      );
     in
     lib.hm.dag.entryAfter [ "writeBoundary" ]
       # bash
@@ -137,9 +174,10 @@ in
         ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
         [ -s "$settings" ] || echo '{}' > "$settings"
 
-        cmd=${lib.escapeShellArg notifyCommand}
+        cmd=${notifyScript}
         new=$(${pkgs.jq}/bin/jq --arg cmd "$cmd" '
           .hooks.Stop |= [ { hooks: [ { type: "command", command: $cmd } ] } ]
+          | .hooks.Notification |= [ { hooks: [ { type: "command", command: $cmd } ] } ]
         ' "$settings" 2>/dev/null) || {
           echo "claude-code: settings.json is not valid JSON, skipping hook patch" >&2
           new=""
@@ -285,6 +323,12 @@ in
         user = "andybolton";
         identityfile = "~/.ssh/id_ed25519";
       };
+      jetkvm = {
+        hostname = "jetkvm.tail4b1b78.ts.net";
+        user = "root";
+        identityfile = "~/.ssh/id_ed25519";
+      };
+
     };
   };
 

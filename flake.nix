@@ -185,9 +185,9 @@
           ];
         };
 
-      nixosConfigurations.kvm-kiosk = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.jetkvm-kiosk = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
-        modules = [ ./hosts/kvm-kiosk.nix ];
+        modules = [ ./hosts/jetkvm-kiosk.nix ];
       };
 
       darwinConfigurations.work-darwin =
