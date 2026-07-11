@@ -30,7 +30,6 @@
     networking.wireless = {
       enable = true;
       userControlled = true;
-      extraConfig = "ctrl_interface=DIR=/run/wpa_supplicant GROUP=wpa_supplicant";
       fallbackToWPA2 = false;
       secretsFile = config.modules.wireless.secretsFile;
       networks = lib.genAttrs' config.modules.wireless.networks (

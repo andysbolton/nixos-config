@@ -19,4 +19,4 @@ local function _2_()
   end
   return paredit.setup({keys = {[">s"] = {paredit.api.slurp_forwards, "Slurp forwards"}, ["<s"] = {paredit.api.slurp_backwards, "Slurp backwards"}, [">b"] = {paredit.api.barf_forwards, "Barf forwards"}, ["<b"] = {paredit.api.barf_backwards, "Barf backwards"}, ["<localleader>rf"] = {paredit.api.raise_form, "[R]aise [f]orm"}, ["<localleader>re"] = {paredit.api.raise_element, "[R]aise [e]lement"}, ["<localleader>wh"] = {_3_, "[W]rap element [h]ead"}, ["<localleader>wt"] = {_4_, "[W]rap element insert [t]ail"}, ["<localleader>weh"] = {_5_, "[W]rap [e]nclosing form insert [h]ead"}, ["<localleader>wet"] = {_6_, "[W]rap [e]nclosing form insert [t]ail"}, ["<("] = false, ["<)"] = false, ["<localleader>O"] = false, ["<localleader>o"] = false, [">("] = false, [">)"] = false}})
 end
-return {"gpanders/fennel-repl.nvim", "gpanders/nvim-parinfer", "vlime/vlime", {"Olical/conjure", config = _1_}, {"julienvincent/nvim-paredit", config = _2_}}
+return {"gpanders/fennel-repl.nvim", "gpanders/nvim-parinfer", "vlime/vlime", {"Olical/conjure", config = _1_}, {"andysbolton/nvim-paredit", branch = "feature/support-fennel-if-pair", config = _2_}}

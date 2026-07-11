@@ -5,8 +5,9 @@
  :vlime/vlime
  (tx :Olical/conjure {:config #(set vim.g.conjure#extract#tree_sitter#enabled
                                     true)})
- (tx :julienvincent/nvim-paredit
-     {:config (fn []
+ (tx :andysbolton/nvim-paredit
+     {:branch :feature/support-fennel-if-pair
+      :config (fn []
                 (let [paredit (require :nvim-paredit)]
                   (paredit.setup {:keys {:<localleader>o false
                                          :<localleader>O false
