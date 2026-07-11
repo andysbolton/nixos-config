@@ -62,6 +62,11 @@
       flake = false;
     };
 
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # firefox-addons = {
     #   url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -78,6 +83,7 @@
       home-manager,
       nix-darwin,
       nix-homebrew,
+      nixos-generators,
       nixpkgs,
       nixpkgs-unstable,
       opnix,
@@ -179,6 +185,11 @@
           ];
         };
 
+      nixosConfigurations.jetkvm-kiosk = nixpkgs.lib.nixosSystem {
+        system = "aarch64-linux";
+        modules = [ ./hosts/jetkvm-kiosk.nix ];
+      };
+
       darwinConfigurations.work-darwin =
         let
           system = "aarch64-darwin";
@@ -215,5 +226,6 @@
             }
           ];
         };
+
     };
 }

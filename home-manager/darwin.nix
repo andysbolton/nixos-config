@@ -66,6 +66,39 @@ in
       azure-cli-extensions.durabletask
       azure-cli-extensions.resource-graph
     ])
+    (pkgs.writeShellScriptBin "jetkvm-kiosk" ''
+      set -e
+
+      mkdir -p "${config.home.homeDirectory}/vms"
+      # --out-link roots the image against GC; the overlay's backing file lives
+      # in the store, so without a root a GC would corrupt the overlay.
+      nix build ${config.repoPath}#nixosConfigurations.jetkvm-kiosk.config.system.build.images.qemu-efi \
+        --out-link "${config.home.homeDirectory}/vms/jetkvm-kiosk-base"
+      base=$(echo "$(readlink -f "${config.home.homeDirectory}/vms/jetkvm-kiosk-base")"/*.qcow2)
+      overlay="${config.home.homeDirectory}/vms/jetkvm-kiosk-overlay.qcow2"
+      cur=$(${pkgs.qemu}/bin/qemu-img info --output=json "$overlay" 2>/dev/null | ${pkgs.jq}/bin/jq -r '."backing-filename" // empty')
+
+      if [ "$cur" != "$base" ]; then
+        echo "New base image, recreating overlay..."
+        ${pkgs.qemu}/bin/qemu-img create -f qcow2 -F qcow2 -b "$base" "$overlay"
+      fi
+
+      exec ${pkgs.qemu}/bin/qemu-system-aarch64 \
+        -machine virt \
+        -accel hvf \
+        -cpu host \
+        -m 2G \
+        -smp 2 \
+        -nic user,model=virtio-net-pci \
+        -drive file="$overlay",if=virtio \
+        -drive if=pflash,format=raw,readonly=on,file=${pkgs.qemu}/share/qemu/edk2-aarch64-code.fd \
+        -device virtio-gpu-pci \
+        -display cocoa,full-screen=on,full-grab=on \
+        -device qemu-xhci \
+        -device usb-kbd \
+        -device usb-tablet \
+        "$@"
+    '')
     desktoppr
     gatherv2
     jira-cli-go
@@ -88,6 +121,24 @@ in
     - Length must be earned by complexity or risk, not padding. When unsure, cut.
     - PR descriptions: routine change → self-contained body. Risky or multi-step change → short body (what / why + links), with the runbook (ordered steps, timings, rollback) living in a Confluence document and linked from the PR.
     - Make minimal changes. If something can be written better, bring it up but don't implement it immediately.
+
+    ## Epistemics
+    - Label platform-capability claims by evidence class: [tested this session],
+      [doc + URL fetched this session], [inferred], [training memory]. Never
+      deliver [inferred] in the same register as [tested].
+    - "X is impossible / the only way is Y" requires, in the same message, a
+      current-doc citation or a concrete runtime test that would falsify it.
+      Otherwise phrase it as a hypothesis.
+    - An unverified caveat is a to-do, not a disclaimer: resolve it before
+      building on the claim, or state "the following builds on unverified
+      assumption X".
+    - For fast-moving platforms (Foundry, Claude API, GitHub), fetch the current
+      doc before answering capability questions, even when confident. Source
+      precedence: runtime test > current docs > API specs > Q&A/blogs > memory.
+    - Scope claims exactly: "Sonnet 5.x" ≠ "Claude"; "the UI accepts it" ≠ "the
+      runtime supports it"; "not documented" ≠ "not supported".
+    - When corrected, also hunt down sibling claims sharing the broken premise —
+      don't just patch the one that got caught.
   '';
 
   programs.claude-code.mcpServers = {

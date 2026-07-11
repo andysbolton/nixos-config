@@ -308,21 +308,39 @@ in
           # fish
           ''
             if [ (count $argv) -lt 2 ]
-              echo "Usage: unlock <sandbox> <prefix1> [prefix2] ... [prefixN]"
+              echo "Usage: unlock <workspace> [s/suffix] <container> [container2] ... [containerN]"
               return 1
             end
 
-            set sandbox $argv[1]
+            argparse 's/suffix=?' -- $argv
+            if [ -z "$_flag_suffix" ]
+              set _flag_suffix "state.tfstateenv:"
+            end
+
+            set workspace $argv[1]
 
             for prefix in $argv[2..-1]
-              set suffix "state.tfstateenv:$sandbox"
-              for blob in (az storage blob list \
+              set suffix ([ "$workspace" = "default" ]; and echo "$_flag_suffix"; or echo "$_flag_suffix:$workspace")
+              echo "Searching for blobs ending in $suffix"
+              set blobs (az storage blob list \
                 --account-name sttfstatecusglobal \
                 --container-name tfstate \
                 --prefix $prefix \
                 --auth-mode login \
                 --query "[?ends_with(name, '$suffix')].name" \
                 -o tsv)
+              if [ -z "$blobs" ]
+                echo "No blobs found for suffix: $suffix"
+                echo "Available blobs for prefix $prefix:"
+                az storage blob list \
+                  --account-name sttfstatecusglobal \
+                  --container-name tfstate \
+                  --prefix $prefix \
+                  --auth-mode login \
+                  --query "[].name"
+                continue
+              end
+              for blob in "$blobs"
                 echo "Breaking lease on: $blob"
                 az storage blob lease break \
                   --account-name sttfstatecusglobal \

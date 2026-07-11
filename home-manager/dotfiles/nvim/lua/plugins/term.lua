@@ -26,9 +26,11 @@ return {
       })
 
       vim.keymap.set("t", "<C-r>", function()
-        local next_char_code = vim.fn.getchar()
-        local next_char = vim.fn.nr2char(next_char_code)
-        return [[<C-\><C-n>"]] .. next_char .. "pi"
+        local key = vim.fn.getcharstr()
+        if vim.fn.keytrans(key):lower() == "<c-r>" then
+          return "<C-r>" -- pass through to fish reverse-search
+        end
+        return [[<C-\><C-n>"]] .. key .. "pi"
       end, { expr = true })
 
       -- Quick exit

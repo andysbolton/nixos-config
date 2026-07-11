@@ -1,6 +1,6 @@
 ## Neovim
 
-- [ ] visual mode indicator
+- [x] visual mode indicator
 - [x] get back diagnostic icons in gutter
 - [ ] actually investigate codecompanioncli
 - [x] register fzf as vim.ui.select
@@ -24,6 +24,9 @@
 - [ ] fix yank command. also yank stderr
 - [ ] source code actions not doing anything
 - [ ] codeactions: bring back diff
+- [ ] code actions: wrench showing first line, ex: term.lua
+- [ ] treesitter motions would be really helpful
+- [ ] modes.nvim: turn off the bottom statusline (maybe?), try to theme it
 
 ## rofi
 
@@ -44,3 +47,4 @@
 
 - [ ] check out lazygit
 - [ ] fzf fish
+- [ ] postmarketOS

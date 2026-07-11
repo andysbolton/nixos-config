@@ -116,15 +116,12 @@ return {
         },
       }
 
-      -- Claude Code via the CodeCompanion CLI
       local cli = function(...) return require("codecompanion").cli(...) end
-
-      vim.keymap.set({ "n" }, "<leader>a", function() cli() end, { silent = true, desc = "[A]I: new CLI" })
 
       vim.keymap.set(
         { "n" },
         "<leader>at",
-        function() require("codecompanion").toggle() end,
+        function() require("codecompanion").toggle_cli() end,
         { silent = true, desc = "[A]I: [T]oggle Code Companion" }
       )
 

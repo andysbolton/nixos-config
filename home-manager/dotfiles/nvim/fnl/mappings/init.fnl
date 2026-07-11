@@ -8,8 +8,8 @@
 
 ; Move lines up/down
 (km-set :n :<A-Down> ":m .+1<CR>==" {:desc "Move line down" :silent true})
-
 (km-set :n :<A-Up> ":m .-2<CR>==" {:desc "Move line up" :silent true})
+
 (km-set :i :<A-Down> "<Esc>:m .+1<CR>==gi"
         {:desc "Move line down" :silent true})
 
@@ -32,16 +32,6 @@
 (km-set :n :<leader>w ":w<cr>" {:desc "[W]rite" :silent true})
 (km-set :n :<leader>wa ":wa<cr>" {:desc "[W]rite [A]ll" :silent true})
 (km-set :n :<C-a> ":normal gg0vG$<cr>" {:desc "Select all text"})
-
-; Diagnostic keymaps
-(km-set :n "[d" #(vim.diagnostic.jump {:count 1 :float true})
-        {:desc "Go to previous diagnostic message"})
-
-(km-set :n "]d" #(vim.diagnostic.jump {:count -1 :float true})
-        {:desc "Go to next diagnostic message"})
-
-(km-set :n :<leader>d vim.diagnostic.open_float
-        {:desc "Open floating [d]iagnostic message"})
 
 ; Copy current buffer name
 (km-set :n :<leader>c ":let @+=expand('%')<cr>"
