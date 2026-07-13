@@ -1,6 +1,5 @@
 {
   pkgs,
-  pkgs-unstable,
   lib,
   config,
   ...
@@ -26,7 +25,6 @@
 
   programs.fish = {
     enable = true;
-    package = pkgs-unstable.fish;
   };
 
   nix.settings.experimental-features = [

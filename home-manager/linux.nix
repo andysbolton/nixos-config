@@ -136,4 +136,34 @@ in
       };
     };
   };
+
+  services.kanshi = {
+    enable = true;
+    settings = [
+      {
+        profile.name = "kvm";
+        profile.exec = [ "${pkgs.systemd}/bin/systemctl --user stop ${pkgs.lan-mouse}/bin/lan-mouse" ];
+        profile.outputs = [
+          {
+            criteria = "JET POWER TECHNOLOGY CO., LTD. JetKVM v1 0xC0FFEE01";
+            status = "enable";
+          }
+          {
+            criteria = "eDP-1";
+            status = "disable";
+          }
+        ];
+      }
+      {
+        profile.name = "default";
+        profile.exec = [ "${pkgs.systemd}/bin/systemctl --user start ${pkgs.lan-mouse}/bin/lan-mouse" ];
+        profile.outputs = [
+          {
+            criteria = "eDP-1";
+            status = "enable";
+          }
+        ];
+      }
+    ];
+  };
 }
