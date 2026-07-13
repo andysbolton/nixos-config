@@ -183,6 +183,8 @@
               --config "window_decorations='RESIZE'" \
               start --always-new-process -- 'search-nix-pkgs.sh' &
 
+            cmd - a : wezterm-gui start --always-new-process -- 'ask-claude.sh' &
+
             cmd - s : screencapture -ic
 
             ${lib.pipe spaces [

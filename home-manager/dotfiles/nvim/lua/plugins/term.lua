@@ -21,7 +21,7 @@ return {
         pattern = "*",
         callback = function(args)
           vim.opt_local.timeoutlen = 200
-          vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
+          vim.keymap.set("t", "<M-j>", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
         end,
       })
 
@@ -32,10 +32,6 @@ return {
         end
         return [[<C-\><C-n>"]] .. key .. "pi"
       end, { expr = true })
-
-      -- Quick exit
-      -- This interfers when navigating 'less' in the integrated terminal.
-      -- vim.keymap.set("t", "jk", [[<C-\><C-n>]], { silent = true })
 
       -- When a bottom terminal is open, force it full-width along the bottom so neo-tree
       -- can't keep full height, then reclaim the CodeCompanion CLI's full-height right

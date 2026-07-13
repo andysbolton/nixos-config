@@ -7,7 +7,7 @@ return {
     { "rcarriga/nvim-dap-ui", dependencies = { "nvim-neotest/nvim-nio" } },
 
     "leoluz/nvim-dap-go",
-    "jbyuki/one-small-step-for-vimkind",
+    { "jbyuki/one-small-step-for-vimkind", branch = "support-watches" },
   },
   config = function()
     local dap = require "dap"
@@ -48,6 +48,8 @@ return {
     vim.keymap.set("n", "<leader>do", require("dap").step_over, { noremap = true })
     vim.keymap.set("n", "<leader>di", require("dap").step_into, { noremap = true })
 
+    vim.keymap.set({ "n", "v" }, "<leader>de", function() require("dapui").eval() end, { desc = "DAP UI: [E]val" })
+
     vim.keymap.set("n", "<leader>dl", function() require("osv").launch { port = 8086 } end, { noremap = true })
 
     vim.keymap.set("n", "<leader>dw", function()
@@ -61,7 +63,7 @@ return {
     end)
 
     vim.keymap.set("n", "<leader>dq", function()
-      require("dap").close()
+      require("dap").terminate()
       require("dapui").close()
     end, { desc = "Stop Debugging and Close UI" })
 

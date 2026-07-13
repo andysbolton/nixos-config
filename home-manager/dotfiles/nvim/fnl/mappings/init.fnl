@@ -31,6 +31,10 @@
 
 (km-set :n :<leader>w ":w<cr>" {:desc "[W]rite" :silent true})
 (km-set :n :<leader>wa ":wa<cr>" {:desc "[W]rite [A]ll" :silent true})
+(km-set :n :<leader>wn ":noa w<cr>"
+        {:desc "[W]rite [N]o formatting" :silent true})
+(km-set :n :<leader>wan ":noa wa<cr>"
+        {:desc "[W]rite [A]ll [N]o formatting" :silent true})
 (km-set :n :<C-a> ":normal gg0vG$<cr>" {:desc "Select all text"})
 
 ; Copy current buffer name

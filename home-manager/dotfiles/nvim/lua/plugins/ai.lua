@@ -102,6 +102,15 @@ return {
                 description = "Claude Code CLI",
                 provider = "terminal",
               },
+              -- Opt-in variant launching from ~/smartwyre so work sessions
+              -- share one claude project bucket (the terminal provider
+              -- hardcodes cwd = getcwd(), hence the sh wrapper)
+              claude_work = {
+                cmd = "sh",
+                args = { "-c", [[cd "$HOME/smartwyre" && exec claude]] },
+                description = "Claude Code CLI (from ~/smartwyre)",
+                provider = "terminal",
+              },
             },
           },
         },
@@ -123,6 +132,13 @@ return {
         "<leader>at",
         function() require("codecompanion").toggle_cli() end,
         { silent = true, desc = "[A]I: [T]oggle Code Companion" }
+      )
+
+      vim.keymap.set(
+        { "n" },
+        "<leader>aw",
+        function() require("codecompanion").toggle_cli { agent = "claude_work" } end,
+        { silent = true, desc = "[A]I: claude from [w]ork root (~/smartwyre)" }
       )
 
       vim.keymap.set(
@@ -163,6 +179,10 @@ return {
   },
   {
     "supermaven-inc/supermaven-nvim",
-    config = function() require("supermaven-nvim").setup {} end,
+    config = function()
+      require("supermaven-nvim").setup {
+        ignore_filetypes = { ["neo-tree-popup"] = true },
+      }
+    end,
   },
 }

@@ -36,11 +36,13 @@ return {
         },
         post_restore_cmds = {
           function()
-            if not vim.tbl_contains(vim.v.argv, "DiffviewOpen") then vim.cmd "Neotree show filesystem" end
+            if not vim.tbl_contains(vim.v.argv, "DiffviewOpen") then
+              require("workspaces").neotree { action = "show" }
+            end
           end,
         },
       }
-      vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,localoptions"
+      vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos"
     end,
   },
   {

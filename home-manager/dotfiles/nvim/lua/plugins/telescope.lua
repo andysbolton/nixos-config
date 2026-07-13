@@ -19,11 +19,23 @@ return {
         function() require("telescope.builtin").git_files() end,
         desc = "Search [G]it [F]iles",
       },
-      { "<leader>sf", function() require("telescope.builtin").find_files() end, desc = "[S]earch [F]iles" },
+      {
+        "<leader>sf",
+        function()
+          require("telescope.builtin").find_files {
+            file_ignore_patterns = require("workspaces").ignore_patterns { ".git/" },
+          }
+        end,
+        desc = "[S]earch [F]iles",
+      },
       { "<leader>sh", function() require("telescope.builtin").help_tags() end, desc = "[S]earch [H]elp" },
       {
         "<leader>sw",
-        function() require("telescope.builtin").grep_string() end,
+        function()
+          require("telescope.builtin").grep_string {
+            file_ignore_patterns = require("workspaces").ignore_patterns {},
+          }
+        end,
         desc = "[S]earch current [W]ord",
       },
       {
@@ -37,8 +49,17 @@ return {
         desc = "Search Buffers",
       },
       {
+        "<leader>shl",
+        function() require("telescope.builtin").highlights() end,
+        desc = "[S]earch [H]igh[l]ights",
+      },
+      {
         "<leader>sg",
-        ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>",
+        function()
+          require("telescope").extensions.live_grep_args.live_grep_args {
+            file_ignore_patterns = require("workspaces").ignore_patterns { ".git/" },
+          }
+        end,
         desc = "[S]earch by [G]rep",
       },
       { "<leader>sd", function() require("telescope.builtin").diagnostics() end, desc = "[S]earch [D]iagnostics" },
@@ -63,6 +84,11 @@ return {
       local actions = require "telescope.actions"
       local lga_actions = require "telescope-live-grep-args.actions"
 
+      -- Follow symlinks so grep works in sw-workspace symlink farms;
+      -- vimgrep_arguments replaces the defaults, so extend rather than restate
+      local vimgrep_arguments = { unpack(require("telescope.config").values.vimgrep_arguments) }
+      table.insert(vimgrep_arguments, "--follow")
+
       require("telescope").setup {
         extensions = {
           live_grep_args = {
@@ -79,6 +105,7 @@ return {
           },
         },
         defaults = {
+          vimgrep_arguments = vimgrep_arguments,
           mappings = {
             i = {
               ["<C-s>"] = actions.select_vertical,
@@ -89,6 +116,7 @@ return {
           find_files = {
             file_ignore_patterns = { ".git/" },
             hidden = true,
+            follow = true,
           },
         },
       }

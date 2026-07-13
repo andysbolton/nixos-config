@@ -188,6 +188,45 @@ in
         fi
       '';
 
+  # Statusline showing Claude's cwd + git branch, patched into settings.json
+  # the same way as the notify hooks above.
+  home.activation.claudeStatusLine =
+    let
+      statusLineScript = pkgs.writeShellScript "hm-claude-statusline" ''
+        input=$(cat)
+        dir=$(${pkgs.jq}/bin/jq -r '.workspace.current_dir // .cwd' <<<"$input")
+        branch=$(${pkgs.git}/bin/git -C "$dir" branch --show-current 2>/dev/null)
+        case "$dir" in
+          "$HOME") dir="~" ;;
+          "$HOME"/*) dir="~''${dir#"$HOME"}" ;;
+        esac
+        if [ -n "$branch" ]; then
+          printf '%s ⎇ %s\n' "$dir" "$branch"
+        else
+          printf '%s\n' "$dir"
+        fi
+      '';
+    in
+    lib.hm.dag.entryAfter [ "writeBoundary" ]
+      # bash
+      ''
+        settings="$HOME/.claude/settings.json"
+        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+        [ -s "$settings" ] || echo '{}' > "$settings"
+
+        cmd=${statusLineScript}
+        new=$(${pkgs.jq}/bin/jq --arg cmd "$cmd" '
+          .statusLine = { type: "command", command: $cmd }
+        ' "$settings" 2>/dev/null) || {
+          echo "claude-code: settings.json is not valid JSON, skipping statusline patch" >&2
+          new=""
+        }
+
+        if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
+          printf '%s\n' "$new" > "$settings"
+        fi
+      '';
+
   programs.neovim = {
     enable = true;
     sideloadInitLua = true;

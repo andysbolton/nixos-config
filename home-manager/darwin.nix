@@ -39,6 +39,94 @@ let
   sketchybarLinks = lib.foldl' (
     acc: instance: acc // mkSketchybarLinks instance
   ) { } sketchybarInstances;
+
+  # Symlink farm at $root/.workspaces/<TICKET>: every repo resolves to its
+  # ticket worktree (from a New-WorktreeSession session dir) or, failing that,
+  # the main clone. Prints the workspace path last: nvim "$(sw-workspace X | tail -1)"
+  swWorkspace = pkgs.writeShellScriptBin "sw-workspace" ''
+    set -euo pipefail
+
+    root="''${WORKTREE_SOURCE_ROOT:-$HOME/smartwyre}"
+
+    if [ $# -ne 1 ]; then
+      echo "usage: sw-workspace <TICKET> | list" >&2
+      exit 1
+    fi
+    arg=$1
+
+    # Session dirs are detected structurally: no top-level .git and at least
+    # one immediate subdir whose .git is a file (= a worktree). Primary clones
+    # have a .git directory; a stray worktree at root has a top-level .git file.
+    is_session_dir() {
+      [ -e "$1/.git" ] && return 1
+      local wt
+      for wt in "$1"/*/; do
+        [ -f "''${wt}.git" ] && return 0
+      done
+      return 1
+    }
+
+    if [ "$arg" = list ]; then
+      for d in "$root"/*/; do
+        is_session_dir "$d" || continue
+        repos=()
+        for s in "$d"*/; do
+          [ -e "''${s}.git" ] && repos+=("$(basename "$s")")
+        done
+        printf '%s: %s\n' "$(basename "$d")" "''${repos[*]}"
+      done
+      exit 0
+    fi
+
+    if is_session_dir "$root/$arg"; then
+      # Exact session-dir name given
+      session="$root/$arg"
+      if [[ $arg =~ ^([A-Za-z]+-[0-9]+) ]]; then
+        ticket=$(tr '[:lower:]' '[:upper:]' <<<"''${BASH_REMATCH[1]}")
+      else
+        echo "sw-workspace: cannot derive a ticket from '$arg'" >&2
+        exit 1
+      fi
+    else
+      ticket=$(tr '[:lower:]' '[:upper:]' <<<"$arg")
+      candidates=()
+      for d in "$root/$ticket"-*/; do
+        [ -d "$d" ] || continue
+        is_session_dir "$d" && candidates+=("''${d%/}")
+      done
+      if [ "''${#candidates[@]}" -eq 0 ]; then
+        echo "sw-workspace: no session for $ticket under $root" >&2
+        exit 1
+      elif [ "''${#candidates[@]}" -gt 1 ]; then
+        echo "sw-workspace: multiple sessions for $ticket:" >&2
+        printf '  %s\n' "''${candidates[@]##*/}" >&2
+        echo "re-run with the full session dir name" >&2
+        exit 1
+      fi
+      session=''${candidates[0]}
+    fi
+
+    ws="$root/.workspaces/$ticket"
+    mkdir -p "$ws"
+    find "$ws" -maxdepth 1 -type l -delete
+
+    for d in "$session"/*/; do
+      [ -e "''${d}.git" ] || continue
+      name=$(basename "$d")
+      ln -sfn "''${d%/}" "$ws/$name"
+      printf '%s -> %s (worktree)\n' "$name" "''${d%/}"
+    done
+
+    for d in "$root"/*/; do
+      [ -d "''${d}.git" ] || continue
+      name=$(basename "$d")
+      [ -e "$ws/$name" ] && continue
+      ln -sfn "''${d%/}" "$ws/$name"
+      printf '%s -> %s (main)\n' "$name" "''${d%/}"
+    done
+
+    printf '%s\n' "$ws"
+  '';
 in
 {
   imports = [
@@ -108,6 +196,7 @@ in
     powershell
     powershell-editor-services
     sketchybarBottom
+    swWorkspace # per-ticket worktree symlink farm for nvim
   ];
 
   # Global context loaded into every Claude Code session (~/.claude/CLAUDE.md).
@@ -176,6 +265,17 @@ in
         "terraform-mcp-server"
       ];
     };
+  };
+
+  # Work claude sessions all launch from ~/smartwyre so sessions and
+  # auto-memory share one project bucket (resume + recall work everywhere).
+  programs.fish.functions.swc = {
+    description = "claude from ~/smartwyre (shared work session/memory bucket)";
+    body = ''
+      pushd ~/smartwyre
+      claude $argv
+      popd
+    '';
   };
 
   home.sessionPath = [

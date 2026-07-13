@@ -5,29 +5,27 @@ vim.api.nvim_create_user_command("LspRestart", function()
   vim.cmd.edit()
 end, { desc = "Stop all LSP clients and reattach to the current buffer" })
 
--- Evaluate lua code -- move me to fennel!
-local function eval(code)
-  local chunk, err = load("return " .. code) -- try as an expression
-  if not chunk then
-    chunk, err = load(code)
-  end -- fall back to a statement
-  if not chunk then
-    vim.notify(err, vim.log.levels.ERROR)
-    return
+-- For lua, avoid certain LSP entries showing up twice
+-- https://github.com/LuaLS/lua-language-server/issues/2451#issuecomment-1949934057
+local locations_to_items = vim.lsp.util.locations_to_items
+vim.lsp.util.locations_to_items = function(locations, offset_encoding)
+  if vim.bo.filetype ~= "lua" then return locations_to_items(locations, offset_encoding) end
+
+  local lines = {}
+  local loc_i = 1
+  for _, loc in ipairs(vim.deepcopy(locations)) do
+    local uri = loc.uri or loc.targetUri
+    local range = loc.range or loc.targetSelectionRange
+    if lines[uri .. range.start.line] then
+      table.remove(locations, loc_i)
+    else
+      loc_i = loc_i + 1
+    end
+    lines[uri .. range.start.line] = true
   end
-  local ok, res = pcall(chunk)
-  vim.notify(ok and vim.inspect(res) or tostring(res), ok and vim.log.levels.INFO or vim.log.levels.ERROR)
+
+  return locations_to_items(locations, offset_encoding)
 end
-
-vim.keymap.set("n", "<leader>x", function() eval(vim.api.nvim_get_current_line()) end, { desc = "Eval line as Lua" })
-
-vim.keymap.set("x", "<leader>x", function()
-  local s, e = vim.fn.getpos("v")[2], vim.fn.getpos(".")[2]
-  if s > e then
-    s, e = e, s
-  end
-  eval(table.concat(vim.api.nvim_buf_get_lines(0, s - 1, e, false), "\n"))
-end, { desc = "Eval selection as Lua" })
 
 return {
   -- Disabled: refactor/other code actions are now indicated by cmds.lsp's cursor sign
@@ -74,12 +72,12 @@ return {
 
         nmap("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
 
-        nmap("gd", vim.lsp.buf.definition, "[G]oto [D]efinition")
-        nmap("gD", vim.lsp.buf.definition, "[G]oto [D]eclaration")
+        nmap("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+        nmap("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
         nmap("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
-        nmap("gI", vim.lsp.buf.implementation, "[G]oto [I]mplementation")
+        nmap("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
 
-        nmap("<leader>D", vim.lsp.buf.type_definition, "Type [D]efinition")
+        nmap("<leader>D", require("telescope.builtin").lsp_type_definitions, "Type [D]efinition")
         nmap("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
         nmap("<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[W]orkspace [S]ymbols")
 
