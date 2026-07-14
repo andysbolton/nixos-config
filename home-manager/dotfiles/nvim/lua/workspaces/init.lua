@@ -1,7 +1,11 @@
--- Classification and shared toggle state for sw-workspace farms
--- ($root/.workspaces/*), used by the neo-tree branch badges / B toggle and
--- the telescope pickers.
+-- Workspace farms ($root/.workspaces/<TICKET>): symlinks over main clones
+-- with worktrees claimed lazily on first write (BufWritePre, registered in
+-- plugin/workspaces.lua; external writers via workspaces/guard.lua). Also
+-- classification and shared toggle state for the neo-tree branch badges /
+-- B toggle and the telescope pickers.
 local M = { hidden = false }
+
+M.core = require "workspaces.core"
 
 local function read_head(path)
   local head = path .. "/HEAD"
@@ -37,14 +41,16 @@ local function get_branch(target)
   return nil
 end
 
--- Returns the badge branch, the session name (only for symlinks into a
--- session worktree), and whether the path is inside a workspace farm.
+-- Returns the badge branch, the workspace ticket (only for a claimed
+-- worktree), and whether the path is inside a workspace farm. Unclaimed repos
+-- are symlinks to the main clone (branch of the clone, no ticket); claimed
+-- repos are worktree dirs in place (branch of the worktree, ticket badge).
 function M.classify(path)
-  local workspace_root = path:match "^(.*)/%.workspaces/"
-  if not workspace_root then return get_branch(path), nil, false end
+  local ticket = path:match "/%.workspaces/([^/]+)/[^/]+$"
+  if not path:match "/%.workspaces/" then return get_branch(path), nil, false end
   local target = vim.uv.fs_readlink(path)
-  if not target then return nil, nil, true end
-  return get_branch(target), target:match("^" .. vim.pesc(workspace_root) .. "/([^/]+)/"), true
+  if target then return get_branch(target), nil, true end
+  return get_branch(path), ticket, true
 end
 
 -- Top-level dirs/symlinks under dir that are plain repos (branch, no session).
@@ -99,6 +105,24 @@ function M.ignore_patterns(base)
     end
   end
   return patterns
+end
+
+-- BufWritePre: first save into an unclaimed farm repo creates the worktree
+-- and flips the symlink, so the write lands in the worktree. Erroring here
+-- aborts the write, keeping the main clone clean.
+function M.claim_on_save(buf)
+  local ticket, repo, claimed = M.core.parse(vim.api.nvim_buf_get_name(buf))
+  if not ticket or claimed then return end
+  M.core.claim(ticket, repo)
+  vim.notify(("workspaces: claimed %s in %s"):format(repo, ticket))
+end
+
+-- Open (creating if needed) a workspace: sync the farm and cd into it.
+function M.open(ticket)
+  local farm = M.core.sync(ticket)
+  vim.cmd.cd(farm)
+  vim.notify("workspaces: " .. farm)
+  return farm
 end
 
 return M

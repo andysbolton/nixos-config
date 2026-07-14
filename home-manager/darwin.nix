@@ -40,92 +40,23 @@ let
     acc: instance: acc // mkSketchybarLinks instance
   ) { } sketchybarInstances;
 
-  # Symlink farm at $root/.workspaces/<TICKET>: every repo resolves to its
-  # ticket worktree (from a New-WorktreeSession session dir) or, failing that,
-  # the main clone. Prints the workspace path last: nvim "$(sw-workspace X | tail -1)"
-  swWorkspace = pkgs.writeShellScriptBin "sw-workspace" ''
-    set -euo pipefail
-
-    root="''${WORKTREE_SOURCE_ROOT:-$HOME/smartwyre}"
-
-    if [ $# -ne 1 ]; then
-      echo "usage: sw-workspace <TICKET> | list" >&2
-      exit 1
-    fi
-    arg=$1
-
-    # Session dirs are detected structurally: no top-level .git and at least
-    # one immediate subdir whose .git is a file (= a worktree). Primary clones
-    # have a .git directory; a stray worktree at root has a top-level .git file.
-    is_session_dir() {
-      [ -e "$1/.git" ] && return 1
-      local wt
-      for wt in "$1"/*/; do
-        [ -f "''${wt}.git" ] && return 0
-      done
-      return 1
+  # Workspace farms ($root/.workspaces/<TICKET>) are owned by the nvim
+  # workspaces plugin (dotfiles/nvim/lua/workspaces/). This PreToolUse hook is
+  # the entire Claude integration: before Edit/Write, run the plugin's generic
+  # guard, which claims a worktree for unclaimed farm repos and no-ops
+  # everywhere else. All decision logic lives in guard.lua; the bash prefilter
+  # only avoids a ~130ms headless-nvim spawn on edits outside the farm root.
+  workspaceGuardHook = pkgs.writeShellScript "hm-claude-workspace-guard" ''
+    input=$(cat)
+    file=$(${pkgs.jq}/bin/jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' <<<"$input")
+    case "$file" in
+      "''${WORKTREE_SOURCE_ROOT:-$HOME/smartwyre}/.workspaces/"*) ;;
+      *) exit 0 ;;
+    esac
+    err=$(${config.programs.neovim.finalPackage}/bin/nvim -l ${config.dotfilesPath}/nvim/lua/workspaces/guard.lua "$file" 2>&1) || {
+      echo "workspaces guard blocked the edit: $err" >&2
+      exit 2
     }
-
-    if [ "$arg" = list ]; then
-      for d in "$root"/*/; do
-        is_session_dir "$d" || continue
-        repos=()
-        for s in "$d"*/; do
-          [ -e "''${s}.git" ] && repos+=("$(basename "$s")")
-        done
-        printf '%s: %s\n' "$(basename "$d")" "''${repos[*]}"
-      done
-      exit 0
-    fi
-
-    if is_session_dir "$root/$arg"; then
-      # Exact session-dir name given
-      session="$root/$arg"
-      if [[ $arg =~ ^([A-Za-z]+-[0-9]+) ]]; then
-        ticket=$(tr '[:lower:]' '[:upper:]' <<<"''${BASH_REMATCH[1]}")
-      else
-        echo "sw-workspace: cannot derive a ticket from '$arg'" >&2
-        exit 1
-      fi
-    else
-      ticket=$(tr '[:lower:]' '[:upper:]' <<<"$arg")
-      candidates=()
-      for d in "$root/$ticket"-*/; do
-        [ -d "$d" ] || continue
-        is_session_dir "$d" && candidates+=("''${d%/}")
-      done
-      if [ "''${#candidates[@]}" -eq 0 ]; then
-        echo "sw-workspace: no session for $ticket under $root" >&2
-        exit 1
-      elif [ "''${#candidates[@]}" -gt 1 ]; then
-        echo "sw-workspace: multiple sessions for $ticket:" >&2
-        printf '  %s\n' "''${candidates[@]##*/}" >&2
-        echo "re-run with the full session dir name" >&2
-        exit 1
-      fi
-      session=''${candidates[0]}
-    fi
-
-    ws="$root/.workspaces/$ticket"
-    mkdir -p "$ws"
-    find "$ws" -maxdepth 1 -type l -delete
-
-    for d in "$session"/*/; do
-      [ -e "''${d}.git" ] || continue
-      name=$(basename "$d")
-      ln -sfn "''${d%/}" "$ws/$name"
-      printf '%s -> %s (worktree)\n' "$name" "''${d%/}"
-    done
-
-    for d in "$root"/*/; do
-      [ -d "''${d}.git" ] || continue
-      name=$(basename "$d")
-      [ -e "$ws/$name" ] && continue
-      ln -sfn "''${d%/}" "$ws/$name"
-      printf '%s -> %s (main)\n' "$name" "''${d%/}"
-    done
-
-    printf '%s\n' "$ws"
   '';
 in
 {
@@ -196,8 +127,29 @@ in
     powershell
     powershell-editor-services
     sketchybarBottom
-    swWorkspace # per-ticket worktree symlink farm for nvim
   ];
+
+  # Workspace hooks merged into ~/.claude/settings.json without letting nix
+  # own the file, same pattern as claudeNotifyHooks in shared.nix.
+  home.activation.claudeWorkspaceHooks =
+    lib.hm.dag.entryAfter [ "writeBoundary" ]
+      # bash
+      ''
+        settings="$HOME/.claude/settings.json"
+        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+        [ -s "$settings" ] || echo '{}' > "$settings"
+
+        new=$(${pkgs.jq}/bin/jq --arg guard ${workspaceGuardHook} '
+          .hooks.PreToolUse |= [ { matcher: "Edit|Write|MultiEdit|NotebookEdit", hooks: [ { type: "command", command: $guard } ] } ]
+        ' "$settings" 2>/dev/null) || {
+          echo "claude-code: settings.json is not valid JSON, skipping workspace hook patch" >&2
+          new=""
+        }
+
+        if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
+          printf '%s\n' "$new" > "$settings"
+        fi
+      '';
 
   # Global context loaded into every Claude Code session (~/.claude/CLAUDE.md).
   # Plain markdown; escape ''${ as '''${ and '' as ''' if you add code samples.
