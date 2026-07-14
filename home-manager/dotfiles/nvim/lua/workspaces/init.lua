@@ -65,6 +65,23 @@ function M.plain_repos(dir)
   return names
 end
 
+-- Extra worktrees: claimed farm dirs whose name isn't a base repo (e.g.
+-- ai-workloads-pr2 beside ai-workloads). Excluded from Telescope by default so
+-- a second/third worktree of a repo doesn't multiply every result.
+function M.extra_worktrees(dir)
+  local clones = {}
+  for _, name in ipairs(M.core.main_clones()) do
+    clones[name] = true
+  end
+  local names = {}
+  for name, t in vim.fs.dir(dir) do
+    if t == "directory" and not clones[name] and vim.uv.fs_stat(dir .. "/" .. name .. "/.git") then
+      names[#names + 1] = name
+    end
+  end
+  return names
+end
+
 -- Reverse-map a resolved realpath back to its symlinked location under the
 -- cwd. Only active inside a workspace farm session; nil means "no mapping".
 function M.to_cwd_path(path)
@@ -95,12 +112,17 @@ function M.neotree(args)
   require("neo-tree.command").execute(args)
 end
 
--- Telescope file_ignore_patterns: base plus, while hidden, the plain repos
--- under the cwd.
+-- Telescope file_ignore_patterns: base, always plus the extra worktrees under
+-- the cwd (so a repo's 2nd/3rd worktree doesn't duplicate results), and while
+-- hidden also the plain repos.
 function M.ignore_patterns(base)
   local patterns = vim.list_extend({}, base)
+  local cwd = vim.uv.cwd()
+  for _, name in ipairs(M.extra_worktrees(cwd)) do
+    patterns[#patterns + 1] = "^" .. vim.pesc(name) .. "/"
+  end
   if M.hidden then
-    for _, name in ipairs(M.plain_repos(vim.uv.cwd())) do
+    for _, name in ipairs(M.plain_repos(cwd)) do
       patterns[#patterns + 1] = "^" .. vim.pesc(name) .. "/"
     end
   end
