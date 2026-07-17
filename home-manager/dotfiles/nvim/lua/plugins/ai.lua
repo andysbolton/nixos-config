@@ -102,15 +102,6 @@ return {
                 description = "Claude Code CLI",
                 provider = "terminal",
               },
-              -- Opt-in variant launching from ~/smartwyre so work sessions
-              -- share one claude project bucket (the terminal provider
-              -- hardcodes cwd = getcwd(), hence the sh wrapper)
-              claude_work = {
-                cmd = "sh",
-                args = { "-c", [[cd "$HOME/smartwyre" && exec claude]] },
-                description = "Claude Code CLI (from ~/smartwyre)",
-                provider = "terminal",
-              },
             },
           },
         },
@@ -134,12 +125,15 @@ return {
         { silent = true, desc = "[A]I: [T]oggle Code Companion" }
       )
 
-      vim.keymap.set(
-        { "n" },
-        "<leader>aw",
-        function() require("codecompanion").toggle_cli { agent = "claude_work" } end,
-        { silent = true, desc = "[A]I: claude from [w]ork root (~/smartwyre)" }
-      )
+      -- Work sessions never run in the bare root; route through a workspace
+      -- farm instead (which carries the shared auto-memory settings).
+      vim.keymap.set({ "n" }, "<leader>aw", function()
+        if vim.uv.cwd() == require("workspaces.core").root() then
+          vim.cmd "Telescope workspaces"
+          return vim.notify("workspaces: pick a workspace — claude does not run in the root", vim.log.levels.WARN)
+        end
+        require("codecompanion").toggle_cli()
+      end, { silent = true, desc = "[A]I: claude in [w]orkspace" })
 
       vim.keymap.set(
         { "n", "v" },

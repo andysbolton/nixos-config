@@ -40,92 +40,23 @@ let
     acc: instance: acc // mkSketchybarLinks instance
   ) { } sketchybarInstances;
 
-  # Symlink farm at $root/.workspaces/<TICKET>: every repo resolves to its
-  # ticket worktree (from a New-WorktreeSession session dir) or, failing that,
-  # the main clone. Prints the workspace path last: nvim "$(sw-workspace X | tail -1)"
-  swWorkspace = pkgs.writeShellScriptBin "sw-workspace" ''
-    set -euo pipefail
-
-    root="''${WORKTREE_SOURCE_ROOT:-$HOME/smartwyre}"
-
-    if [ $# -ne 1 ]; then
-      echo "usage: sw-workspace <TICKET> | list" >&2
-      exit 1
-    fi
-    arg=$1
-
-    # Session dirs are detected structurally: no top-level .git and at least
-    # one immediate subdir whose .git is a file (= a worktree). Primary clones
-    # have a .git directory; a stray worktree at root has a top-level .git file.
-    is_session_dir() {
-      [ -e "$1/.git" ] && return 1
-      local wt
-      for wt in "$1"/*/; do
-        [ -f "''${wt}.git" ] && return 0
-      done
-      return 1
+  # Workspace farms ($root/.workspaces/<TICKET>) are owned by the nvim
+  # workspaces plugin (dotfiles/nvim/lua/workspaces/). This PreToolUse hook is
+  # the entire Claude integration: before Edit/Write, run the plugin's generic
+  # guard, which claims a worktree for unclaimed farm repos and no-ops
+  # everywhere else. All decision logic lives in guard.lua; the bash prefilter
+  # only avoids a ~130ms headless-nvim spawn on edits outside the farm root.
+  workspaceGuardHook = pkgs.writeShellScript "hm-claude-workspace-guard" ''
+    input=$(cat)
+    file=$(${pkgs.jq}/bin/jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' <<<"$input")
+    case "$file" in
+      "''${WORKTREE_SOURCE_ROOT:-$HOME/smartwyre}/.workspaces/"*) ;;
+      *) exit 0 ;;
+    esac
+    err=$(${config.programs.neovim.finalPackage}/bin/nvim -l ${config.dotfilesPath}/nvim/lua/workspaces/guard.lua "$file" 2>&1) || {
+      echo "workspaces guard blocked the edit: $err" >&2
+      exit 2
     }
-
-    if [ "$arg" = list ]; then
-      for d in "$root"/*/; do
-        is_session_dir "$d" || continue
-        repos=()
-        for s in "$d"*/; do
-          [ -e "''${s}.git" ] && repos+=("$(basename "$s")")
-        done
-        printf '%s: %s\n' "$(basename "$d")" "''${repos[*]}"
-      done
-      exit 0
-    fi
-
-    if is_session_dir "$root/$arg"; then
-      # Exact session-dir name given
-      session="$root/$arg"
-      if [[ $arg =~ ^([A-Za-z]+-[0-9]+) ]]; then
-        ticket=$(tr '[:lower:]' '[:upper:]' <<<"''${BASH_REMATCH[1]}")
-      else
-        echo "sw-workspace: cannot derive a ticket from '$arg'" >&2
-        exit 1
-      fi
-    else
-      ticket=$(tr '[:lower:]' '[:upper:]' <<<"$arg")
-      candidates=()
-      for d in "$root/$ticket"-*/; do
-        [ -d "$d" ] || continue
-        is_session_dir "$d" && candidates+=("''${d%/}")
-      done
-      if [ "''${#candidates[@]}" -eq 0 ]; then
-        echo "sw-workspace: no session for $ticket under $root" >&2
-        exit 1
-      elif [ "''${#candidates[@]}" -gt 1 ]; then
-        echo "sw-workspace: multiple sessions for $ticket:" >&2
-        printf '  %s\n' "''${candidates[@]##*/}" >&2
-        echo "re-run with the full session dir name" >&2
-        exit 1
-      fi
-      session=''${candidates[0]}
-    fi
-
-    ws="$root/.workspaces/$ticket"
-    mkdir -p "$ws"
-    find "$ws" -maxdepth 1 -type l -delete
-
-    for d in "$session"/*/; do
-      [ -e "''${d}.git" ] || continue
-      name=$(basename "$d")
-      ln -sfn "''${d%/}" "$ws/$name"
-      printf '%s -> %s (worktree)\n' "$name" "''${d%/}"
-    done
-
-    for d in "$root"/*/; do
-      [ -d "''${d}.git" ] || continue
-      name=$(basename "$d")
-      [ -e "$ws/$name" ] && continue
-      ln -sfn "''${d%/}" "$ws/$name"
-      printf '%s -> %s (main)\n' "$name" "''${d%/}"
-    done
-
-    printf '%s\n' "$ws"
   '';
 in
 {
@@ -152,6 +83,7 @@ in
     (azure-cli.withExtensions [
       azure-cli-extensions.azure-devops
       azure-cli-extensions.durabletask
+      azure-cli-extensions.quota
       azure-cli-extensions.resource-graph
     ])
     (pkgs.writeShellScriptBin "jetkvm-kiosk" ''
@@ -196,8 +128,31 @@ in
     powershell
     powershell-editor-services
     sketchybarBottom
-    swWorkspace # per-ticket worktree symlink farm for nvim
   ];
+
+  # Workspace hooks merged into ~/.claude/settings.json without letting nix
+  # own the file, same pattern as claudeNotifyHooks in shared.nix.
+  home.activation.claudeWorkspaceHooks =
+    lib.hm.dag.entryAfter [ "writeBoundary" ]
+      # bash
+      ''
+        settings="$HOME/.claude/settings.json"
+        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+        [ -s "$settings" ] || echo '{}' > "$settings"
+
+        new=$(${pkgs.jq}/bin/jq --arg guard ${workspaceGuardHook} '
+          .hooks.PreToolUse |= [ { matcher: "Edit|Write|MultiEdit|NotebookEdit", hooks: [ { type: "command", command: $guard } ] } ]
+          | .skillOverrides."worktree-session" = "off"
+          | .claudeMdExcludes = (((.claudeMdExcludes // []) + ["**/infra-orchestrator/.claude/skills/worktree-session/SKILL.md"]) | unique)
+        ' "$settings" 2>/dev/null) || {
+          echo "claude-code: settings.json is not valid JSON, skipping workspace hook patch" >&2
+          new=""
+        }
+
+        if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
+          printf '%s\n' "$new" > "$settings"
+        fi
+      '';
 
   # Global context loaded into every Claude Code session (~/.claude/CLAUDE.md).
   # Plain markdown; escape ''${ as '''${ and '' as ''' if you add code samples.
@@ -210,6 +165,7 @@ in
     - Length must be earned by complexity or risk, not padding. When unsure, cut.
     - PR descriptions: routine change → self-contained body. Risky or multi-step change → short body (what / why + links), with the runbook (ordered steps, timings, rollback) living in a Confluence document and linked from the PR.
     - Make minimal changes. If something can be written better, bring it up but don't implement it immediately.
+    - Don't force the reader to skim with a large wall of text. Present easily digestible responses so that a natural question and answer format can be acheived.
 
     ## Epistemics
     - Label platform-capability claims by evidence class: [tested this session],
@@ -229,6 +185,26 @@ in
     - When corrected, also hunt down sibling claims sharing the broken premise —
       don't just patch the one that got caught.
   '';
+
+  # Project context for ~/smartwyre (loaded by all work sessions, farm or root).
+  home.file."smartwyre/CLAUDE.md" = {
+    force = false;
+    text = ''
+      On a new session, name it after the workspace ticket (the workspace CLAUDE.md states it). If there is no workspace ticket, ask for the CLOUD number and name the session after it; if there is none, name it after the question.
+
+      On a new session, always descend into infra-orchestrator and load any skills.
+
+      ## Layout
+
+      - `~/smartwyre/<repo>/` — main clones (`.git` directory). Edits here are for clone maintenance only; ticket work happens in workspaces.
+      - `~/smartwyre/.workspaces/<TICKET>/` — workspace farms (nvim workspaces plugin): one entry per repo, a symlink to the main clone until claimed, then a git worktree in place. Ticket worktrees always live here — never in ad-hoc directories. Each farm's generated CLAUDE.md documents claiming and the shell-write rule.
+      - Create or sync a farm headlessly: `nvim -l ~/.config/nvim/lua/workspaces/sync.lua <TICKET>` (prints the farm path).
+
+      ## Claude sessions
+
+      Work sessions launch inside a workspace farm, never in the bare `~/smartwyre` root (`<leader>aw` in nvim opens claude in the farm; at the root it opens the workspace picker instead). Sessions and transcripts are bucketed per ticket; auto-memory is shared across all smartwyre work via each farm's generated `.claude/settings.json`.
+    '';
+  };
 
   programs.claude-code.mcpServers = {
     atlassian = {
@@ -265,17 +241,6 @@ in
         "terraform-mcp-server"
       ];
     };
-  };
-
-  # Work claude sessions all launch from ~/smartwyre so sessions and
-  # auto-memory share one project bucket (resume + recall work everywhere).
-  programs.fish.functions.swc = {
-    description = "claude from ~/smartwyre (shared work session/memory bucket)";
-    body = ''
-      pushd ~/smartwyre
-      claude $argv
-      popd
-    '';
   };
 
   home.sessionPath = [
