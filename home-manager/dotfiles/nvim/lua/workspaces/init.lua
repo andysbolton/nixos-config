@@ -139,10 +139,19 @@ function M.claim_on_save(buf)
   vim.notify(("workspaces: claimed %s in %s"):format(repo, ticket))
 end
 
--- Open (creating if needed) a workspace: sync the farm and cd into it.
+-- Open (creating if needed) a workspace: sync the farm and cd into it. A
+-- running CLI terminal keeps its launch cwd, so close it on a real change;
+-- the next toggle starts the agent in this farm.
 function M.open(ticket)
   local farm = M.core.sync(ticket)
-  vim.cmd.cd(farm)
+  if vim.uv.cwd() ~= farm then
+    local ok, cli = pcall(require, "codecompanion.interactions.cli")
+    if ok then
+      local instance = cli.last_cli()
+      if instance then instance:close() end
+    end
+    vim.cmd.cd(farm)
+  end
   vim.notify("workspaces: " .. farm)
   return farm
 end

@@ -84,8 +84,20 @@ apply, scripts) in an *unclaimed* repo — only Edit/Write tools trigger the
 claim, so a shell write would land in the shared main clone. Either edit a
 file with Edit/Write first, or claim explicitly with
 `nvim -l %s <path-to-any-file-in-the-repo>`, then shell freely.
-]]):format(ticket, ticket, guard))
+
+Session naming: this workspace is ticket %s — name the session `%s <short
+description>` without asking for a ticket number.
+]]):format(ticket, ticket, guard, ticket, ticket))
   f:close()
+  -- Farm launches land in a per-ticket project bucket; point auto-memory at
+  -- the shared root bucket so recall spans tickets.
+  vim.fn.mkdir(farm .. "/.claude", "p")
+  local s = assert(io.open(farm .. "/.claude/settings.json", "w"))
+  s:write(('{\n  "autoMemoryDirectory": "%s/.claude/projects/%s/memory"\n}\n'):format(
+    uv.os_homedir(),
+    (M.root():gsub("[^%w]", "-"))
+  ))
+  s:close()
 end
 
 -- Ensure the farm exists and every main clone has an entry: a symlink where

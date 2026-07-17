@@ -83,6 +83,7 @@ in
     (azure-cli.withExtensions [
       azure-cli-extensions.azure-devops
       azure-cli-extensions.durabletask
+      azure-cli-extensions.quota
       azure-cli-extensions.resource-graph
     ])
     (pkgs.writeShellScriptBin "jetkvm-kiosk" ''
@@ -141,6 +142,8 @@ in
 
         new=$(${pkgs.jq}/bin/jq --arg guard ${workspaceGuardHook} '
           .hooks.PreToolUse |= [ { matcher: "Edit|Write|MultiEdit|NotebookEdit", hooks: [ { type: "command", command: $guard } ] } ]
+          | .skillOverrides."worktree-session" = "off"
+          | .claudeMdExcludes = (((.claudeMdExcludes // []) + ["**/infra-orchestrator/.claude/skills/worktree-session/SKILL.md"]) | unique)
         ' "$settings" 2>/dev/null) || {
           echo "claude-code: settings.json is not valid JSON, skipping workspace hook patch" >&2
           new=""
@@ -162,6 +165,7 @@ in
     - Length must be earned by complexity or risk, not padding. When unsure, cut.
     - PR descriptions: routine change → self-contained body. Risky or multi-step change → short body (what / why + links), with the runbook (ordered steps, timings, rollback) living in a Confluence document and linked from the PR.
     - Make minimal changes. If something can be written better, bring it up but don't implement it immediately.
+    - Don't force the reader to skim with a large wall of text. Present easily digestible responses so that a natural question and answer format can be acheived.
 
     ## Epistemics
     - Label platform-capability claims by evidence class: [tested this session],
@@ -181,6 +185,26 @@ in
     - When corrected, also hunt down sibling claims sharing the broken premise —
       don't just patch the one that got caught.
   '';
+
+  # Project context for ~/smartwyre (loaded by all work sessions, farm or root).
+  home.file."smartwyre/CLAUDE.md" = {
+    force = false;
+    text = ''
+      On a new session, name it after the workspace ticket (the workspace CLAUDE.md states it). If there is no workspace ticket, ask for the CLOUD number and name the session after it; if there is none, name it after the question.
+
+      On a new session, always descend into infra-orchestrator and load any skills.
+
+      ## Layout
+
+      - `~/smartwyre/<repo>/` — main clones (`.git` directory). Edits here are for clone maintenance only; ticket work happens in workspaces.
+      - `~/smartwyre/.workspaces/<TICKET>/` — workspace farms (nvim workspaces plugin): one entry per repo, a symlink to the main clone until claimed, then a git worktree in place. Ticket worktrees always live here — never in ad-hoc directories. Each farm's generated CLAUDE.md documents claiming and the shell-write rule.
+      - Create or sync a farm headlessly: `nvim -l ~/.config/nvim/lua/workspaces/sync.lua <TICKET>` (prints the farm path).
+
+      ## Claude sessions
+
+      Work sessions launch inside a workspace farm, never in the bare `~/smartwyre` root (`<leader>aw` in nvim opens claude in the farm; at the root it opens the workspace picker instead). Sessions and transcripts are bucketed per ticket; auto-memory is shared across all smartwyre work via each farm's generated `.claude/settings.json`.
+    '';
+  };
 
   programs.claude-code.mcpServers = {
     atlassian = {
@@ -217,17 +241,6 @@ in
         "terraform-mcp-server"
       ];
     };
-  };
-
-  # Work claude sessions all launch from ~/smartwyre so sessions and
-  # auto-memory share one project bucket (resume + recall work everywhere).
-  programs.fish.functions.swc = {
-    description = "claude from ~/smartwyre (shared work session/memory bucket)";
-    body = ''
-      pushd ~/smartwyre
-      claude $argv
-      popd
-    '';
   };
 
   home.sessionPath = [

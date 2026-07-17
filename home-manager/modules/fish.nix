@@ -320,7 +320,7 @@ in
             set workspace $argv[1]
 
             for prefix in $argv[2..-1]
-              set suffix ([ "$workspace" = "default" ]; and echo "$_flag_suffix"; or echo "$_flag_suffix:$workspace")
+              set suffix ([ "$workspace" = "default" ]; and echo "$_flag_suffix"; or echo "$_flag_suffix$workspace")
               echo "Searching for blobs ending in $suffix"
               set blobs (az storage blob list \
                 --account-name sttfstatecusglobal \

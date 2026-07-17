@@ -31,7 +31,6 @@ return {
       return ws.to_cwd_path(path) or path
     end
 
-
     require("neo-tree").setup {
       auto_clean_after_session_restore = true,
       close_if_last_window = true,
