@@ -44,6 +44,11 @@ return {
         desc = "[S]earch [R]esume",
       },
       {
+        "<leader>sW",
+        function() require("telescope").extensions.workspaces.workspaces() end,
+        desc = "[S]earch [W]orkspaces",
+      },
+      {
         "<leader><leader>",
         function() require("telescope.builtin").buffers() end,
         desc = "Search Buffers",
@@ -84,7 +89,7 @@ return {
       local actions = require "telescope.actions"
       local lga_actions = require "telescope-live-grep-args.actions"
 
-      -- Follow symlinks so grep works in sw-workspace symlink farms;
+      -- Follow symlinks so grep works in workspace symlink farms;
       -- vimgrep_arguments replaces the defaults, so extend rather than restate
       local vimgrep_arguments = { unpack(require("telescope.config").values.vimgrep_arguments) }
       table.insert(vimgrep_arguments, "--follow")
@@ -122,6 +127,7 @@ return {
       }
 
       require("telescope").load_extension "luasnip"
+      require("telescope").load_extension "workspaces"
 
       -- Enable telescope fzf native, if installed
       pcall(require("telescope").load_extension, "fzf")

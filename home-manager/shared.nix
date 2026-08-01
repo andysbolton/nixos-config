@@ -81,6 +81,7 @@ in
     go
     httpie # user-friendly HTTP client
     hwatch
+    jo
     jq
     killall
     lazygit

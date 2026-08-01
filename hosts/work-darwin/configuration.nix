@@ -71,6 +71,7 @@
     ];
     casks = [
       # "bot-framework-emulator"
+      "docker-desktop"
       "hammerspoon"
       "microsoft-teams"
       "protonvpn"
