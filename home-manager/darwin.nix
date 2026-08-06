@@ -161,11 +161,58 @@ in
 
     - Be concise and direct — skip preamble and flattery. Applies to chat, Jira comments, and PR descriptions.
     - State each fact once. Don't restate context or explain the same thing two ways.
-    - Don't comment self-evident code; reserve comments for non-obvious logic, and keep any explanatory context short.
     - Length must be earned by complexity or risk, not padding. When unsure, cut.
-    - PR descriptions: routine change → self-contained body. Risky or multi-step change → short body (what / why + links), with the runbook (ordered steps, timings, rollback) living in a Confluence document and linked from the PR.
     - Make minimal changes. If something can be written better, bring it up but don't implement it immediately.
     - Don't force the reader to skim with a large wall of text. Present easily digestible responses so that a natural question and answer format can be acheived.
+
+    ## Code comments
+
+    Add a comment only when one of these applies:
+    - a VERY BRIEF summary of a non-obvious unit (1-2 lines max), or
+    - a workaround, constraint, or gotcha the code itself cannot make obvious.
+
+    Never add comments that:
+    - narrate the change ("replaces X", "used to", "same as the old…", "moved from") — git history owns that;
+    - restate what the adjacent code visibly does;
+    - describe other systems or consumers (which pipeline/job/alert/field uses this) — those rot;
+    - justify the change to a reviewer — that belongs in the PR body or commit message;
+    - explain or defend the design ("so that…", "this way we get…", "without needing X") —
+      the code's shape is the decision; rationale lives in the PR body or commit message.
+
+    Default is zero comments. Before writing one, name which allowed category it is
+    (brief summary of a non-obvious unit / workaround-constraint-gotcha); if you can't
+    name it, don't write it. Truth is not sufficient — a comment must be necessary:
+    if deleting it loses nothing a cold reader needs to safely change the code, delete it.
+
+    Litmus test: would this comment still be true and useful to someone reading the
+    file in a year, having never seen the diff? If not, don't write it. When in
+    doubt, no comment — deleting is better than letting one go stale.
+
+    ## PR descriptions
+
+    Write for exactly two readers: the reviewer deciding whether to approve, and
+    the operator executing the merge. Include only what the diff cannot say:
+    - one or two sentences of what and why — the problem and the end state;
+    - effects the reviewer can't infer from the diff (per-environment plan
+      summaries, behaviour changes, data effects);
+    - out-of-band validation the reviewer can't see from CI: sandbox
+      allocate/deallocate runs (config + run links), manual or load tests;
+    - operational content: ordered pre/post-merge steps with exact commands,
+      known risks with their canary and rollback;
+    - links: ticket, dependent PRs, docs.
+
+    Never include:
+    - the development journey ("initially we…", "after discussion this was
+      changed to…") — describe what the PR *is*, not how it got there;
+    - a file-by-file tour of the diff — reviewers read the diff;
+    - green-CI / unit-tests-pass status the checks UI already shows, or
+      boilerplate section headers with nothing under them;
+    - selling ("significantly improves", "robust", "clean").
+
+    Length is earned by risk, not effort: routine change → a few self-contained
+    sentences. Risky or multi-step change → short what/why + links, with the full
+    runbook (ordered steps, timings, rollback) living in Confluence, linked from
+    the PR.
 
     ## Epistemics
     - Label platform-capability claims by evidence class: [tested this session],
