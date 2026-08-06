@@ -4,6 +4,7 @@
   pkgs,
   pkgs-unstable,
   inputs,
+  osConfig,
   ...
 }:
 let
@@ -159,6 +160,23 @@ in
               # env vars sidestep AppleScript string escaping
               MSG="$msg" TITLE="$title" /usr/bin/osascript -e \
                 'display notification (system attribute "MSG") with title (system attribute "TITLE") sound name "Glass"'
+
+              # Mark the session's space in the bar; space.sh un-marks it on
+              # focus. The nearest ancestor owning a yabai window is the
+              # session's terminal window.
+              command -v yabai >/dev/null && command -v sketchybar >/dev/null || exit 0
+              windows=$(yabai -m query --windows)
+              pid=$$ space=""
+              while [ "$pid" -gt 1 ] 2>/dev/null; do
+                space=$(${pkgs.jq}/bin/jq -r --argjson pid "$pid" \
+                  '[.[] | select(.pid == $pid) | .space] | first // empty' <<<"$windows")
+                [ -z "$space" ] || break
+                pid=$(ps -o ppid= -p "$pid" | tr -d ' ')
+              done
+              focused=$(yabai -m query --spaces --space | ${pkgs.jq}/bin/jq -r .index)
+              if [ -n "$space" ] && [ "$space" != "$focused" ]; then
+                sketchybar --set "space.$space" icon.color=${osConfig.palette.ORANGE} 2>/dev/null || true
+              fi
             ''
           else
             ''
