@@ -1,6 +1,63 @@
 return {
   {
     "olimorris/codecompanion.nvim",
+    keys = {
+      {
+        "<leader>at",
+        function() require("codecompanion").toggle_cli() end,
+        silent = true,
+        desc = "[A]I: [T]oggle Code Companion",
+      },
+      -- Work sessions never run in the bare root; route through a workspace
+      -- farm instead (which carries the shared auto-memory settings).
+      {
+        "<leader>aw",
+        function()
+          if vim.uv.cwd() == require("workspaces.core").root() then
+            vim.cmd "Telescope workspaces"
+            return vim.notify("workspaces: pick a workspace — claude does not run in the root", vim.log.levels.WARN)
+          end
+          require("codecompanion").toggle_cli()
+        end,
+        silent = true,
+        desc = "[A]I: claude in [w]orkspace",
+      },
+      {
+        "<leader>aa",
+        function() require("codecompanion").cli { prompt = true } end,
+        mode = { "n", "v" },
+        silent = true,
+        desc = "[A]I: [a]sk (compose prompt)",
+      },
+      {
+        "<leader>ab",
+        function() require("codecompanion").cli("#{this}", { focus = false }) end,
+        mode = { "n", "v" },
+        silent = true,
+        desc = "[A]I: send [b]uffer/selection as context",
+      },
+      {
+        "<leader>af",
+        function()
+          require("codecompanion").cli("Fix these diagnostics: #{diagnostics}", { focus = false, submit = true })
+        end,
+        silent = true,
+        desc = "[A]I: [f]ix diagnostics",
+      },
+      {
+        "<leader>ae",
+        function() require("codecompanion").cli("Explain #{this}", { prompt = true }) end,
+        mode = "v",
+        silent = true,
+        desc = "[A]I: [e]xplain selection",
+      },
+      {
+        "<leader>ao",
+        function() require("codecompanion").cli("#{terminal}", { focus = false }) end,
+        silent = true,
+        desc = "[A]I: send terminal [o]utput",
+      },
+    },
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-treesitter/nvim-treesitter",
@@ -115,64 +172,11 @@ return {
           },
         },
       }
-
-      local cli = function(...) return require("codecompanion").cli(...) end
-
-      vim.keymap.set(
-        { "n" },
-        "<leader>at",
-        function() require("codecompanion").toggle_cli() end,
-        { silent = true, desc = "[A]I: [T]oggle Code Companion" }
-      )
-
-      -- Work sessions never run in the bare root; route through a workspace
-      -- farm instead (which carries the shared auto-memory settings).
-      vim.keymap.set({ "n" }, "<leader>aw", function()
-        if vim.uv.cwd() == require("workspaces.core").root() then
-          vim.cmd "Telescope workspaces"
-          return vim.notify("workspaces: pick a workspace — claude does not run in the root", vim.log.levels.WARN)
-        end
-        require("codecompanion").toggle_cli()
-      end, { silent = true, desc = "[A]I: claude in [w]orkspace" })
-
-      vim.keymap.set(
-        { "n", "v" },
-        "<leader>aa",
-        function() cli { prompt = true } end,
-        { silent = true, desc = "[A]I: [a]sk (compose prompt)" }
-      )
-
-      vim.keymap.set(
-        { "n", "v" },
-        "<leader>ab",
-        function() cli("#{this}", { focus = false }) end,
-        { silent = true, desc = "[A]I: send [b]uffer/selection as context" }
-      )
-
-      vim.keymap.set(
-        "n",
-        "<leader>af",
-        function() cli("Fix these diagnostics: #{diagnostics}", { focus = false, submit = true }) end,
-        { silent = true, desc = "[A]I: [f]ix diagnostics" }
-      )
-
-      vim.keymap.set(
-        "v",
-        "<leader>ae",
-        function() cli("Explain #{this}", { prompt = true }) end,
-        { silent = true, desc = "[A]I: [e]xplain selection" }
-      )
-
-      vim.keymap.set(
-        "n",
-        "<leader>ao",
-        function() cli("#{terminal}", { focus = false }) end,
-        { silent = true, desc = "[A]I: send terminal [o]utput" }
-      )
     end,
   },
   {
     "supermaven-inc/supermaven-nvim",
+    event = "InsertEnter",
     config = function()
       require("supermaven-nvim").setup {
         ignore_filetypes = { ["neo-tree-popup"] = true },

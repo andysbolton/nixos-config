@@ -31,6 +31,9 @@ end
 vim.api.nvim_create_autocmd({"BufEnter", "CursorHold", "CursorHoldI", "FocusGained"}, {pattern = {"*"}, callback = _1_, desc = "Reload buffer on focus/hold unless in command-line window"})
 vim.opt.list = true
 vim.opt.listchars:append({extends = "\226\128\186", precedes = "\226\128\185", eol = "\226\143\142", trail = "\194\183", nbsp = "\226\142\181", space = " "})
+vim.o.scrolloff = 1
+vim.o.sidescrolloff = 2
+vim.opt.display:append("truncate")
 vim.o.mousemoveevent = true
 vim.fileformats = "unix"
 vim.o.showmode = false

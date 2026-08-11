@@ -42,4 +42,4 @@ local function _1_()
   cmp.setup.cmdline({"/", "?"}, {mapping = cmp.mapping.preset.cmdline(), sources = {{name = "buffer"}}})
   return cmp.setup.cmdline(":", {mapping = cmp.mapping.preset.cmdline(), sources = cmp.config.sources({{name = "path"}}, {{name = "cmdline"}})})
 end
-return {{"hrsh7th/nvim-cmp", config = _1_, dependencies = {"hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer", "hrsh7th/cmp-path", "hrsh7th/cmp-cmdline", "hrsh7th/nvim-cmp", "saadparwaiz1/cmp_luasnip", {"L3MON4D3/LuaSnip", build = "make install_jsregexp", dependencies = {"rafamadriz/friendly-snippets"}, version = "v2.*"}}}}
+return {{"hrsh7th/nvim-cmp", config = _1_, dependencies = {"hrsh7th/cmp-nvim-lsp", "hrsh7th/cmp-buffer", "hrsh7th/cmp-path", "hrsh7th/cmp-cmdline", "hrsh7th/nvim-cmp", "saadparwaiz1/cmp_luasnip", {"L3MON4D3/LuaSnip", build = "make install_jsregexp", dependencies = {"rafamadriz/friendly-snippets"}, version = "v2.*"}}, event = {"InsertEnter", "CmdlineEnter"}}}

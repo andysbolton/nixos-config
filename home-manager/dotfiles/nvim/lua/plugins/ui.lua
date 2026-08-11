@@ -2,6 +2,7 @@ return {
   {
     "akinsho/bufferline.nvim",
     version = "*",
+    event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       vim.keymap.set("n", "<leader><tab>", ":BufferLineCycleNext<cr>", { desc = "Cycle to next tab", silent = true })
@@ -74,6 +75,7 @@ return {
   {
     "modes.nvim",
     dir = "/Users/andybolton/code/modes.nvim",
+    event = "VeryLazy",
     -- branch = "buffer-scoped-cursorlines",
     config = function()
       local modes = require "modes"
@@ -93,6 +95,7 @@ return {
 
   {
     "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
     config = function()
       require("lualine").setup {
         options = {
@@ -117,6 +120,7 @@ return {
     -- Add indentation guides even on blank lines
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
+    event = "VeryLazy",
     opts = {
       indent = { char = "┊" },
     },
@@ -130,6 +134,7 @@ return {
 
   {
     "rcarriga/nvim-notify",
+    event = "VeryLazy",
     config = function()
       require("notify").setup {
         stages = "fade_in_slide_out",

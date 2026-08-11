@@ -1,19 +1,14 @@
 -- [nfnl] fnl/plugins/fmt.fnl
-local formatters
-do
+local function filetype_actions()
   local _let_1_ = require("configs.util")
   local get_formatters = _let_1_.get_formatters
-  formatters = get_formatters()
-end
-local filetype_actions
-do
-  local filetype_actions0 = {}
-  for _, formatter in pairs(formatters) do
+  local actions = {}
+  for _, formatter in pairs(get_formatters()) do
     for _0, filetype in pairs((formatter.filetypes or {})) do
-      filetype_actions0[filetype] = formatter.actions
+      actions[filetype] = formatter.actions
     end
   end
-  filetype_actions = filetype_actions0
+  return actions
 end
 local function _2_()
   local _let_3_ = require("formatter.filetypes.any")
@@ -21,11 +16,12 @@ local function _2_()
   local _let_4_ = require("cmds.fmt")
   local register_formatters = _let_4_.register_formatters
   local formatter = require("formatter")
+  local actions = filetype_actions()
   local function _5_()
     return remove_trailing_whitespace()
   end
-  filetype_actions["*"] = _5_
-  formatter.setup({logging = true, log_level = vim.log.levels.WARN, filetype = filetype_actions})
+  actions["*"] = _5_
+  formatter.setup({logging = true, log_level = vim.log.levels.WARN, filetype = actions})
   return register_formatters()
 end
-return {{"mhartington/formatter.nvim", config = _2_}}
+return {{"mhartington/formatter.nvim", config = _2_, event = "BufWritePre"}}

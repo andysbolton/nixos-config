@@ -96,7 +96,7 @@ return {
         nmap("<leader>wrr", vim.lsp.buf.remove_workspace_folder, "[W]orkspace [R]emove Folder")
         nmap("<leader>wrl", vim.lsp.buf.list_workspace_folders, "[W]orkspace [L]ist Folders")
 
-        if client.supports_method "textDocument/codeAction" then
+        if client:supports_method "textDocument/codeAction" then
           nmap("<leader>ca", require("cmds.lsp").code_action, "[C]ode [A]ction")
 
           -- visual mode: use the selection (builtin default)
@@ -105,7 +105,7 @@ return {
           require("cmds.lsp").setup_codeactions(bufnr)
         end
 
-        if client.supports_method "textDocument/signatureHelp" then
+        if client:supports_method "textDocument/signatureHelp" then
           nmap(
             "<C-s>",
             function()

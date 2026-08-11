@@ -6,16 +6,18 @@ return {
     "MunifTanjim/nui.nvim",
   },
   version = "*",
-  init = function() vim.g.neo_tree_remove_legacy_commands = true end,
-  config = function()
-    vim.keymap.set(
-      "n",
+  cmd = "Neotree",
+  keys = {
+    {
       "<leader>f",
       function() require("workspaces").neotree { toggle = true } end,
-      { desc = "Toggle Neotree", silent = true }
-    )
-    vim.keymap.set("n", "|", ":Neotree reveal<cr>", { silent = true })
-
+      silent = true,
+      desc = "Toggle Neotree",
+    },
+    { "|", ":Neotree reveal<cr>", silent = true },
+  },
+  init = function() vim.g.neo_tree_remove_legacy_commands = true end,
+  config = function()
     local directory_renderer = vim.deepcopy(require("neo-tree.defaults").renderers.directory)
     table.insert(directory_renderer, { "git_info" })
 

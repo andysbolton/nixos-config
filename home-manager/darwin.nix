@@ -160,6 +160,7 @@ in
     # Global instructions
 
     - Be concise and direct — skip preamble and flattery. Applies to chat, Jira comments, and PR descriptions.
+    - Always use ASD-STE100 Simplified Technical English (STE).
     - State each fact once. Don't restate context or explain the same thing two ways.
     - Length must be earned by complexity or risk, not padding. When unsure, cut.
     - Make minimal changes. If something can be written better, bring it up but don't implement it immediately.

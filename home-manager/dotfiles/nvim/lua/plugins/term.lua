@@ -47,7 +47,7 @@ return {
         end
         if not term then return end
         vim.api.nvim_win_call(term, function() vim.cmd "wincmd J" end)
-        local cli = require("codecompanion.interactions.cli").get_visible()
+        local cli = package.loaded["codecompanion"] and require("codecompanion.interactions.cli").get_visible()
         if cli then vim.api.nvim_win_call(cli.ui.winnr, function() vim.cmd "wincmd L" end) end
       end
 

@@ -59,6 +59,10 @@
                            :nbsp "⎵"
                            :space " "})
 
+(set vim.o.scrolloff 1)
+(set vim.o.sidescrolloff 2)
+(vim.opt.display:append :truncate)
+
 (set vim.o.mousemoveevent true)
 
 (set vim.fileformats :unix)

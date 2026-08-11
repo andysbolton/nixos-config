@@ -9,6 +9,31 @@ return {
     "leoluz/nvim-dap-go",
     { "jbyuki/one-small-step-for-vimkind", branch = "support-watches" },
   },
+  keys = {
+    { "<leader>db", function() require("dap").toggle_breakpoint() end },
+    { "<leader>dc", function() require("dap").continue() end },
+    { "<leader>do", function() require("dap").step_over() end },
+    { "<leader>di", function() require("dap").step_into() end },
+    { "<leader>de", function() require("dapui").eval() end, mode = { "n", "v" }, desc = "DAP UI: [E]val" },
+    { "<leader>dl", function() require("osv").launch { port = 8086 } end },
+    { "<leader>dw", function() require("dap.ui.widgets").hover() end },
+    {
+      "<leader>df",
+      function()
+        local widgets = require "dap.ui.widgets"
+        widgets.centered_float(widgets.frames)
+      end,
+    },
+    {
+      "<leader>dq",
+      function()
+        require("dap").terminate()
+        require("dapui").close()
+      end,
+      desc = "Stop Debugging and Close UI",
+    },
+    { "<leader>dt", function() require("dapui").toggle() end, desc = "Toggle DAP UI" },
+  },
   config = function()
     local dap = require "dap"
     local dapui = require "dapui"
@@ -42,33 +67,6 @@ return {
     --
     -- -- Toggle to see last session result. Without this, you can't see session output in case of a unhandled exception.
     -- vim.keymap.set("n", "<F6>", dapui.toggle, { desc = "Debug: See last session result." })
-
-    vim.keymap.set("n", "<leader>db", require("dap").toggle_breakpoint, { noremap = true })
-    vim.keymap.set("n", "<leader>dc", require("dap").continue, { noremap = true })
-    vim.keymap.set("n", "<leader>do", require("dap").step_over, { noremap = true })
-    vim.keymap.set("n", "<leader>di", require("dap").step_into, { noremap = true })
-
-    vim.keymap.set({ "n", "v" }, "<leader>de", function() require("dapui").eval() end, { desc = "DAP UI: [E]val" })
-
-    vim.keymap.set("n", "<leader>dl", function() require("osv").launch { port = 8086 } end, { noremap = true })
-
-    vim.keymap.set("n", "<leader>dw", function()
-      local widgets = require "dap.ui.widgets"
-      widgets.hover()
-    end)
-
-    vim.keymap.set("n", "<leader>df", function()
-      local widgets = require "dap.ui.widgets"
-      widgets.centered_float(widgets.frames)
-    end)
-
-    vim.keymap.set("n", "<leader>dq", function()
-      require("dap").terminate()
-      require("dapui").close()
-    end, { desc = "Stop Debugging and Close UI" })
-
-    -- Toggle UI windows manually if needed
-    vim.keymap.set("n", "<leader>dt", function() require("dapui").toggle() end, { desc = "Toggle DAP UI" })
 
     dapui.setup {
       icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
