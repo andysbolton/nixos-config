@@ -113,6 +113,20 @@
   ];
   services.tailscale.enable = true;
 
+  systemd.services.tailscaled = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+  };
+
+  # tailscaled doesn't reliably re-run resolver discovery on link changes.
+  # See https://github.com/tailscale/tailscale/issues/15138
+  networking.dhcpcd.runHook = ''
+    if [[ $reason =~ ^(BOUND|REBOOT|REBIND)$ ]]; then
+      ${pkgs.tailscale}/bin/tailscale set --accept-dns=false >/dev/null 2>&1 || true
+      ${pkgs.tailscale}/bin/tailscale set --accept-dns=true >/dev/null 2>&1 || true
+    fi
+  '';
+
   services.avahi = {
     enable = true;
     nssmdns4 = true;
