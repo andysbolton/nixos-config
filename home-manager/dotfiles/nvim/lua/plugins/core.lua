@@ -10,10 +10,6 @@ return {
     branch = "master",
   },
   {
-    "williamboman/mason.nvim",
-    config = true,
-  },
-  {
     "numToStr/Comment.nvim",
     config = function()
       require("Comment").setup()
@@ -22,28 +18,40 @@ return {
       ft.jq = "#%s"
     end,
   },
-  "tpope/vim-sensible",
   -- Detect tabstop and shiftwidth automatically
   "tpope/vim-sleuth",
   "romainl/vim-cool",
   {
     "rmagatti/auto-session",
+    priority = 100,
     config = function()
       ---@diagnostic disable-next-line: missing-fields
+      -- an unguarded :Neotree close would drag the lazy-loaded plugin in
+      -- via its cmd trigger on every session save/restore
+      local close_neotree = function()
+        if package.loaded["neo-tree"] then vim.cmd "Neotree close" end
+      end
       require("auto-session").setup {
         log_level = "error",
+        -- default (true) registers the telescope session-lens extension at
+        -- startup, force-loading the otherwise lazy telescope
+        session_lens = { load_on_setup = false },
         pre_save_cmds = {
-          "Neotree close",
+          close_neotree,
         },
         pre_restore_cmds = {
-          "Neotree close",
+          close_neotree,
         },
         post_restore_cmds = {
           function()
-            if not vim.tbl_contains(vim.v.argv, "DiffviewOpen") then vim.cmd "Neotree show filesystem" end
+            if not vim.tbl_contains(vim.v.argv, "DiffviewOpen") then
+              require("workspaces").neotree { action = "show" }
+            end
           end,
         },
       }
+      -- localoptions records each buffer's filetype in the session, so restore
+      -- doesn't depend on filetype detection (see nvim-session-restore-ft-poisoning)
       vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,localoptions"
     end,
   },
@@ -91,20 +99,23 @@ return {
   },
   {
     "ibhagwan/fzf-lua",
+    event = "VeryLazy",
     -- optional for icon support
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
-      -- lsp = {
-      --   code_actions = {
-      --     previewer = "codeaction_native",
-      --     preview_pager = "delta --side-by-side --width=$FZF_PREVIEW_COLUMNS --hunk-header-style='omit' --file-style='omit'",
-      --   },
-      -- },
+      lsp = {
+        code_actions = {
+          previewer = "codeaction_native",
+        },
+      },
     },
+    config = function(_, opts)
+      local fzf = require "fzf-lua"
+      fzf.setup(opts)
+      -- route vim.ui.select (incl. code actions) through fzf-lua
+      fzf.register_ui_select {
+        winopts = { width = 0.6, height = 0.8 },
+      }
+    end,
   },
-
-  -- {
-  --   "stevearc/dressing.nvim",
-  --   opts = {},
-  -- },
 }

@@ -19,63 +19,72 @@ let
   me = osConfig.networking.hostName;
   others = lib.filterAttrs (n: _: n != me) fingerprints;
 
-  karabiner = "/opt/homebrew/bin/karabiner_cli";
+  darwinEnterHook = lib.getExe (
+    pkgs.writeShellApplication {
+      name = "lan-mouse-darwin-enter-hook";
+      runtimeInputs = [ pkgs.pngpaste ];
+      bashOptions = [ ];
+      text = ''
+        log=/tmp/lan-mouse.err.log
+        off=$(stat -f%z "$log" 2>/dev/null || echo 0)
 
-  darwinEnterHook = ''
-    log=/tmp/lan-mouse.err.log
-    off=$(stat -f%z "$log" 2>/dev/null || echo 0)
+        uid=$(id -u)
+        skhd_plist="$HOME/Library/LaunchAgents/org.nixos.skhd.plist"
 
-    uid=$(/usr/bin/id -u)
-    skhd_plist="$HOME/Library/LaunchAgents/org.nixos.skhd.plist"
+        trap 'launchctl bootstrap "gui/$uid" "$skhd_plist"; open "hammerspoon://work"' EXIT
 
-    trap '/bin/launchctl bootstrap "gui/$uid" "$skhd_plist" 2>/dev/null; "${karabiner}" --select-profile work' EXIT
+        # Forward the clipboard to portable: an image if one is present, else text.
+        (
+          remote="env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=)"
+          if pngpaste - >/dev/null 2>&1; then
+            pngpaste - | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy --type image/png >/dev/null 2>&1"
+          else
+            # pbpaste defaults to MacRoman without a UTF-8 locale (none under
+            # launchd), mangling multibyte chars; force UTF-8.
+            env LC_CTYPE=UTF-8 pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy >/dev/null 2>&1"
+          fi
+        ) &
 
-    # Forward the clipboard to portable: an image if one is present, else text.
-    (
-      remote="env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=)"
-      if ${pkgs.pngpaste}/bin/pngpaste - >/dev/null 2>&1; then
-        ${pkgs.pngpaste}/bin/pngpaste - | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy --type image/png >/dev/null 2>&1"
-      else
-        # pbpaste defaults to MacRoman without a UTF-8 locale (none under
-        # launchd), mangling multibyte chars; force UTF-8.
-        env LC_CTYPE=UTF-8 pbpaste | ssh -o BatchMode=yes -o ConnectTimeout=3 portable "$remote wl-copy >/dev/null 2>&1"
-      fi
-    ) &
+        launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
 
-    /bin/launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
+        open "hammerspoon://linux" || exit 0
 
-    "${karabiner}" --select-profile linux || exit 0
+        tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
+      '';
+    }
+  );
 
-    tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
-  '';
+  linuxEnterHook = lib.getExe (
+    pkgs.writeShellApplication {
+      name = "lan-mouse-linux-enter-hook";
+      runtimeInputs = [
+        pkgs.wl-clipboard
+        pkgs.river-classic
+      ];
+      bashOptions = [ ];
+      text = ''
+        cursor=$(journalctl --user -u lan-mouse.service -n1 --show-cursor -o cat 2>/dev/null | sed -n 's/^-- cursor: *//p')
 
-  linuxCopyImageToDarwin = ''
-    f=$(mktemp /tmp/lan-mouse-clip.XXXXXX.png); cat > "$f"; osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1; rm -f "$f"
-  '';
+        # Forward the clipboard to work: an image if one is present, else text.
+        (
+          if wl-paste -l | grep -q '^image/png$'; then
+            # Remote login shell is fish, so write the body in fish
+            wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work 'set f (mktemp /tmp/lan-mouse-clip.XXXXXX); cat > $f; /usr/bin/osascript -e "set the clipboard to (read (POSIX file \"$f\") as «class PNGf»)" >/dev/null 2>&1; rm -f $f'
+          else
+            # pbcopy defaults to MacRoman without a UTF-8 locale (none over ssh),
+            # mangling multibyte chars; force UTF-8.
+            wl-paste --no-newline | ssh -o BatchMode=yes -o ConnectTimeout=3 work "env LC_CTYPE=UTF-8 pbcopy"
+          fi
+        ) &
 
-  linuxEnterHook = ''
-    cursor=$(journalctl --user -u lan-mouse.service -n1 --show-cursor -o cat 2>/dev/null | sed -n 's/^-- cursor: *//p')
+        trap 'riverctl enter-mode normal' EXIT
+        riverctl enter-mode passthrough
 
-    # Forward the clipboard to work: an image if one is present, else text.
-    (
-      if ${pkgs.wl-clipboard}/bin/wl-paste -l | grep -q '^image/png$'; then
-        ${pkgs.wl-clipboard}/bin/wl-paste --type image/png | ssh -o BatchMode=yes -o ConnectTimeout=3 work 'sh -c "${linuxCopyImageToDarwin}"'
-      else
-        # pbcopy defaults to MacRoman without a UTF-8 locale (none over ssh),
-        # mangling multibyte chars; force UTF-8.
-        ${pkgs.wl-clipboard}/bin/wl-paste | ssh -o BatchMode=yes -o ConnectTimeout=3 work "env LC_CTYPE=UTF-8 pbcopy"
-      fi
-    ) &
-
-    input=$(${pkgs.river-classic}/bin/riverctl list-inputs | grep -i "pointer.*mx_anywhere") || exit 0
-
-    trap '${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll disabled' EXIT
-
-    ${pkgs.river-classic}/bin/riverctl input "$input" natural-scroll enabled
-
-    if [ -n "$cursor" ]; then set -- --after-cursor "$cursor"; else set -- -n0; fi
-    journalctl --user -u lan-mouse.service "$@" -f -o cat | { grep -m1 -E "releasing capture"; pkill -P $$ -x journalctl; }
-  '';
+        if [ -n "$cursor" ]; then set -- --after-cursor "$cursor"; else set -- -n0; fi
+        journalctl --user -u lan-mouse.service "$@" -f -o cat | { grep -m1 -E "releasing capture"; pkill -P $$ -x journalctl; }
+      '';
+    }
+  );
 
   topology = {
     main = [

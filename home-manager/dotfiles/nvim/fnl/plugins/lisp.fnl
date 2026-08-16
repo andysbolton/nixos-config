@@ -1,12 +1,15 @@
-(import-macros {: tx} :utils.macros)
+(import-macros {: tx} :macros)
 
-[:gpanders/fennel-repl.nvim
- :gpanders/nvim-parinfer
- :vlime/vlime
- (tx :Olical/conjure {:config #(set vim.g.conjure#extract#tree_sitter#enabled
+[(tx :gpanders/fennel-repl.nvim {:ft :fennel})
+ (tx :gpanders/nvim-parinfer {:ft [:fennel]})
+ (tx :vlime/vlime {:ft :lisp})
+ (tx :Olical/conjure {:ft [:fennel :lua]
+                      :config #(set vim.g.conjure#extract#tree_sitter#enabled
                                     true)})
- (tx :julienvincent/nvim-paredit
-     {:config (fn []
+ (tx :andysbolton/nvim-paredit
+     {:branch :feature/support-fennel-if-pair
+      :ft [:fennel]
+      :config (fn []
                 (let [paredit (require :nvim-paredit)]
                   (paredit.setup {:keys {:<localleader>o false
                                          :<localleader>O false

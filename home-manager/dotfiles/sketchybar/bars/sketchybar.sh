@@ -148,13 +148,14 @@ set_volume=(
   --set volume_spacer width="$GAP" background.drawing=off \
   icon.drawing=off label.drawing=off
 
-karabiner_profile=(
+hammerspoon_profile=(
   icon="$KEYBOARD"
-  script="$PLUGIN_DIR/karabiner_profile.sh"
+  script="$PLUGIN_DIR/hammerspoon_profile.sh"
   "${block[@]}"
+  update_freq=1
   "${icon_with_label[@]}"
   background.padding_right=0
 )
 
-"$BAR_NAME" --add item karabiner_profile right \
-  --set karabiner_profile "${karabiner_profile[@]}"
+"$BAR_NAME" --add item hammerspoon_profile right \
+  --set hammerspoon_profile "${hammerspoon_profile[@]}"

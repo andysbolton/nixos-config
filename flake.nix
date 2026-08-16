@@ -44,7 +44,7 @@
     };
 
     stylix = {
-      url = "github:nix-community/stylix/release-25.11";
+      url = "github:nix-community/stylix/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -55,6 +55,16 @@
 
     lan-mouse = {
       url = "github:feschber/lan-mouse";
+    };
+
+    fennel-ls-nvim-docs = {
+      url = "sourcehut:~micampe/fennel-ls-nvim-docs";
+      flake = false;
+    };
+
+    nixos-generators = {
+      url = "github:nix-community/nixos-generators";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # firefox-addons = {
@@ -73,6 +83,7 @@
       home-manager,
       nix-darwin,
       nix-homebrew,
+      nixos-generators,
       nixpkgs,
       nixpkgs-unstable,
       opnix,
@@ -136,7 +147,10 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
-              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
+              home-manager.sharedModules = [
+                opnix.homeManagerModules.default
+                stylix.homeModules.stylix
+              ];
             }
           ];
         };
@@ -163,10 +177,18 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
-              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
+              home-manager.sharedModules = [
+                opnix.homeManagerModules.default
+                stylix.homeModules.stylix
+              ];
             }
           ];
         };
+
+      nixosConfigurations.jetkvm-kiosk = nixpkgs.lib.nixosSystem {
+        system = "aarch64-linux";
+        modules = [ ./hosts/jetkvm-kiosk.nix ];
+      };
 
       darwinConfigurations.work-darwin =
         let
@@ -189,7 +211,10 @@
               home-manager.extraSpecialArgs = extraSpecialArgs;
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = false;
-              home-manager.sharedModules = [ opnix.homeManagerModules.default ];
+              home-manager.sharedModules = [
+                opnix.homeManagerModules.default
+                stylix.homeModules.stylix
+              ];
             }
             nix-homebrew.darwinModules.nix-homebrew
             {
@@ -201,5 +226,6 @@
             }
           ];
         };
+
     };
 }

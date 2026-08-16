@@ -2,6 +2,7 @@ return {
   {
     "akinsho/bufferline.nvim",
     version = "*",
+    event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       vim.keymap.set("n", "<leader><tab>", ":BufferLineCycleNext<cr>", { desc = "Cycle to next tab", silent = true })
@@ -65,19 +66,6 @@ return {
   },
 
   {
-    "utilyre/barbecue.nvim",
-    name = "barbecue",
-    version = "*",
-    dependencies = {
-      "SmiteshP/nvim-navic",
-      "nvim-tree/nvim-web-devicons",
-    },
-    opts = {
-      theme = "tokyonight-storm",
-    },
-  },
-
-  {
     "folke/tokyonight.nvim",
     lazy = false,
     priority = 1000,
@@ -85,7 +73,29 @@ return {
   },
 
   {
+    "modes.nvim",
+    dir = "/Users/andybolton/code/modes.nvim",
+    event = "VeryLazy",
+    -- branch = "buffer-scoped-cursorlines",
+    config = function()
+      local modes = require "modes"
+      -- Its WinLeave handler strips cursorline from any window it leaves,
+      -- without consulting ignore_filetypes; exempt neo-tree so the tree
+      -- keeps its own cursorline (current-file tracking) when unfocused.
+      -- Must wrap before setup(): the autocmd captures the fn by value.
+      -- local disable_managed_ui = modes.disable_managed_ui
+      -- modes.disable_managed_ui = function(...)
+      --   if vim.bo.filetype == "neo-tree" then return end
+      --   return disable_managed_ui(...)
+      -- end
+      modes.setup {} --{ ignore = { "neo-tree" } }
+      -- modes.setup { ignore = function() return vim.bo.filetype == "neo-tree" end }
+    end,
+  },
+
+  {
     "nvim-lualine/lualine.nvim",
+    event = "VeryLazy",
     config = function()
       require("lualine").setup {
         options = {
@@ -110,6 +120,7 @@ return {
     -- Add indentation guides even on blank lines
     "lukas-reineke/indent-blankline.nvim",
     main = "ibl",
+    event = "VeryLazy",
     opts = {
       indent = { char = "┊" },
     },
@@ -123,10 +134,11 @@ return {
 
   {
     "rcarriga/nvim-notify",
+    event = "VeryLazy",
     config = function()
       require("notify").setup {
         stages = "fade_in_slide_out",
-        timeout = 3000,
+        timeout = 2500,
         icons = {
           ERROR = "",
           WARN = "",
@@ -135,6 +147,7 @@ return {
           TRACE = "✎",
         },
         render = "wrapped-default",
+        merge_duplicates = true,
       }
       vim.notify = require "notify"
     end,
@@ -164,25 +177,25 @@ return {
         mode = { "n", "t" },
       },
       {
-        "<leader>swh",
+        "<leader><leader>h",
         function() require("smart-splits").swap_buf_left() end,
         mode = { "n", "t" },
         desc = "[S][w]ap buffer left",
       },
       {
-        "<leader>swj",
+        "<leader><leader>j",
         function() require("smart-splits").swap_buf_down() end,
         mode = { "n", "t" },
         desc = "[S][w]ap buffer down",
       },
       {
-        "<leader>swk",
+        "<leader><leader>k",
         function() require("smart-splits").swap_buf_up() end,
         mode = { "n", "t" },
         desc = "[S][w]ap buffer up",
       },
       {
-        "<leader>swl",
+        "<leader><leader>l",
         function() require("smart-splits").swap_buf_right() end,
         mode = { "n", "t" },
         desc = "[S][w]ap buffer right",

@@ -6,6 +6,10 @@
   ...
 }:
 {
+  imports = [
+    ../../modules/theme.nix
+  ];
+
   networking.hostName = "work";
 
   users.users.andybolton = {
@@ -19,7 +23,29 @@
       "flakes"
       "nix-command"
     ];
-    trusted-users = [ "andybolton" ];
+    trusted-users = [
+      "@admin"
+      "andybolton"
+    ];
+  };
+
+  nix.linux-builder = {
+    enable = true;
+    ephemeral = true; # fresh builder each start
+    maxJobs = 4;
+    config = {
+      virtualisation = {
+        cores = 4;
+        memorySize = lib.mkForce (8 * 1024);
+        diskSize = lib.mkForce (80 * 1024);
+      };
+      # Auto-GC inside the builder: disk-image builds eat ~9G each and
+      # otherwise fill the disk until the next daemon restart.
+      nix.settings = {
+        min-free = lib.mkForce (10 * 1024 * 1024 * 1024); # GC when <10G free
+        max-free = lib.mkForce (30 * 1024 * 1024 * 1024); # stop at 30G free
+      };
+    };
   };
 
   programs.fish = {
@@ -45,7 +71,8 @@
     ];
     casks = [
       # "bot-framework-emulator"
-      "karabiner-elements"
+      "docker-desktop"
+      "hammerspoon"
       "microsoft-teams"
       "protonvpn"
     ];
@@ -58,175 +85,224 @@
     last-resort
   ];
 
-  services = {
-    tailscale.enable = true;
-    eternal-terminal.enable = true;
+  services =
+    let
+      spaces = {
+        "Firefox" = {
+          display = 1;
+          space = 5;
+          key = "w";
+        };
+        "GatherV2" = {
+          display = 1;
+          space = 6;
+          key = "g";
+        };
+        "Vesktop" = {
+          display = 1;
+          space = 7;
+          key = "d";
+        };
+        "Microsoft Teams" = {
+          display = 1;
+          space = 8;
+          key = "t";
+        };
+        "Proton VPN" = {
+          display = 1;
+          space = 9;
+          key = "v";
+        };
+      };
+    in
+    {
+      tailscale.enable = true;
+      eternal-terminal.enable = true;
 
-    skhd = {
-      enable = true;
-      skhdConfig =
-        let
-          spaceQuery = n: "yabai -m query --spaces --display | jq -r 'map(select(.\"is-native-fullscreen\" == false))[${toString (n - 1)}].index // empty'";
-          focusSpace = n: "cmd - ${toString n} : set i (${spaceQuery n}); test -n \"$i\"; and yabai -m space --focus \"$i\"";
-          moveToSpace = n: "shift + cmd - ${toString n} : set i (${spaceQuery n}); test -n \"$i\"; and yabai -m window --space \"$i\"; and yabai -m space --focus \"$i\"";
-          mkBindings = f: lib.concatMapStrings (n: "${f n}\n") (lib.range 1 9);
-        in
-        ''
-          # focus window
-          ctrl + shift - h : yabai -m window --focus west  || yabai -m display --focus west
-          ctrl + shift - j : yabai -m window --focus south || yabai -m display --focus south
-          ctrl + shift - k : yabai -m window --focus north || yabai -m display --focus north
-          ctrl + shift - l : yabai -m window --focus east  || yabai -m display --focus east
-
-          # focus space
-          ${mkBindings focusSpace}
-          # move to space
-          ${mkBindings moveToSpace}
-
-          # swap managed window
-          ctrl + shift + alt - h : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap west || { yabai -m window --display west && yabai -m window --focus "$id" }
-          ctrl + shift + alt - j : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap south || { yabai -m window --display south && yabai -m window --focus "$id" }
-          ctrl + shift + alt - k : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap north|| { yabai -m window --display north && yabai -m window --focus "$id" }
-          ctrl + shift + alt - l : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap east || { yabai -m window --display east && yabai -m window --focus "$id" }
-
-          # balance size of windows
-          shift + alt - 0 : yabai -m space --balance
-
-          shift + ctrl - o : yabai -m window --focus recent
-          shift + ctrl - i : yabai -m window --focus next
-
-          # fast focus desktop
-          cmd + alt - 1 : yabai -m space --focus 1
-          cmd + alt - 2 : yabai -m space --focus 2
-          cmd + alt - 3 : yabai -m space --focus 3
-
-          # expand window to the left OR shrink from the right
-          alt + shift - h : yabai -m window --resize left:-20:0 || yabai -m window --resize right:-20:0
-          # expand window down OR shrink from the top
-          alt + shift - j : yabai -m window --resize bottom:0:20 || yabai -m window --resize top:0:20
-          # expand window up OR shrink from the bottom
-          alt + shift - k : yabai -m window --resize top:0:-20 || yabai -m window --resize bottom:0:-20
-          # expand window to the right OR shrink from the left
-          alt + shift - l : yabai -m window --resize right:20:0 || yabai -m window --resize left:20:0
-
-          cmd - return : wezterm-gui start --always-new-process &
-
-          cmd - t : wezterm-launch.sh &
-
-          cmd - d : yabai -m space --focus --display 1
-        '';
-    };
-
-    # karabiner-elements = {
-    #   enable = false;
-    #   package = pkgs.karabiner-elements.overrideAttrs (old: {
-    #     version = "14.13.0";
-    #
-    #     src = pkgs.fetchurl {
-    #       inherit (old.src) url;
-    #       hash = "sha256-gmJwoht/Tfm5qMecmq1N6PSAIfWOqsvuHU8VDJY8bLw=";
-    #     };
-    #
-    #     dontFixup = true;
-    #   });
-    # };
-
-    yabai =
-      let
-        sketchybar = "${pkgs.sketchybar}/bin/sketchybar";
-        sketchybar_bottom = "${
-          pkgs.callPackage ../../pkgs/sketchybar-bottom.nix { inherit pkgs-unstable; }
-        }/bin/sketchybar-bottom";
-        ensureDisplays = pkgs.writeShellScript "ensure-displays" ''
-          spaces_per_display=7
-
-          # Clean up any extra spaces
-          for display in $(yabai -m query --displays | jq '.[].index'); do
-            space_count="$(yabai -m query --spaces --display "$display" | jq '. | length')"
-            while [ "$space_count" -gt "$spaces_per_display" ]; do
-              last_space="$(yabai -m query --spaces --display "$display" | jq '.[-1].index')"
-              yabai -m space --destroy "$last_space"
-              space_count="$((space_count - 1))"
-            done
-          done
-
-          # Ensure 7 spaces exist on each display.
-          for display in $(yabai -m query --displays | jq '.[].index'); do
-            count=$(yabai -m query --spaces --display "$display" | jq '[.[] | select(."is-native-fullscreen" == false)] | length')
-            yabai -m display --focus "$display"
-            while [ "$count" -lt "$spaces_per_display" ]; do
-              yabai -m space --create
-              count=$((count + 1))
-            done
-          done
-        '';
-      in
-      {
+      skhd = {
         enable = true;
-        enableScriptingAddition = true;
-        package = pkgs-unstable.yabai;
-        extraConfig = ''
-          yabai -m config \
-              external_bar all:50:50 \
-              mouse_follows_focus off \
-              focus_follows_mouse off \
-              display_arrangement_order default \
-              menubar_opacity 0.0 \
-              window_origin_display default \
-              window_placement second_child \
-              window_insertion_point focused \
-              window_zoom_persist on \
-              window_shadow off \
-              window_animation_easing ease_out_circ \
-              window_opacity_duration 0.0 \
-              active_window_opacity 1.0 \
-              normal_window_opacity 0.90 \
-              window_animation_duration 0.3 \
-              window_opacity on \
-              insert_feedback_color 0xffd75f5f \
-              split_ratio 0.50 \
-              split_type auto \
-              auto_balance off \
-              top_padding 15 \
-              bottom_padding 15 \
-              left_padding 15 \
-              right_padding 15 \
-              window_gap 15 \
-              layout bsp \
-              mouse_modifier fn \
-              mouse_action1 move \
-              mouse_action2 resize \
-              mouse_drop_action swap
+        skhdConfig =
+          let
+            spaceIndex =
+              n:
+              ''yabai -m query --spaces --display | jq -r 'map(select(."is-native-fullscreen" == false))[${toString (n - 1)}].index // empty${"'"}'';
+            focusSpace =
+              n: ''cmd - ${toString n} : set i (${spaceIndex n}); test -n "$i"; and yabai -m space --focus "$i"'';
+            moveToSpace =
+              n:
+              ''shift + cmd - ${toString n} : set i (${spaceIndex n}); test -n "$i"; and yabai -m window --space "$i"; and yabai -m space --focus "$i"'';
+            mkBindings = f: lib.concatMapStrings (n: "${f n}\n") (lib.range 1 9);
+          in
+          ''
+            # focus window
+            ctrl + shift - h : yabai -m window --focus west  || yabai -m display --focus west
+            ctrl + shift - j : yabai -m window --focus south || yabai -m display --focus south
+            ctrl + shift - k : yabai -m window --focus north || yabai -m display --focus north
+            ctrl + shift - l : yabai -m window --focus east  || yabai -m display --focus east
 
-          yabai -m rule --add app="^System Settings$" manage=off
-          yabai -m rule --add app="^Microsoft Teams$" display=1 space=1
-          yabai -m rule --add app="^vesktop$" display=1 space=2
-          yabai -m rule --add app="^GatherV2$" display=1 space=3
-          yabai -m rule --add app="^Proton VPN$" display=1 space=7
+            # focus space
+            ${mkBindings focusSpace}
+            # move to space
+            ${mkBindings moveToSpace}
 
-          yabai -m rule --add app="^WezTerm\$" title="^launch\.sh\$" manage=off grid=4:4:1:1:2:2
+            # swap managed window
+            ctrl + shift + alt - h : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap west || { yabai -m window --display west && yabai -m window --focus "$id" }
+            ctrl + shift + alt - j : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap south || { yabai -m window --display south && yabai -m window --focus "$id" }
+            ctrl + shift + alt - k : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap north|| { yabai -m window --display north && yabai -m window --focus "$id" }
+            ctrl + shift + alt - l : set id (yabai -m query --windows --window | jq '.id'); yabai -m window --swap east || { yabai -m window --display east && yabai -m window --focus "$id" }
 
-          yabai -m signal --add label="wezterm_created" event=window_created app="^WezTerm\$" action='
-              yabai -m window $YABAI_WINDOW_ID --focus
-          '
+            # balance size of windows
+            shift + alt - 0 : yabai -m space --balance
 
-          ${ensureDisplays}
+            shift + ctrl - o : yabai -m window --focus recent
+            shift + ctrl - i : yabai -m window --focus next
 
-          for event in display_added display_removed system_woke; do
-            yabai -m signal --add label="$event" event="$event" action='
+            # focus desktop
+            cmd + alt - 1 : yabai -m space --focus 1
+            cmd + alt - 2 : yabai -m space --focus 2
+            cmd + alt - 3 : yabai -m space --focus 3
+
+            ### I never use these, buf if I decide to, I should use a different hotkey, as this one is used to change Wezterm panes.
+            # # expand window to the left OR shrink from the right
+            # alt + shift - h : yabai -m window --resize left:-20:0 || yabai -m window --resize right:-20:0
+            # # expand window down OR shrink from the top
+            # alt + shift - j : yabai -m window --resize bottom:0:20 || yabai -m window --resize top:0:20
+            # # expand window up OR shrink from the bottom
+            # alt + shift - k : yabai -m window --resize top:0:-20 || yabai -m window --resize bottom:0:-20
+            # # expand window to the right OR shrink from the left
+            # alt + shift - l : yabai -m window --resize right:20:0 || yabai -m window --resize left:20:0
+
+            cmd - return : wezterm-gui start --always-new-process &
+
+            cmd - t : open -na WezTerm --args \
+              --config "enable_tab_bar=false" \
+              --config "window_decorations='RESIZE'" \
+              start --always-new-process -- 'launcher.sh' &
+
+            cmd - n : open -na WezTerm --args \
+              --config "enable_tab_bar=false" \
+              --config "window_decorations='RESIZE'" \
+              start --always-new-process -- 'search-nix-pkgs.sh' &
+
+            cmd - a : wezterm-gui start --always-new-process -- 'ask-claude.sh' &
+
+            cmd - s : screencapture -ic
+
+            ${lib.pipe spaces [
+              (lib.filterAttrs (name: value: value ? key))
+              (lib.mapAttrsToList (
+                name: value: "cmd + alt - ${value.key} : yabai -m space --focus ${toString value.space}"
+              ))
+              (lib.concatStringsSep "\n\n")
+            ]}
+
+            # jump to the jetkvm-kiosk native-fullscreen space (there's only ever one)
+            cmd + alt - q : set i (yabai -m query --spaces | jq -r 'map(select(."is-native-fullscreen"))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
+          '';
+      };
+
+      yabai =
+        let
+          sketchybar = "${pkgs.sketchybar}/bin/sketchybar";
+          sketchybar_bottom = "${
+            pkgs.callPackage ../../pkgs/sketchybar-bottom.nix { inherit pkgs-unstable; }
+          }/bin/sketchybar-bottom";
+          ensureDisplays = pkgs.writeShellScript "ensure-displays" ''
+            spaces_per_display=9
+
+            # Clean up any extra spaces
+            for display in $(yabai -m query --displays | jq '.[].index'); do
+              space_count="$(yabai -m query --spaces --display "$display" | jq '. | length')"
+              while [ "$space_count" -gt "$spaces_per_display" ]; do
+                last_space="$(yabai -m query --spaces --display "$display" | jq '.[-1].index')"
+                yabai -m space --destroy "$last_space"
+                space_count="$((space_count - 1))"
+              done
+            done
+
+            # Ensure exact number spaces exist on each display.
+            for display in $(yabai -m query --displays | jq '.[].index'); do
+              count=$(yabai -m query --spaces --display "$display" | jq '[.[] | select(."is-native-fullscreen" == false)] | length')
+              yabai -m display --focus "$display"
+              while [ "$count" -lt "$spaces_per_display" ]; do
+                yabai -m space --create
+                count=$((count + 1))
+              done
+            done
+          '';
+        in
+        {
+          enable = true;
+          enableScriptingAddition = true;
+          package = pkgs-unstable.yabai;
+          extraConfig =
+            # bash
+            ''
+              yabai -m config \
+                  external_bar all:50:50 \
+                  mouse_follows_focus off \
+                  focus_follows_mouse off \
+                  display_arrangement_order default \
+                  menubar_opacity 0.0 \
+                  window_origin_display default \
+                  window_placement second_child \
+                  window_insertion_point focused \
+                  window_zoom_persist on \
+                  window_shadow off \
+                  window_animation_easing ease_out_circ \
+                  window_opacity_duration 0.0 \
+                  active_window_opacity 1.0 \
+                  normal_window_opacity 0.90 \
+                  window_animation_duration 0.0 \
+                  window_opacity on \
+                  insert_feedback_color 0xffd75f5f \
+                  split_ratio 0.50 \
+                  split_type auto \
+                  auto_balance off \
+                  top_padding 17 \
+                  bottom_padding 17 \
+                  left_padding 17 \
+                  right_padding 17 \
+                  window_gap 17 \
+                  layout bsp \
+                  mouse_modifier fn \
+                  mouse_action1 move \
+                  mouse_action2 resize \
+                  mouse_drop_action swap
+
+              yabai -m rule --add app="^System Settings$" manage=off
+              ${lib.pipe spaces [
+                (lib.filterAttrs (name: value: value ? key))
+                (lib.mapAttrsToList (
+                  name: value:
+                  ''yabai -m rule --add app="^${name}$" display=${toString value.display} space=${toString value.space}''
+                ))
+                (lib.concatStringsSep "\n")
+              ]}
+
+              yabai -m rule --add app="^WezTerm\$" title="^(launcher|search-nix-pkgs)$" manage=off
+
+              yabai -m signal --add label="wezterm_created" event=window_created app="^WezTerm\$" action='
+                  yabai -m window $YABAI_WINDOW_ID --focus
+              '
+
               ${ensureDisplays}
+
+              for event in display_added display_removed system_woke; do
+                yabai -m signal --add label="$event" event="$event" action='
+                  ${ensureDisplays}
+                  ${sketchybar} --reload
+                  ${sketchybar_bottom} --reload
+                '
+              done
+
+              yabai -m rule --apply
+
               ${sketchybar} --reload
               ${sketchybar_bottom} --reload
-            '
-          done
-
-          yabai -m rule --apply
-
-          ${sketchybar} --reload
-          ${sketchybar_bottom} --reload
-        '';
-      };
-  };
+            '';
+        };
+    };
 
   launchd.user.agents.skhd.serviceConfig = {
     StandardOutPath = "/tmp/skhd.log";
@@ -283,7 +359,7 @@
       ShowDayOfWeek = true;
     };
 
-    screencapture.location = "/Users/andybolton/Desktop";
+    screencapture.location = "${config.users.users.andybolton.home}/Desktop";
   };
 
   system.keyboard = {
@@ -294,23 +370,19 @@
   security.pam.services.sudo_local.touchIdAuth = false;
 
   # Ensure the utilities are in your environment
-  environment.systemPackages = [
-    pkgs.desktoppr
-    pkgs.yabai
-    pkgs.jq
+  environment.systemPackages = with pkgs; [
+    desktoppr
+    yabai
+    jq
+    qemu
   ];
 
   system.activationScripts.postActivation.text =
     let
       user = config.system.primaryUser;
-      wallpaper =
-        pkgs.runCommand "wallpaper.png"
-          {
-            nativeBuildInputs = [ pkgs.imagemagick ];
-          }
-          ''
-            magick -size 1x1 xc:"#1a1b26ff" $out
-          '';
+      wallpaper = pkgs.runCommand "wallpaper.png" {
+        nativeBuildInputs = [ pkgs.imagemagick ];
+      } "magick -size 1x1 xc:\"${config.palette.hex.BASE}\" $out";
     in
     ''
       sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr scale stretch

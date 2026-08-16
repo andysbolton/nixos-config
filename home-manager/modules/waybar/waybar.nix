@@ -1,4 +1,9 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  config,
+  osConfig,
+  ...
+}:
 let
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
 
@@ -14,6 +19,8 @@ let
       *) printf '%s' "$line" | cliphist -db-path "$db" decode ;;
     esac
   '';
+
+  colorWrap = color: item: ''<span color="${color}">${item}</span>'';
 in
 {
   programs.waybar = {
@@ -26,6 +33,7 @@ in
       {
         name = "top-bar";
         layer = "top";
+        spacing = 0;
 
         modules-left = [
           "river/tags"
@@ -37,18 +45,19 @@ in
         modules-center = [ "clock" ];
 
         modules-right = [
+          "battery"
           "pulseaudio"
           "pulseaudio/slider"
         ];
 
         clock = {
-          interval = 1;
-          format = "{:%A, %B %d | %I:%M:%S %Z}";
           tooltip-format = "<tt><small>{calendar}</small></tt>";
+          interval = 1;
+          format = "${colorWrap osConfig.palette.hex.OVERLAY "{0:%A, %B %d}"} | ${colorWrap osConfig.palette.hex.TEXT "{0:%I:%M:%S %Z}"}";
         };
 
         "river/window" = {
-          "max-length" = 70;
+          "max-length" = 60;
         };
 
         "river/tags" = {
@@ -60,9 +69,9 @@ in
           interval = 5;
           exec = pkgs.writeShellScript "lan-mouse-check" ''
             if ${systemctl} is-active --quiet "lan-mouse.service"; then
-              echo " 󰍽 "
+              echo "󰍽"
             else
-              echo " 󰍾 "
+              echo "󰍾"
             fi
           '';
           format = "{}";
@@ -74,6 +83,38 @@ in
               ${systemctl} start "lan-mouse.service"
             fi
           '';
+        };
+
+        battery = {
+          format = "{icon} {capacity}%";
+          format-icons = {
+            default = [
+              "󰂎"
+              "󰁺"
+              "󰁻"
+              "󰁼"
+              "󰁽"
+              "󰁾"
+              "󰁿"
+              "󰂀"
+              "󰂁"
+              "󰂂"
+              "󰁹"
+            ];
+            charging = [
+              "󰢟"
+              "󰢜"
+              "󰂆"
+              "󰂇"
+              "󰂈"
+              "󰢝"
+              "󰂉"
+              "󰢞"
+              "󰂊"
+              "󰂋"
+              "󰂅"
+            ];
+          };
         };
 
         pulseaudio = {
@@ -95,7 +136,8 @@ in
               ""
             ];
           };
-          "on-click" = "${pkgs.pavucontrol}/bin/pavucontrol";
+          "onclick" = "${pkgs.pavucontrol}/bin/pavucontrol";
+          "on-right-click" = "${pkgs.pavucontrol}/bin/pavucontrol";
         };
 
         "pulseaudio/slider" = {
@@ -108,6 +150,7 @@ in
         name = "bottom-bar";
         layer = "top";
         position = "bottom";
+        spacing = 0;
 
         modules-left = [
           "disk"
@@ -199,6 +242,8 @@ in
         };
       }
     ];
-    style = ./style.css;
+    style = pkgs.runCommand "waybar-style.css" { nativeBuildInputs = [ pkgs.lessc ]; } ''
+      lessc ${./style.less} > $out
+    '';
   };
 }

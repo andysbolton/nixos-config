@@ -4,6 +4,7 @@
   pkgs,
   pkgs-unstable,
   inputs,
+  osConfig,
   ...
 }:
 let
@@ -19,7 +20,6 @@ in
     ./options/shared.nix
     ./modules/fish.nix
     ./modules/lan-mouse.nix
-    inputs.stylix.homeModules.stylix
   ];
 
   home.stateVersion = "25.05";
@@ -52,6 +52,9 @@ in
         config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
       "starship.toml".source = ./dotfiles/starship.toml;
     };
+    # fennel-ls docset: hover docs + completion for the vim/nvim API.
+    # Pinned via the flake input; `nix flake update fennel-ls-nvim-docs` to bump.
+    dataFile."fennel-ls/docsets/nvim.lua".source = "${inputs.fennel-ls-nvim-docs}/nvim.lua";
   };
 
   home.file = {
@@ -66,7 +69,6 @@ in
     age # simple modern file encryption tool
     bat # cat replacement with syntax highlighting
     bat-extras.core
-    claude-code
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
     docker-compose
@@ -80,6 +82,7 @@ in
     go
     httpie # user-friendly HTTP client
     hwatch
+    jo
     jq
     killall
     lazygit
@@ -92,6 +95,7 @@ in
     nh # helper CLI for Nix/Home Manager workflows
     nix-tree
     nixfmt
+    nodejs_24 # Node.js runtime — npx for MCP servers & general tooling
     pkgs-unstable.gh
     pkgs-unstable.opencode
     postgresql
@@ -107,7 +111,6 @@ in
     speedtest-cli
     tinyxxd
     tokyonight-extras
-    tinyxxd
     tree # recursive directory listing
     unzip
     vesktop
@@ -117,21 +120,188 @@ in
     zoxide # smarter cd command
   ];
 
+  programs.claude-code.enable = true;
+
+  # Companion to plan mode: keeps its read-only enforcement but defers the
+  # plan-drafting behaviour so the session stays conversational.
+  programs.claude-code.commands.discuss = ''
+    ---
+    description: Discussion mode — in plan mode, defer planning until asked
+    ---
+
+    Discussion mode: treat plan mode as read-only conversation. Explore the
+    codebase and answer questions conversationally. Defer drafting a plan, and do
+    not call ExitPlanMode or steer towards plan approval, until I explicitly ask
+    for a plan. If plan mode is not active, remind me to enable it (shift+tab)
+    before continuing.
+  '';
+
+  # Merge notification hooks (turn finished / waiting for input) into
+  # ~/.claude/settings.json without letting nix own the file (so interactive
+  # /model, /fast, etc. still persist).
+  home.activation.claudeNotifyHooks =
+    let
+      notifyScript = pkgs.writeShellScript "hm-claude-notify" (
+        ''
+          input=$(cat)
+          sid=$(${pkgs.jq}/bin/jq -r .session_id <<<"$input")
+          cwd=$(${pkgs.jq}/bin/jq -r .cwd <<<"$input")
+          msg=$(${pkgs.jq}/bin/jq -r '.message // "Needs your attention"' <<<"$input")
+          # Session name via the live-session registry (undocumented internals);
+          # fall back to the project directory name.
+          name=$(${pkgs.jq}/bin/jq -rs --arg sid "$sid" \
+            '[.[] | select(.sessionId == $sid) | .name] | first // empty' \
+            "$HOME"/.claude/sessions/*.json 2>/dev/null)
+          title="Claude Code - ''${name:-''${cwd##*/}}"
+        ''
+        + (
+          if pkgs.stdenv.hostPlatform.isDarwin then
+            ''
+              # env vars sidestep AppleScript string escaping
+              MSG="$msg" TITLE="$title" /usr/bin/osascript -e \
+                'display notification (system attribute "MSG") with title (system attribute "TITLE") sound name "Glass"'
+
+              # Mark the session's space in the bar; space.sh un-marks it on
+              # focus. The nearest ancestor owning a yabai window is the
+              # session's terminal window.
+              command -v yabai >/dev/null && command -v sketchybar >/dev/null || exit 0
+              windows=$(yabai -m query --windows)
+              pid=$$ space=""
+              while [ "$pid" -gt 1 ] 2>/dev/null; do
+                space=$(${pkgs.jq}/bin/jq -r --argjson pid "$pid" \
+                  '[.[] | select(.pid == $pid) | .space] | first // empty' <<<"$windows")
+                [ -z "$space" ] || break
+                pid=$(ps -o ppid= -p "$pid" | tr -d ' ')
+              done
+              focused=$(yabai -m query --spaces --space | ${pkgs.jq}/bin/jq -r .index)
+              if [ -n "$space" ] && [ "$space" != "$focused" ]; then
+                sketchybar --set "space.$space" icon.color=${osConfig.palette.ORANGE} 2>/dev/null || true
+              fi
+            ''
+          else
+            ''
+              ${pkgs.libnotify}/bin/notify-send "$title" "$msg"
+              ${pkgs.libcanberra-gtk3}/bin/canberra-gtk-play -f ${pkgs.sound-theme-freedesktop}/share/sounds/freedesktop/stereo/complete.oga
+            ''
+        )
+      );
+    in
+    lib.hm.dag.entryAfter [ "writeBoundary" ]
+      # bash
+      ''
+        settings="$HOME/.claude/settings.json"
+        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+        [ -s "$settings" ] || echo '{}' > "$settings"
+
+        cmd=${notifyScript}
+        new=$(${pkgs.jq}/bin/jq --arg cmd "$cmd" '
+          .hooks.Stop |= [ { hooks: [ { type: "command", command: $cmd } ] } ]
+          | .hooks.Notification |= [ { hooks: [ { type: "command", command: $cmd } ] } ]
+        ' "$settings" 2>/dev/null) || {
+          echo "claude-code: settings.json is not valid JSON, skipping hook patch" >&2
+          new=""
+        }
+
+        if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
+          printf '%s\n' "$new" > "$settings"
+        fi
+      '';
+
+  # Statusline showing Claude's cwd + git branch, patched into settings.json
+  # the same way as the notify hooks above.
+  home.activation.claudeStatusLine =
+    let
+      statusLineScript = pkgs.writeShellScript "hm-claude-statusline" ''
+        input=$(cat)
+        dir=$(${pkgs.jq}/bin/jq -r '.workspace.current_dir // .cwd' <<<"$input")
+        branch=$(${pkgs.git}/bin/git -C "$dir" branch --show-current 2>/dev/null)
+        case "$dir" in
+          "$HOME") dir="~" ;;
+          "$HOME"/*) dir="~''${dir#"$HOME"}" ;;
+        esac
+        if [ -n "$branch" ]; then
+          printf '%s ⎇ %s\n' "$dir" "$branch"
+        else
+          printf '%s\n' "$dir"
+        fi
+      '';
+    in
+    lib.hm.dag.entryAfter [ "writeBoundary" ]
+      # bash
+      ''
+        settings="$HOME/.claude/settings.json"
+        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+        [ -s "$settings" ] || echo '{}' > "$settings"
+
+        cmd=${statusLineScript}
+        new=$(${pkgs.jq}/bin/jq --arg cmd "$cmd" '
+          .statusLine = { type: "command", command: $cmd }
+        ' "$settings" 2>/dev/null) || {
+          echo "claude-code: settings.json is not valid JSON, skipping statusline patch" >&2
+          new=""
+        }
+
+        if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
+          printf '%s\n' "$new" > "$settings"
+        fi
+      '';
+
   programs.neovim = {
     enable = true;
     sideloadInitLua = true;
     withRuby = false;
     withPython3 = false;
+    # All language servers, formatters, linters and debug adapters are
+    # managed here via nix (previously a mix of nix and mason.nvim).
     extraPackages = with pkgs; [
+      # Runtimes / build tooling needed by various servers & plugins
       cargo
-      clang-tools
-      fennel-ls
-      fnlfmt
-      lua-language-server
       luaPackages.luarocks
       nodejs_24
-      stylua
       tree-sitter
+
+      # Language servers
+      bash-language-server # bashls
+      clang-tools # clangd (also provides clang-format)
+      clojure-lsp
+      dockerfile-language-server # dockerls (docker-langserver)
+      fennel-ls # fennel_ls
+      fish-lsp
+      fsautocomplete
+      gopls
+      jq-lsp # jqls
+      lua-language-server # lua_ls
+      marksman
+      nixd
+      omnisharp-roslyn # omnisharp
+      pyright
+      svelte-language-server
+      terraform-ls # terraformls
+      typescript # tsserver, required by ts_ls
+      typescript-language-server # ts_ls
+      vscode-langservers-extracted # cssls, html, jsonls
+      yaml-language-server # yamlls
+
+      # Formatters
+      black
+      csharpier
+      fantomas
+      fixjson
+      fnlfmt
+      gofumpt
+      nixfmt
+      prettierd
+      shfmt
+      stylua
+      zprint
+
+      # Linters
+      cpplint
+      markdownlint-cli # markdownlint
+      shellcheck
+
+      # Debug adapters
+      delve # dlv, used by nvim-dap-go
     ];
   };
 
@@ -211,6 +381,12 @@ in
         user = "andybolton";
         identityfile = "~/.ssh/id_ed25519";
       };
+      jetkvm = {
+        hostname = "jetkvm.tail4b1b78.ts.net";
+        user = "root";
+        identityfile = "~/.ssh/id_ed25519";
+      };
+
     };
   };
 

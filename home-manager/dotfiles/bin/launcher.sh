@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Change title so yabai can track
-echo -ne "\033]0;launch.sh\007" >/dev/tty
+echo -ne "\033]0;launcher\007" >/dev/tty
 
 bookmarks=$(bookmarks.sh &)
 apps=$(apps.sh &)
@@ -45,6 +45,12 @@ handle_selection() {
 
 	elif [[ "$choice" == "spaces" ]]; then
 		echo "spaces.sh"
+		return
+
+	elif [[ "$choice" =~ ^\?j ]]; then
+		# Extract everything after "?j "
+		rest=${choice//?j /}
+		open_app "Firefox.app" "\"https://smartwyre.atlassian.net/browse/$rest\"" -na
 		return
 
 	elif [[ "$choice" =~ ^\?gh ]]; then

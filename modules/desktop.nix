@@ -1,12 +1,11 @@
 {
   pkgs,
-  pkgs-unstable,
   lib,
   config,
   ...
 }:
 {
-  time.timeZone = "America/Denver";
+  time.timeZone = "America/New_York";
 
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
@@ -26,7 +25,6 @@
 
   programs.fish = {
     enable = true;
-    package = pkgs-unstable.fish;
   };
 
   nix.settings.experimental-features = [
@@ -130,4 +128,9 @@
   services.blueman.enable = true;
   services.udisks2.enable = true;
   security.polkit.enable = true;
+
+  virtualisation.podman = {
+    enable = true;
+  };
+
 }

@@ -25,6 +25,8 @@ fi
 
 if mic_on; then
   "$BAR_NAME" --set "$NAME" icon="$MIC" icon.color="$GREEN"
+  sh "$HOME"/.config/borders/bordersrc
 else
   "$BAR_NAME" --set "$NAME" icon="$MIC_OFF" icon.color="$RED"
+  borders active_color="$RED"
 fi

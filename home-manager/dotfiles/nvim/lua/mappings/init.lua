@@ -17,16 +17,9 @@ km_set({"n"}, "<leader>x", "\"_x<Esc>", {silent = true})
 km_set("n", "<leader>xa", ":wa | qa<cr>", {desc = "Write and close all buffers while terminal open", silent = true})
 km_set("n", "<leader>w", ":w<cr>", {desc = "[W]rite", silent = true})
 km_set("n", "<leader>wa", ":wa<cr>", {desc = "[W]rite [A]ll", silent = true})
+km_set("n", "<leader>wn", ":noa w<cr>", {desc = "[W]rite [N]o formatting", silent = true})
+km_set("n", "<leader>wan", ":noa wa<cr>", {desc = "[W]rite [A]ll [N]o formatting", silent = true})
 km_set("n", "<C-a>", ":normal gg0vG$<cr>", {desc = "Select all text"})
-local function _1_()
-  return vim.diagnostic.jump({count = 1, float = true})
-end
-km_set("n", "[d", _1_, {desc = "Go to previous diagnostic message"})
-local function _2_()
-  return vim.diagnostic.jump({count = -1, float = true})
-end
-km_set("n", "]d", _2_, {desc = "Go to next diagnostic message"})
-km_set("n", "<leader>d", vim.diagnostic.open_float, {desc = "Open floating diagnostic message"})
 km_set("n", "<leader>c", ":let @+=expand('%')<cr>", {desc = "[C]opy current buffer name", silent = true})
 km_set("n", "<leader>gs", ":Git<CR>")
 km_set("n", "<leader>gd", ":Gdiffsplit<CR>")
@@ -35,4 +28,23 @@ km_set("n", "<leader>gb", ":Git blame<CR>")
 km_set("n", "<leader>gm", ":Git mergetool<CR>")
 km_set("t", "<M-Space>", "<Esc>b\\<Esc>ei", {desc = "Fish help abbreviation bypass.", silent = true})
 vim.opt.diffopt:append("algorithm:patience")
-return vim.opt.diffopt:append("indent-heuristic")
+vim.opt.diffopt:append("indent-heuristic")
+local function _1_()
+  local function _2_(input)
+    if ((input ~= "") and (input ~= nil)) then
+      local _let_3_ = vim.api.nvim_exec2(input, {output = true})
+      local output = _let_3_.output
+      vim.fn.setreg(vim.v.register, output)
+      vim.fn.histadd("cmd", input)
+      vim.api.nvim_echo({{output, "IncSearch"}}, true, {})
+      local function _4_()
+        return vim.api.nvim_echo({{output, "Normal"}}, true, {})
+      end
+      return vim.defer_fn(_4_, 200)
+    else
+      return nil
+    end
+  end
+  return vim.ui.input({prompt = "sup:", completion = "command"}, _2_)
+end
+return vim.keymap.set("n", "y:", _1_, {desc = "Yank in command mode."})

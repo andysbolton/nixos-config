@@ -1,6 +1,5 @@
 -- [nfnl] init.fnl
 table.unpack = (table.unpack or unpack)
-vim.g.python3_host_prog = (vim.fn.expand("~") .. ".asdf/shims/python")
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.o.winborder = "rounded"
@@ -12,7 +11,7 @@ end
 vim.opt.rtp:prepend(lazypath)
 do
   local lazy = require("lazy")
-  lazy.setup({{import = "plugins"}}, {{change_detection = {notify = false}}})
+  lazy.setup({{import = "plugins"}})
 end
 require("mappings")
 require("options")

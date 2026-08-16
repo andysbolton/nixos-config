@@ -10,9 +10,9 @@ end
 
 config.term = "xterm-256color"
 config.adjust_window_size_when_changing_font_size = false
-config.enable_wayland = false
+-- config.enable_wayland = true
 
-config.front_end = "OpenGL"
+config.front_end = "WebGpu"
 
 config.default_prog = { "fish" }
 
@@ -25,13 +25,16 @@ config.font = wezterm.font_with_fallback({
 })
 config.font_size = wezterm.hostname() == "main" and 13 or 15
 config.line_height = 1.1
-config.window_decorations = "RESIZE"
 config.use_dead_keys = false
 config.colors = {
 	cursor_fg = "black",
 }
 config.window_close_confirmation = "NeverPrompt"
 config.window_background_opacity = 0.75
+
+local function is_mac()
+	return wezterm.target_triple:find("darwin") ~= nil
+end
 
 -- Equivalent to POSIX basename(3)
 -- Given "/foo/bar" returns "bar"
@@ -53,9 +56,41 @@ local function fmt_working_dir(s)
 end
 
 local tab_title = function(tab_info)
+	if not tab_info.active_pane.current_working_dir then
+		return "no working dir"
+	end
+
 	local baseexe = basename(tab_info.active_pane.foreground_process_name)
 	local fmt_dir = fmt_working_dir(tab_info.active_pane.current_working_dir)
 	return baseexe .. " @ " .. fmt_dir
+end
+
+wezterm.on("gui-startup", function(cmd)
+	if not is_mac() then
+		return
+	end
+
+	local _, _, window = wezterm.mux.spawn_window(cmd or {})
+	local gui = window:gui_window()
+
+	local screen = wezterm.gui.screens().active
+
+	local dims = gui:get_dimensions()
+
+	local center_x = screen.x + ((screen.width - dims.pixel_width) / 2)
+	local center_y = screen.y + ((screen.height - dims.pixel_height) / 2)
+
+	-- 4. Snap it into place before the first frame renders
+	gui:set_position(center_x, center_y)
+end)
+
+if is_mac() then
+	config.initial_rows = 30
+	config.initial_cols = 100
+
+	config.window_decorations = "RESIZE"
+else
+	config.window_decorations = "NONE"
 end
 
 wezterm.on("format-tab-title", function(tab, tabs)
@@ -104,7 +139,7 @@ wezterm.on("format-tab-title", function(tab, tabs)
 	end
 end)
 
-config.leader = { key = " ", mods = "ALT" }
+config.leader = { key = " ", mods = "CMD" }
 config.keys = {
 	{ key = "F", mods = "CTRL|SHIFT", action = act.Search("CurrentSelectionOrEmptyString") },
 	{ key = "X", mods = "CTRL|SHIFT", action = act.ActivateCopyMode },
@@ -112,18 +147,18 @@ config.keys = {
 	{
 		key = "h",
 		mods = "ALT|CTRL",
-		action = act.AdjustPaneSize({ "Left", 10 }),
+		action = act.AdjustPaneSize({ "Left", 5 }),
 	},
 	{
 		key = "j",
 		mods = "ALT|CTRL",
-		action = act.AdjustPaneSize({ "Down", 10 }),
+		action = act.AdjustPaneSize({ "Down", 5 }),
 	},
-	{ key = "k", mods = "ALT|CTRL", action = act.AdjustPaneSize({ "Up", 10 }) },
+	{ key = "k", mods = "ALT|CTRL", action = act.AdjustPaneSize({ "Up", 5 }) },
 	{
 		key = "l",
 		mods = "ALT|CTRL",
-		action = act.AdjustPaneSize({ "Right", 10 }),
+		action = act.AdjustPaneSize({ "Right", 5 }),
 	},
 	{
 		key = "h",
@@ -162,10 +197,15 @@ config.keys = {
 		mods = "LEADER",
 		action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
 	},
-	{ key = "v", mods = "CTRL", action = act.PasteFrom("Clipboard") },
+	{ key = "V", mods = "CTRL", action = act.PasteFrom("Clipboard") },
 	{
 		key = "Enter",
 		mods = "ALT",
+		action = wezterm.action.DisableDefaultAssignment,
+	},
+	{
+		key = "n",
+		mods = "CMD",
 		action = wezterm.action.DisableDefaultAssignment,
 	},
 }

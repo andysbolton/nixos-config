@@ -194,42 +194,44 @@ in
       };
 
       sub = {
-        body = ''
-          if count $argv >/dev/null
-            # We're in selection mode.
-            set ordinal $argv[1]
+        body =
+          # fish
+          ''
+            if count $argv >/dev/null
+              # We're in selection mode.
+              set ordinal $argv[1]
 
-            if ! string match -qr '^\d+$' $ordinal
-              echo "The subscription ordinal to select must be an integer, received '$argv[1]'."
-              return
-            end
+              if ! string match -qr '^\d+$' $ordinal
+                echo "The subscription ordinal to select must be an integer, received '$argv[1]'."
+                return
+              end
 
-            set index (math $argv[1] - 1)
+              set index (math $argv[1] - 1)
 
-            set sub $(
-              az account list --all --query "[].{name:name,id:id}" |
-                jq -r --arg INDEX $index \
-                  'sort_by(.name) | to_entries | map(select(.key == ($INDEX | tonumber))) | .[].value.name'
-            )
-            if [ -n "$sub" ]
-              az account set --subscription $sub >/dev/null
-              echo "Switched to sub $sub."
+              set sub $(
+                az account list --all --query "[].{name:name,id:id}" |
+                  jq -r --arg INDEX $index \
+                    'sort_by(.name) | to_entries | map(select(.key == ($INDEX | tonumber))) | .[].value.name'
+              )
+              if [ -n "$sub" ]
+                az account set --subscription $sub >/dev/null
+                echo "Switched to sub $sub."
+              else
+                echo "Subscription at ordinal '$ordinal' not found."
+              end
             else
-              echo "Subscription at ordinal '$ordinal' not found."
+              # We're in list mode.
+              set current_sub $(az account show --query name -o tsv)
+              az account list --all --query "[].{name:name,id:id}" |
+                jq -r --arg CURRENT_SUB $current_sub \
+                  'sort_by(.name)
+                      | to_entries
+                      | .[]
+                      | .value.name = if .value.name == $CURRENT_SUB then "*** \(.value.name) ***" else .value.name end
+                      | "\(.key + 1)~\(.value.name)~\(.value.id)"' |
+                column -t -s'~' -c ' ',Name,Id
             end
-          else
-            # We're in list mode.
-            set current_sub $(az account show --query name -o tsv)
-            az account list --all --query "[].{name:name,id:id}" |
-              jq -r --arg CURRENT_SUB $current_sub \
-                'sort_by(.name)
-                    | to_entries
-                    | .[]
-                    | .value.name = if .value.name == $CURRENT_SUB then "*** \(.value.name) ***" else .value.name end
-                    | "\(.key + 1)~\(.value.name)~\(.value.id)"' |
-              column -t -s'~' -c ' ',Name,Id
-          end
-        '';
+          '';
       };
 
       restart-wm = {
@@ -244,20 +246,50 @@ in
       };
 
       rebuild = {
-        body = ''
-          [ "$(basename $(pwd))" != "nixos-config" ] && echo "Not in nixos-config repo." && return 1
+        body =
+          # fish
+          ''
+            [ "$(basename $(pwd))" != "nixos-config" ] && echo "Not in nixos-config repo." && return 1
 
-          set -l untracked (git ls-files --others --exclude-standard)
+            set -l untracked (git ls-files --others --exclude-standard)
 
-          if test (count $untracked) -gt 0
-            echo "Untracked files exist; add them before rebuild:"
-            printf '%s\n' $untracked
-            return 1
-          end
+            if test (count $untracked) -gt 0
+              echo "Untracked files exist; add them before rebuild:"
+              printf '%s\n' $untracked
+              return 1
+            end
 
-          git status --short
-          ${rebuildCmd} $argv
-        '';
+            git status --short
+            ${rebuildCmd} $argv
+
+            set flake $HOME/nixos-config/flake.lock
+            set snapshot "$XDG_CACHE_HOME/nixpkgs-snapshot"
+
+            # refresh the dump only when nixpkgs changed (flake.lock newer than the dump)
+            if test $flake -nt $snapshot
+                echo "$flake newer than $snapshot; refreshing snapshot."
+                set tmp (mktemp)
+                nix search nixpkgs '^' --json | jq -rj '
+                  to_entries[]
+                  | (.key | sub("^legacyPackages\\\.[^.]+\\\.";"")) as $attr
+                  | (.value.version // "") as $ver
+                  | (.value.description // "" | gsub("[\n\t]";" ")) as $desc
+                  | "\($attr)\t\($ver)\t\($desc)\n"
+                ' |
+                awk -F'\t' '
+                  function substr_trim(string, trim_to) {
+                      if (length(string) > trim_to) {
+                          return substr(string, 1, trim_to - 1) "…" # only subtract 1 as "..." is a single ligature character
+                      }
+                      return string
+                  }
+                  {
+                      printf "%-25s %-12s %s\n", substr_trim($1, 25), substr_trim($2, 12), $3
+                  }
+                ' >"$tmp"
+                mv "$tmp" "$snapshot"
+            end
+          '';
       };
 
       az_group_member_id = {
@@ -272,32 +304,52 @@ in
       };
 
       unlock = {
-        body = ''
-          if [ (count $argv) -lt 2 ]
-            echo "Usage: unlock <sandbox> <prefix1> [prefix2] ... [prefixN]"
-            return 1
-          end
+        body =
+          # fish
+          ''
+            if [ (count $argv) -lt 2 ]
+              echo "Usage: unlock <workspace> [s/suffix] <container> [container2] ... [containerN]"
+              return 1
+            end
 
-          set sandbox $argv[1]
+            argparse 's/suffix=?' -- $argv
+            if [ -z "$_flag_suffix" ]
+              set _flag_suffix "state.tfstateenv:"
+            end
 
-          for prefix in $argv[2..-1]
-            set suffix "state.tfstateenv:$sandbox"
-            for blob in (az storage blob list \
-              --account-name sttfstatecusglobal \
-              --container-name tfstate \
-              --prefix $prefix \
-              --auth-mode login \
-              --query "[?ends_with(name, '$suffix')].name" \
-              -o tsv)
-              echo "Breaking lease on: $blob"
-              az storage blob lease break \
+            set workspace $argv[1]
+
+            for prefix in $argv[2..-1]
+              set suffix ([ "$workspace" = "default" ]; and echo "$_flag_suffix"; or echo "$_flag_suffix$workspace")
+              echo "Searching for blobs ending in $suffix"
+              set blobs (az storage blob list \
                 --account-name sttfstatecusglobal \
                 --container-name tfstate \
-                --blob-name $blob \
-                --auth-mode login
+                --prefix $prefix \
+                --auth-mode login \
+                --query "[?ends_with(name, '$suffix')].name" \
+                -o tsv)
+              if [ -z "$blobs" ]
+                echo "No blobs found for suffix: $suffix"
+                echo "Available blobs for prefix $prefix:"
+                az storage blob list \
+                  --account-name sttfstatecusglobal \
+                  --container-name tfstate \
+                  --prefix $prefix \
+                  --auth-mode login \
+                  --query "[].name"
+                continue
+              end
+              for blob in "$blobs"
+                echo "Breaking lease on: $blob"
+                az storage blob lease break \
+                  --account-name sttfstatecusglobal \
+                  --container-name tfstate \
+                  --blob-name $blob \
+                  --auth-mode login
+              end
             end
-          end
-        '';
+          '';
       };
     }
     // (

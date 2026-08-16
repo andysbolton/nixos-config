@@ -8,8 +8,8 @@
 
 ; Move lines up/down
 (km-set :n :<A-Down> ":m .+1<CR>==" {:desc "Move line down" :silent true})
-
 (km-set :n :<A-Up> ":m .-2<CR>==" {:desc "Move line up" :silent true})
+
 (km-set :i :<A-Down> "<Esc>:m .+1<CR>==gi"
         {:desc "Move line down" :silent true})
 
@@ -31,17 +31,11 @@
 
 (km-set :n :<leader>w ":w<cr>" {:desc "[W]rite" :silent true})
 (km-set :n :<leader>wa ":wa<cr>" {:desc "[W]rite [A]ll" :silent true})
+(km-set :n :<leader>wn ":noa w<cr>"
+        {:desc "[W]rite [N]o formatting" :silent true})
+(km-set :n :<leader>wan ":noa wa<cr>"
+        {:desc "[W]rite [A]ll [N]o formatting" :silent true})
 (km-set :n :<C-a> ":normal gg0vG$<cr>" {:desc "Select all text"})
-
-; Diagnostic keymaps
-(km-set :n "[d" #(vim.diagnostic.jump {:count 1 :float true})
-        {:desc "Go to previous diagnostic message"})
-
-(km-set :n "]d" #(vim.diagnostic.jump {:count -1 :float true})
-        {:desc "Go to next diagnostic message"})
-
-(km-set :n :<leader>d vim.diagnostic.open_float
-        {:desc "Open floating diagnostic message"})
 
 ; Copy current buffer name
 (km-set :n :<leader>c ":let @+=expand('%')<cr>"
@@ -66,3 +60,38 @@
 ; Improve diff experience (move me)
 (vim.opt.diffopt:append "algorithm:patience")
 (vim.opt.diffopt:append :indent-heuristic)
+
+; Yank command
+(vim.keymap.set :n "y:"
+                (fn []
+                  (vim.ui.input {:prompt "sup:" :completion :command}
+                                (fn [input]
+                                  (when (and (not= input "") (not= input nil))
+                                    (let [{: output} (vim.api.nvim_exec2 input
+                                                                         {:output true})]
+                                      (vim.fn.setreg vim.v.register output)
+                                      (vim.fn.histadd :cmd input)
+                                      (vim.api.nvim_echo [[output :IncSearch]]
+                                                         true {})
+                                      (vim.defer_fn (fn []
+                                                      (vim.api.nvim_echo [[output
+                                                                           :Normal]]
+                                                                         true {}))
+                                        200))))))
+                {:desc "Yank in command mode."})
+
+; vim.keymap.set('n', '<leader>f\\', function())
+;   -- Fetch clipboard text
+;   local text = vim.fn.getreg('+')
+;
+;   -- Manually escape backslashes first, then forward slashes
+;   local escaped = vim.fn.escape(text, '\\/')
+;
+;   -- Apply Very Nomagic to protect all other special characters
+;   local pattern = '\\V' .. escaped
+;
+;   -- Set search register and execute
+;   vim.fn.setreg('/', pattern)
+;   vim.fn.histadd('/', pattern)
+;   vim.cmd('normal! n')
+; end, { desc = "Search text with literal backslashes safely"}

@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  pkgs-unstable,
   inputs,
   ...
 }:
@@ -17,6 +16,7 @@ in
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ../../modules/theme.nix
     ../../modules/desktop.nix
     ../../modules/nvidia4070.nix
     ../../modules/arrs.nix
@@ -41,8 +41,10 @@ in
 
   modules.wireless = {
     enable = true;
-    ssid = "Hammy 5 GHz";
-    secretsFile = config.sops.secrets."wireless.conf".path;
+    networks = {
+      ssid = "Hammy 5 GHz";
+      secretsFile = config.sops.secrets."wireless.conf".path;
+    };
   };
 
   users.users.andy.extraGroups = [
@@ -142,10 +144,6 @@ in
   # Arkscan/Zebra usually works with standard CUPS drivers,
   # but gutenprint provides extra compatibility if needed.
   services.printing.drivers = [ pkgs.gutenprint ];
-
-  virtualisation.docker = {
-    enable = true;
-  };
 
   systemd.settings.Manager = {
     ShowStatus = "Yes";

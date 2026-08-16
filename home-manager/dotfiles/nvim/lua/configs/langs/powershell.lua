@@ -1,10 +1,6 @@
 return {
   name = "powershell",
   ft = { "ps1" },
-  ls = {
-    name = "powershell_es",
-    settings = {},
-  },
   formatter = {
     name = "powershell_es",
     actions = {
@@ -15,4 +11,5 @@ return {
     },
     autoinstall = false,
   },
+  treesitter = { "powershell" },
 }

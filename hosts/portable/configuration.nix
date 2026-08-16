@@ -1,7 +1,6 @@
 {
   config,
   pkgs,
-  pkgs-unstable,
   inputs,
   ...
 }:
@@ -9,6 +8,7 @@
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
+    ../../modules/theme.nix
     ../../modules/desktop.nix
     ../../modules/steam.nix
     ../../modules/wireless.nix
@@ -27,8 +27,19 @@
 
   modules.wireless = {
     enable = true;
-    ssid = "Fios-Xj7tG";
     secretsFile = config.sops.secrets."wireless.conf".path;
+    networks = [
+      # clay
+      {
+        ssid = "Fios-Xj7tG";
+        pskRaw = "ext:psk_home";
+      }
+      # miller
+      {
+        ssid = "Verizon_S9K9SF";
+        pskRaw = "ext:psk_sukh";
+      }
+    ];
   };
 
   environment.systemPackages = with pkgs; [

@@ -19,8 +19,7 @@
 (set vim.o.ignorecase true)
 (set vim.o.smartcase true)
 
-;; Keep signcolumn on by defaul
-(set vim.wo.signcolumn :yes)
+(set vim.wo.signcolumn "auto:2")
 
 ;; Decrease update time
 (set vim.o.updatetime 250)
@@ -60,6 +59,12 @@
                            :nbsp "⎵"
                            :space " "})
 
+(set vim.o.scrolloff 1)
+(set vim.o.sidescrolloff 2)
+(vim.opt.display:append :truncate)
+
 (set vim.o.mousemoveevent true)
 
 (set vim.fileformats :unix)
+
+(set vim.o.showmode false)

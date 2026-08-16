@@ -6,7 +6,7 @@ riverctl map normal Super Return spawn "uwsm app -- wezterm"
 riverctl map normal Alt+Shift F spawn "killall .firefox-wrapped || uwsm app -- firefox"
 riverctl map normal Alt+Shift+Control F spawn "killall .firefox-wrapped || uwsm app -- firefox-vpn"
 riverctl map normal Super T spawn 'uwsm app -- rofi -show drun -drun-exclude-categories "Game"'
-riverctl map normal Super N spawn "uwsm app -- $HOME/nixos-config/home-manager/rofi/search-nix-pkgs.sh"
+riverctl map normal Super N spawn "uwsm app -- foot --app-id=nixpkgs-search $HOME/.local/bin/search-nix-pkgs.sh"
 riverctl map normal Super S spawn "uwsm app -- grim -g \"\$(slurp)\" - | wl-copy"
 
 riverctl map normal Alt+Shift Q close
@@ -114,7 +114,7 @@ for mode in normal locked; do
     riverctl map $mode None XF86MonBrightnessDown spawn 'brightnessctl set 5%-'
 done
 
-riverctl background-color 0x002b36
+riverctl background-color 0x1a1b26
 riverctl border-color-focused 0x93a1a1
 riverctl border-color-unfocused 0x586e75
 riverctl border-width 3
@@ -123,8 +123,14 @@ riverctl set-repeat 50 300
 riverctl rule-add -app-id 'float*' -title 'foo' float
 riverctl rule-add -app-id "bar" csd
 
+# Firefox draws CSD by default; force SSD so river draws its border.
+riverctl rule-add -app-id "firefox" ssd
+
+riverctl rule-add -app-id "nixpkgs-search" float
+riverctl rule-add -app-id "nixpkgs-search" dimensions 1280 800
+
 riverctl default-layout "$layout_generator"
-$layout_generator -view-padding 6 -outer-padding 6 &
+$layout_generator -view-padding 18 -outer-padding 18 &
 
 # It makes sure WAYLAND_DISPLAY is shared and unblocks graphical-session.target.
 uwsm finalize
