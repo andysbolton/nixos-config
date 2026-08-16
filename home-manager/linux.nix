@@ -31,6 +31,7 @@ in
     killall
     mangohud
     mpv # command-line media player
+    reaper
     slskd
     slurp # select region of screen
     swappy # screenshot annotation tool
