@@ -5,7 +5,7 @@
   ...
 }:
 {
-  time.timeZone = "America/New_York";
+  time.timeZone = "America/Denver";
 
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
@@ -112,6 +112,13 @@
     "f /etc/ssh/ssh_host_ed25519_key 0640 root ssh-keys -"
   ];
   services.tailscale.enable = true;
+
+  systemd.services.tailscaled = {
+    after = [ "network-online.target" ];
+    wants = [ "network-online.target" ];
+  };
+
+  services.resolved.enable = true;
 
   services.avahi = {
     enable = true;

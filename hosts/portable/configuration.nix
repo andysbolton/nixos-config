@@ -39,6 +39,26 @@
         ssid = "Verizon_S9K9SF";
         pskRaw = "ext:psk_sukh";
       }
+      # whisper
+      {
+        ssid = "Hammy 5 GHz";
+        pskRaw = "ext:psk_parents";
+      }
+      # hobbs
+      {
+        ssid = "LDWP_5G";
+        pskRaw = "ext:psk_dougie";
+      }
+      # hobbs ext
+      {
+        ssid = "LDWP_5GEXT";
+        pskRaw = "ext:psk_dougie";
+      }
+      # gl
+      {
+        ssid = "GL-MT3000-4f3-5G";
+        pskRaw = "ext:psk_gl";
+      }
     ];
   };
 
@@ -73,6 +93,22 @@
       owner = "wpa_supplicant";
       group = "wpa_supplicant";
       mode = "0440";
+    };
+  };
+
+  services.keyd = {
+    enable = true;
+    keyboards = {
+      laptop_keyboard = {
+        ids = [ "0001:0001" ];
+        settings = {
+          main = {
+            capslock = "leftcontrol";
+            leftcontrol = "capslock";
+            sysrq = "leftmeta";
+          };
+        };
+      };
     };
   };
 

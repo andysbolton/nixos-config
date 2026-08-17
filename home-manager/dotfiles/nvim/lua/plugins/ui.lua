@@ -73,10 +73,9 @@ return {
   },
 
   {
-    "andysbolton/modes.nvim",
-    branch = "buffer-scoped-cursorlines",
-    -- dir = "/Users/andybolton/code/modes.nvim",
+    "modes.nvim",
     event = "VeryLazy",
+    dir = "/home/andy/code/modes.nvim",
     -- branch = "buffer-scoped-cursorlines",
     config = function()
       local modes = require "modes"

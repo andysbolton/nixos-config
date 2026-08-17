@@ -31,6 +31,7 @@ in
     killall
     mangohud
     mpv # command-line media player
+    reaper
     slskd
     slurp # select region of screen
     swappy # screenshot annotation tool
@@ -66,22 +67,6 @@ in
     ''
       export WLR_NO_HARDWARE_CURSORS=1
       export WLR_RENDERER=vulkan
-
-      monitor_connected=0
-      for status in /sys/class/drm/*/status; do
-          [ -r "$status" ] || continue
-          read -r state < "$status"
-          if [ "$state" = connected ]; then
-              monitor_connected=1
-              break
-          fi
-      done
-
-      if [ "$monitor_connected" -eq 0 ]; then
-          export WLR_BACKENDS=headless,libinput
-          export WLR_LIBINPUT_NO_DEVICES=1
-          export WLR_HEADLESS_OUTPUTS=1
-      fi
     '';
 
   programs.rofi = {
@@ -135,35 +120,5 @@ in
         file_manager = "${pkgs.thunar}/bin/thunar";
       };
     };
-  };
-
-  services.kanshi = {
-    enable = true;
-    settings = [
-      {
-        profile.name = "kvm";
-        profile.exec = [ "${pkgs.systemd}/bin/systemctl --user stop ${pkgs.lan-mouse}/bin/lan-mouse" ];
-        profile.outputs = [
-          {
-            criteria = "JET POWER TECHNOLOGY CO., LTD. JetKVM v1 0xC0FFEE01";
-            status = "enable";
-          }
-          {
-            criteria = "eDP-1";
-            status = "disable";
-          }
-        ];
-      }
-      {
-        profile.name = "default";
-        profile.exec = [ "${pkgs.systemd}/bin/systemctl --user start ${pkgs.lan-mouse}/bin/lan-mouse" ];
-        profile.outputs = [
-          {
-            criteria = "eDP-1";
-            status = "enable";
-          }
-        ];
-      }
-    ];
   };
 }
