@@ -1,10 +1,11 @@
 #!/bin/bash
 
 STATE_FILE="/tmp/sketchybar_clock_tz"
-tz=$(cat "$STATE_FILE" 2>/dev/null || echo "US/Eastern")
+tz=$(cat "$STATE_FILE" 2>/dev/null || echo "America/Denver")
+# tz=$(cat "$STATE_FILE" 2>/dev/null || echo "America/Denver")
 
 if [ "$SENDER" = "mouse.clicked" ]; then
-    [ "$tz" = "US/Eastern" ] && tz="Europe/London" || tz="US/Eastern"
+    [ "$tz" = "America/Denver" ] && tz="Europe/London" || tz="America/Denver"
     echo "$tz" >"$STATE_FILE"
 fi
 
