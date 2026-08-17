@@ -143,7 +143,7 @@ in
     settings = [
       {
         profile.name = "kvm";
-        profile.exec = [ "${pkgs.systemd}/bin/systemctl --user stop ${pkgs.lan-mouse}/bin/lan-mouse" ];
+        profile.exec = [ "${pkgs.systemd}/bin/systemctl --user stop lan-mouse.service" ];
         profile.outputs = [
           {
             criteria = "JET POWER TECHNOLOGY CO., LTD. JetKVM v1 0xC0FFEE01";
@@ -157,7 +157,7 @@ in
       }
       {
         profile.name = "default";
-        profile.exec = [ "${pkgs.systemd}/bin/systemctl --user start ${pkgs.lan-mouse}/bin/lan-mouse" ];
+        profile.exec = [ "${pkgs.systemd}/bin/systemctl --user start lan-mouse.service" ];
         profile.outputs = [
           {
             criteria = "eDP-1";

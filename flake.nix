@@ -39,7 +39,9 @@
     };
 
     opnix = {
-      url = "github:brizzbuzz/opnix";
+      # Local clone while working on the home-manager module; restore
+      # "github:brizzbuzz/opnix" once the fix is upstream.
+      url = "git+file:///home/andy/code/opnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
