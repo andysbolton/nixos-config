@@ -4,14 +4,6 @@
   inputs,
   ...
 }:
-let
-  headlessSetRes = pkgs.writeShellScript "sunshine-headless-set-res" ''
-    if ${pkgs.wlr-randr}/bin/wlr-randr | ${pkgs.gnugrep}/bin/grep -q '^HEADLESS-1'; then
-      ${pkgs.wlr-randr}/bin/wlr-randr --output HEADLESS-1 \
-        --custom-mode "''${SUNSHINE_CLIENT_WIDTH}x''${SUNSHINE_CLIENT_HEIGHT}@''${SUNSHINE_CLIENT_FPS}Hz"
-    fi
-  '';
-in
 {
   imports = [
     ./hardware-configuration.nix
@@ -123,13 +115,6 @@ in
     settings = {
       capture = "wlr";
       encoder = "nvenc";
-      global_prep_cmd = builtins.toJSON [
-        {
-          do = "${headlessSetRes}";
-          undo = "";
-          elevated = false;
-        }
-      ];
     };
     applications.apps = [
       {
