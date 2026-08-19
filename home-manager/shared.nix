@@ -96,6 +96,7 @@ in
     nix-tree
     nixfmt
     nodejs_24 # Node.js runtime — npx for MCP servers & general tooling
+    ookla-speedtest
     pkgs-unstable.gh
     pkgs-unstable.opencode
     postgresql
@@ -108,7 +109,6 @@ in
     sd # sed replacement
     sops # secrets editor/manager
     starship # cross-shell prompt
-    speedtest-cli
     tinyxxd
     tokyonight-extras
     tree # recursive directory listing
