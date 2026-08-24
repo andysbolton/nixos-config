@@ -25,11 +25,12 @@
   };
   users.users.kvm.isNormalUser = true;
 
-  # The guest's DNS can't see MagicDNS (slirp forwards to the Mac's plain
-  # resolver, which doesn't know *.ts.net), so pin the device's tailnet IP.
+  # macOS MagicDNS is a scoped resolver file (/etc/resolver/ts.net) that slirp's
+  # DNS proxy never reads, so aim *.ts.net at tailscaled's quad100 listener.
   # Routing needs no tailscale in the guest: slirp traffic exits as Mac
   # connections and the Mac routes 100.x via tailscaled.
-  networking.hosts."100.106.162.4" = [ "jetkvm.tail4b1b78.ts.net" ];
+  networking.nameservers = [ "100.100.100.100" ];
+  services.resolved.settings.Resolve.Domains = [ "~ts.net" ];
 
   # dhcpcd intermittently fails to start in this minimal image (boots race:
   # sometimes full network, sometimes none). networkd is deterministic here.
@@ -43,8 +44,6 @@
     enable = true;
     wantedBy = [ "multi-user.target" ];
   };
-  environment.systemPackages = [
-  ];
 
   system.stateVersion = "25.05";
 }
