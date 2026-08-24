@@ -39,6 +39,14 @@
         ssid = "Verizon_S9K9SF";
         pskRaw = "ext:psk_sukh";
       }
+      {
+        ssid = "Verizon_S9K9SF 2GHz";
+        pskRaw = "ext:psk_sukh";
+      }
+      {
+        ssid = "Verizon_BL9V92";
+        pskRaw = "ext:psk_sukh_ext";
+      }
       # whisper
       {
         ssid = "Hammy 5 GHz";
