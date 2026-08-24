@@ -15,8 +15,9 @@
               description = "SSID of the network.";
             };
             pskRaw = mkOption {
-              type = types.str;
+              type = types.nullOr types.str;
               description = "Name of the PSK in the form of ext:{var_name}.";
+              default = null;
             };
           };
         }
@@ -33,10 +34,7 @@
       fallbackToWPA2 = false;
       secretsFile = config.modules.wireless.secretsFile;
       networks = lib.genAttrs' config.modules.wireless.networks (
-        nw:
-        lib.nameValuePair nw.ssid {
-          pskRaw = nw.pskRaw;
-        }
+        nw: lib.nameValuePair nw.ssid (lib.optionalAttrs (nw ? pskRaw) { pskRaw = nw.pskRaw; })
       );
     };
   };

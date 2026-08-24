@@ -1,7 +1,4 @@
-#!/usr/bin/env bash
 set -euo pipefail
-
-echo -ne "\033]0;search-nix-pkgs\007" >/dev/tty
 
 snapshot="$XDG_CACHE_HOME/nixpkgs-snapshot"
 

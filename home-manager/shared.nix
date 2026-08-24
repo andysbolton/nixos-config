@@ -59,11 +59,8 @@ in
   };
 
   home.file = {
-    ".local/bin".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/bin";
     ".wezterm.lua".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/wezterm.lua";
   };
-
-  home.sessionPath = [ "${config.home.homeDirectory}/.local/bin" ];
 
   home.packages = with pkgs; [
     (sbcl.withPackages (ps: [ ps.swank ]))
@@ -97,6 +94,7 @@ in
     nix-tree
     nixfmt
     nodejs_24 # Node.js runtime — npx for MCP servers & general tooling
+    ookla-speedtest
     pkgs-unstable.gh
     pkgs-unstable.opencode
     postgresql
@@ -109,7 +107,6 @@ in
     sd # sed replacement
     sops # secrets editor/manager
     starship # cross-shell prompt
-    speedtest-cli
     tinyxxd
     tokyonight-extras
     tree # recursive directory listing
@@ -268,6 +265,7 @@ in
   programs.onepassword-secrets = {
     enable = true;
     tokenFile = "${config.home.homeDirectory}/.config/opnix/token";
+    service.enable = true;
     secrets = {
       ageKey = {
         reference = "op://nix/age-secret-key/password";
@@ -282,6 +280,11 @@ in
       sshRsaPub = {
         reference = "op://nix/andy-ssh-rsa/public key";
         path = ".ssh/id_rsa.pub";
+        mode = "0600";
+      };
+      hi = {
+        reference = "op://nix/andy-ssh-rsa/hi/password";
+        path = "hi";
         mode = "0600";
       };
       sshEd25519 = {
@@ -307,13 +310,14 @@ in
 
   stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-moon.yaml";
 
-  stylix.targets.neovim.enable = false;
+  stylix.targets.eog.enable = false;
   stylix.targets.fish.enable = false;
-  stylix.targets.waybar.enable = false;
+  stylix.targets.gnome-text-editor.enable = false;
   stylix.targets.gnome.enable = false;
   stylix.targets.gtk.enable = false;
-  stylix.targets.eog.enable = false;
-  stylix.targets.gnome-text-editor.enable = false;
+  stylix.targets.neovim.enable = false;
+  stylix.targets.river.enable = false;
+  stylix.targets.waybar.enable = false;
 
   stylix.targets.firefox.profileNames = [ "home" ];
   stylix.targets.firefox.colorTheme.enable = true;

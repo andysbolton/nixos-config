@@ -1,6 +1,10 @@
-#!/bin/bash
+bookmarks_folder="$1"
 
-bookmarks_folder="$HOME/Library/Application Support/Firefox/Profiles/home/"
+if [ -z "$bookmarks_folder" ]; then
+	echo "Usage: $0 <bookmarks folder>"
+	exit 1
+fi
+
 cache_file="$HOME/.cache/bookmarks.txt"
 
 # Check if cache exists and is up to date

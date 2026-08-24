@@ -39,6 +39,14 @@
         ssid = "Verizon_S9K9SF";
         pskRaw = "ext:psk_sukh";
       }
+      {
+        ssid = "Verizon_S9K9SF 2GHz";
+        pskRaw = "ext:psk_sukh";
+      }
+      {
+        ssid = "Verizon_BL9V92";
+        pskRaw = "ext:psk_sukh_ext";
+      }
       # whisper
       {
         ssid = "Hammy 5 GHz";
@@ -49,15 +57,13 @@
         ssid = "LDWP_5G";
         pskRaw = "ext:psk_dougie";
       }
-      # hobbs ext
-      {
-        ssid = "LDWP_5GEXT";
-        pskRaw = "ext:psk_dougie";
-      }
       # gl
       {
         ssid = "GL-MT3000-4f3-5G";
         pskRaw = "ext:psk_gl";
+      }
+      {
+        ssid = "Unitedwifi.com";
       }
     ];
   };
