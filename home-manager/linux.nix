@@ -53,6 +53,10 @@ in
            sudo -E -u $(whoami) \
              ${pkgs.firefox}/bin/firefox -no-remote "$@"
     '')
+    (pkgs.callPackage ../pkgs/jetkvm-kiosk.nix {
+      inherit (config) repoPath;
+      vmDir = "${config.home.homeDirectory}/vms";
+    })
   ]);
 
   home.sessionVariables = {

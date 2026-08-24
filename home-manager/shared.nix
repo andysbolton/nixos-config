@@ -4,7 +4,6 @@
   pkgs,
   pkgs-unstable,
   inputs,
-  osConfig,
   ...
 }:
 let
@@ -265,7 +264,7 @@ in
   programs.onepassword-secrets = {
     enable = true;
     tokenFile = "${config.home.homeDirectory}/.config/opnix/token";
-    services.enable = true;
+    service.enable = true;
     secrets = {
       ageKey = {
         reference = "op://nix/age-secret-key/password";

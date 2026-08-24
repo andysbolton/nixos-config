@@ -1,5 +1,12 @@
-{ pkgs, modulesPath, ... }: {
-  imports = [ "${modulesPath}/profiles/minimal.nix" ];
+{ pkgs, modulesPath, ... }:
+let
+  serialTty = if pkgs.stdenv.hostPlatform.isAarch64 then "ttyAMA0" else "ttyS0";
+in
+{
+  imports = [
+    "${modulesPath}/profiles/minimal.nix"
+    "${modulesPath}/profiles/qemu-guest.nix"
+  ];
 
   disabledModules = [ "${modulesPath}/profiles/all-hardware.nix" ];
 
@@ -40,7 +47,7 @@
 
   # Debug shell in the host terminal: jetkvm-kiosk -serial mon:stdio
   # (full scrollback/copy-paste; Ctrl+A x quits qemu, Ctrl+A c toggles monitor)
-  systemd.services."serial-getty@ttyAMA0" = {
+  systemd.services."serial-getty@${serialTty}" = {
     enable = true;
     wantedBy = [ "multi-user.target" ];
   };
