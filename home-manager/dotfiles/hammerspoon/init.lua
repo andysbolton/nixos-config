@@ -130,15 +130,21 @@ scrollTap = hs.eventtap.new({ t.scrollWheel }, function(e)
 	return false
 end)
 
+-- launchctl errors harmlessly when skhd is already in the target state.
+local SKHD_ON = 'launchctl bootstrap gui/$(id -u) "$HOME/Library/LaunchAgents/org.nixos.skhd.plist"'
+local SKHD_OFF = "launchctl bootout gui/$(id -u)/org.nixos.skhd"
+
 local function work()
 	keyTap:start()
 	scrollTap:start()
+	hs.execute(SKHD_ON, true)
 	Profile = "work"
 end
 
 local function linux()
 	keyTap:stop()
 	scrollTap:stop()
+	hs.execute(SKHD_OFF, true)
 	Profile = "linux"
 end
 

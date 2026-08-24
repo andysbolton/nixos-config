@@ -38,7 +38,6 @@ in
 
       # Path additions
       fish_add_path ~/smartwyre/infra-orchestrator/scripts/util
-      fish_add_path ~/.local/bin
       fish_add_path ~/bin
 
       # Key bindings

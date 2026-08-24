@@ -5,6 +5,8 @@
   ...
 }:
 let
+  scripts = pkgs.callPackage ../pkgs/scripts { };
+
   # https://github.com/davatorium/rofi/issues/584#issuecomment-384555551
   askPass = pkgs.writeShellScriptBin "ask-pass" ''
     rofi -dmenu \
@@ -24,7 +26,11 @@ in
   home.username = "andy";
   home.homeDirectory = "/home/andy";
 
-  home.packages = with pkgs; [
+  home.packages = [
+    scripts.nixos-launcher
+    scripts.search-nix-pkgs
+  ]
+  ++ (with pkgs; [
     cliphist
     grim # screenshot tool
     imv # command-line image viewer
@@ -34,19 +40,20 @@ in
     reaper
     slskd
     slurp # select region of screen
+    sqlite
     swappy # screenshot annotation tool
     tcpdump
     traceroute
-    waypipe
     trash-cli
     thunar
+    waypipe
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       SUDO_ASKPASS=${askPass}/bin/ask-pass \
          sudo -A -E ip netns exec vpn \
            sudo -E -u $(whoami) \
              ${pkgs.firefox}/bin/firefox -no-remote "$@"
     '')
-  ];
+  ]);
 
   home.sessionVariables = {
     SOPS_AGE_SSH_PRIVATE_KEY_FILE = "/etc/ssh/ssh_host_ed25519_key";
@@ -59,7 +66,7 @@ in
   wayland.windowManager.river = {
     enable = true;
     systemd.enable = false;
-    extraConfig = builtins.readFile ./river/init;
+    extraConfig = import ./river/init.nix { inherit pkgs scripts; };
   };
 
   xdg.configFile."uwsm/env-river".text =

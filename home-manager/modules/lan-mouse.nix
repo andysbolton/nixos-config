@@ -28,10 +28,8 @@ let
         log=/tmp/lan-mouse.err.log
         off=$(stat -f%z "$log" 2>/dev/null || echo 0)
 
-        uid=$(id -u)
-        skhd_plist="$HOME/Library/LaunchAgents/org.nixos.skhd.plist"
-
-        trap 'launchctl bootstrap "gui/$uid" "$skhd_plist"; open "hammerspoon://work"' EXIT
+        # hammerspoon://work restores the remap taps and skhd together.
+        trap 'open "hammerspoon://work"' EXIT
 
         # Forward the clipboard to portable: an image if one is present, else text.
         (
@@ -45,8 +43,7 @@ let
           fi
         ) &
 
-        launchctl bootout "gui/$uid/org.nixos.skhd" 2>/dev/null
-
+        # hammerspoon://linux stops the remap taps and boots out skhd together.
         open "hammerspoon://linux" || exit 0
 
         tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }

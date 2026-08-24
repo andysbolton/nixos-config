@@ -463,15 +463,15 @@
       "locked": {
         "lastModified": 1786887547,
         "narHash": "sha256-Yzu/pJq6acDUp80ZyP5Jp+LWmy/NtWF2hVcmmK5TaJU=",
-        "ref": "refs/heads/fix-hm-network",
+        "owner": "brizzbuzz",
+        "repo": "opnix",
         "rev": "be38e4a50de246d7705784151845ef3166293783",
-        "revCount": 53,
-        "type": "git",
-        "url": "file:///home/andy/code/opnix"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/andy/code/opnix"
+        "owner": "brizzbuzz",
+        "repo": "opnix",
+        "type": "github"
       }
     },
     "root": {

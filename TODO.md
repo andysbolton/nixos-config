@@ -26,7 +26,7 @@
 - [ ] codeactions: bring back diff
 - [ ] code actions: wrench showing first line, ex: term.lua
 - [ ] treesitter motions would be really helpful
-- [ ] modes.nvim: turn off the bottom statusline (maybe?), try to theme it
+- [ ] portable: vpn
 
 ## rofi
 
