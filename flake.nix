@@ -39,7 +39,7 @@
     };
 
     opnix = {
-      url = "github:brizzbuzz/opnix";
+      url = "github:andysbolton/opnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

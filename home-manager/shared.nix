@@ -265,6 +265,7 @@ in
   programs.onepassword-secrets = {
     enable = true;
     tokenFile = "${config.home.homeDirectory}/.config/opnix/token";
+    services.enable = true;
     secrets = {
       ageKey = {
         reference = "op://nix/age-secret-key/password";
