@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 set -euo pipefail
 
 echo -ne "\033]0;ask-claude\007" >/dev/tty

@@ -20,7 +20,7 @@ return {
   "APZelos/blamer.nvim",
   {
     "sindrets/diffview.nvim",
-    cmd = "DiffviewOpen",
+    cmd = { "DiffviewOpen" },
     keys = {
       {
         "<leader>dv",

@@ -1,10 +1,8 @@
-#!/bin/bash
-
 cache_file="$HOME/.cache/apps.txt"
 
 # Check if cache exists and is recent (less than 1 hour old)
 if [ -f "$cache_file" ]; then
-	cache_age=$(($(date +%s) - $(stat -f %m "$cache_file")))
+	cache_age=$(($(date +%s) - $(stat -c %Y "$cache_file")))
 	if [ $cache_age -lt 3600 ]; then
 		cat "$cache_file"
 		exit 0

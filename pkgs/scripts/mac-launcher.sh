@@ -1,11 +1,9 @@
-#!/bin/bash
-
 # Change title so yabai can track
 echo -ne "\033]0;launcher\007" >/dev/tty
 
-bookmarks=$(bookmarks.sh &)
-apps=$(apps.sh &)
-azure_resource_types=$(azure-resource-types.sh &)
+bookmarks=$(bookmarks "$HOME/Library/Application Support/Firefox/Profiles/home/" &)
+apps=$(apps &)
+azure_resource_types=$(azure-resource-types &)
 
 wait
 
@@ -44,7 +42,7 @@ handle_selection() {
 		return
 
 	elif [[ "$choice" == "spaces" ]]; then
-		echo "spaces.sh"
+		echo "yabai-spaces"
 		return
 
 	elif [[ "$choice" =~ ^\?j ]]; then

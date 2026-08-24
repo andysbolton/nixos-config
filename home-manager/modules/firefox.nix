@@ -41,8 +41,8 @@
       EnableTrackingProtection = {
         Value = true;
         Locked = true;
-        Cryptominig = true;
-        Fingerpriting = true;
+        Cryptomining = true;
+        Fingerprinting = true;
         EmailTracking = true;
       };
       FirefoxSuggest = {
