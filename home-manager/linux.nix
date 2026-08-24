@@ -63,8 +63,6 @@ in
     MOZ_ENABLE_WAYLAND = "1";
   };
 
-  stylix.targets.river.enable = false;
-
   wayland.windowManager.river = {
     enable = true;
     systemd.enable = false;

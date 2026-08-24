@@ -191,6 +191,8 @@ in
 
             cmd - s : screencapture -ic
 
+            cmd - q : yabai -m window --close
+
             ${lib.pipe spaces [
               (lib.filterAttrs (name: value: value ? key))
               (lib.mapAttrsToList (
@@ -200,7 +202,7 @@ in
             ]}
 
             # jump to the jetkvm-kiosk native-fullscreen space (there's only ever one)
-            cmd + alt - q : set i (yabai -m query --spaces | jq -r 'map(select(."is-native-fullscreen"))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
+            cmd + alt - j : set i (yabai -m query --spaces | jq -r 'map(select(."is-native-fullscreen"))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
           '';
       };
 

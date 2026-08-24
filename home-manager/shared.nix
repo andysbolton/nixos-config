@@ -316,6 +316,7 @@ in
   stylix.targets.gnome.enable = false;
   stylix.targets.gtk.enable = false;
   stylix.targets.neovim.enable = false;
+  stylix.targets.river.enable = false;
   stylix.targets.waybar.enable = false;
 
   stylix.targets.firefox.profileNames = [ "home" ];

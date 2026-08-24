@@ -11,7 +11,7 @@
   riverctl map normal Super T spawn "uwsm app -- ${pkgs.foot}/bin/foot --app-id=nixos-launcher ${scripts.nixos-launcher}/bin/nixos-launcher"
   riverctl map normal Super S spawn "uwsm app -- ${pkgs.grim}/bin/grim -g \"\$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy"
 
-  riverctl map normal Alt+Shift Q close
+  riverctl map normal Super Q close
   riverctl map normal Control+Shift E spawn "uwsm stop"
 
   riverctl input pointer-1133-45082-MX_Anywhere_2S_Mouse middle-emulation enabled
