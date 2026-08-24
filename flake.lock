@@ -461,17 +461,18 @@
         ]
       },
       "locked": {
-        "lastModified": 1786887547,
-        "narHash": "sha256-Yzu/pJq6acDUp80ZyP5Jp+LWmy/NtWF2hVcmmK5TaJU=",
-        "ref": "refs/heads/fix-hm-network",
-        "rev": "be38e4a50de246d7705784151845ef3166293783",
-        "revCount": 53,
-        "type": "git",
-        "url": "file:///home/andy/code/opnix"
+        "lastModified": 1787022578,
+        "narHash": "sha256-SDpnOfW+9wICsggqS53FFyzXS8YW94eo13UL92xNAok=",
+        "owner": "andysbolton",
+        "repo": "opnix",
+        "rev": "ba6e2afb7cb33977a340df3ad211d8334391b368",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/andy/code/opnix"
+        "owner": "andysbolton",
+        "ref": "fix-hm-network",
+        "repo": "opnix",
+        "type": "github"
       }
     },
     "root": {

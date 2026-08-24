@@ -1,10 +1,8 @@
-#!/bin/bash
-
 cache_file="$HOME/.cache/azure-resource-types.txt"
 
 # Check if cache exists and is recent (less than 3 days old)
 if [ -f "$cache_file" ]; then
-	cache_age=$(($(date +%s) - $(stat -f %m "$cache_file")))
+	cache_age=$(($(date +%s) - $(stat -c %Y "$cache_file")))
 	if [ $cache_age -lt 259200 ]; then
 		cat "$cache_file"
 		exit 0

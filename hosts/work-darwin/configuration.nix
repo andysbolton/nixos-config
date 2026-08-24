@@ -5,6 +5,9 @@
   config,
   ...
 }:
+let
+  scripts = pkgs.callPackage ../../pkgs/scripts { inherit (pkgs-unstable) yabai; };
+in
 {
   imports = [
     ../../modules/theme.nix
@@ -177,14 +180,14 @@
             cmd - t : open -na WezTerm --args \
               --config "enable_tab_bar=false" \
               --config "window_decorations='RESIZE'" \
-              start --always-new-process -- 'launcher.sh' &
+              start --always-new-process -- '${scripts.mac-launcher}/bin/mac-launcher' &
 
             cmd - n : open -na WezTerm --args \
               --config "enable_tab_bar=false" \
               --config "window_decorations='RESIZE'" \
-              start --always-new-process -- 'search-nix-pkgs.sh' &
+              start --always-new-process -- '${scripts.search-nix-pkgs}/bin/search-nix-pkgs' &
 
-            cmd - a : wezterm-gui start --always-new-process -- 'ask-claude.sh' &
+            cmd - a : wezterm-gui start --always-new-process -- '${scripts.ask-claude}/bin/ask-claude' &
 
             cmd - s : screencapture -ic
 
