@@ -23,6 +23,12 @@
     shell = pkgs.fish;
   };
 
+  # Real hosts keep andy's password in /etc/shadow; a build-vm guest starts empty.
+  virtualisation.vmVariant.users.users = {
+    andy.initialPassword = "vm";
+    root.initialPassword = "vm";
+  };
+
   programs.fish = {
     enable = true;
   };
