@@ -107,6 +107,7 @@
 
   modules.vpn = {
     enable = true;
+    portForwarding.enable = true;
     dns = "10.2.0.1";
     ip = "10.2.0.2/32";
     netns = "vpn";

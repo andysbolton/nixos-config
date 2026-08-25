@@ -18,10 +18,18 @@
       description = "IP address to assign to the WireGuard interface.";
     };
 
+    ip6 = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      description = "IPv6 address to assign to the WireGuard interface, for dual-stack profiles.";
+    };
+
     netns = lib.mkOption {
       type = lib.types.str;
       description = "Name of the network namespace to use with the VPN.";
     };
+
+    portForwarding.enable = lib.mkEnableOption "the ProtonVPN NAT-PMP port forwarding loop for qBittorrent.";
 
     wgConfPath = lib.mkOption {
       type = lib.types.path;
@@ -49,40 +57,62 @@
       description = "wg network interface (proton)";
       requires = [ "network-online.target" ];
       bindsTo = [ "netns@${config.modules.vpn.netns}.service" ];
-      after = [ "netns@${config.modules.vpn.netns}.service" ];
+      after = [
+        "netns@${config.modules.vpn.netns}.service"
+        "network-online.target"
+      ];
       wantedBy = [ "multi-user.target" ];
+      # Retry indefinitely; on wireless hosts the link may not be up yet at boot.
+      unitConfig.StartLimitIntervalSec = 0;
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
+        Restart = "on-failure";
+        RestartSec = "10s";
         ExecStart =
           with pkgs;
           writers.writeBash "wg-up" ''
             set -e
 
+            # A failed attempt can leave wg0 behind, which would fail the retry.
+            ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link del wg0 2>/dev/null || true
+            ${iproute2}/bin/ip link del wg0 2>/dev/null || true
+
             ${iproute2}/bin/ip link add wg0 type wireguard
             ${iproute2}/bin/ip link set wg0 netns ${config.modules.vpn.netns}
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link set dev wg0 mtu 1280
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} address add ${config.modules.vpn.ip} dev wg0
+            ${lib.optionalString (config.modules.vpn.ip6 != null)
+              "${iproute2}/bin/ip --netns ${config.modules.vpn.netns} address add ${config.modules.vpn.ip6} dev wg0"
+            }
+            # Address/DNS are wg-quick keys that wg setconf rejects; this module
+            # applies them itself, so strip them from the vendor conf.
+            conf=$(${coreutils}/bin/mktemp /run/wg-proton.XXXXXX)
+            trap 'rm -f "$conf"' EXIT
+            ${gnugrep}/bin/grep -vE '^[[:space:]]*(Address|DNS)[[:space:]]*=' \
+              ${config.modules.vpn.wgConfPath} > "$conf"
             ${iproute2}/bin/ip netns exec ${config.modules.vpn.netns} \
-              ${wireguard-tools}/bin/wg setconf wg0 ${config.modules.vpn.wgConfPath}
+              ${wireguard-tools}/bin/wg setconf wg0 "$conf"
             # Bring up loopback, as this will allow accessing the localhost application UI
             # (assuming the localhost application and the browser are both in the same netns)
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link set lo up
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link set wg0 up
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} route add default dev wg0
+            ${lib.optionalString (
+              config.modules.vpn.ip6 != null
+            ) "${iproute2}/bin/ip --netns ${config.modules.vpn.netns} -6 route add default dev wg0"}
           '';
         ExecStop =
           with pkgs;
           writers.writeBash "wg-down" ''
-            ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} route del default dev wg0
-            ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link del wg0
-            ${iproute2}/bin/ip link del wg0
+            ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} route del default dev wg0 2>/dev/null || true
+            ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link del wg0 2>/dev/null || true
+            ${iproute2}/bin/ip link del wg0 2>/dev/null || true
           '';
       };
     };
 
-    systemd.services."proton-port-forwarding" = {
-      enable = true;
+    systemd.services."proton-port-forwarding" = lib.mkIf config.modules.vpn.portForwarding.enable {
       description = "Acquire incoming port from protonvpn natpmp and update qBittorrent.";
       after = [ "wg-proton.service" ];
       bindsTo = [ "wg-proton.service" ];
@@ -116,5 +146,11 @@
         Restart = "on-failure";
       };
     };
+
+    environment.systemPackages = [ pkgs.wireguard-tools ];
+
+    # The host resolver is unreachable from the netns; it has its own loopback.
+    environment.etc."netns/${config.modules.vpn.netns}/resolv.conf".text =
+      "nameserver ${config.modules.vpn.dns}";
   };
 }
