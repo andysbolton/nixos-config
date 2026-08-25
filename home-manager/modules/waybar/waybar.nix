@@ -145,6 +145,7 @@ in
           "river/tags"
           "river/window"
           "custom/lan-mouse"
+          "river/mode"
           "systemd-failed-units"
         ];
 
@@ -198,6 +199,10 @@ in
           exec = networkStatus;
           format = "{}";
           tooltip = true;
+        };
+
+        "river/mode" = {
+          format = "{}";
         };
 
         battery = {
