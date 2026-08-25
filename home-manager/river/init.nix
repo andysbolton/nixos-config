@@ -98,10 +98,13 @@
   riverctl map normal Super Down send-layout-cmd "$layout_generator" "main-location bottom"
   riverctl map normal Super Left send-layout-cmd "$layout_generator" "main-location left"
 
-  # Passthrough Mode
+  # Passthrough Mode. Only "enter" is mapped in normal and only "exit" in
+  # passthrough, so once grabbed a bare Super+F11 falls through to the
+  # focused client instead of being caught here — letting a nested guest
+  # running this same config catch it and enter its own passthrough mode.
   riverctl declare-mode passthrough
-  riverctl map normal Super F11 enter-mode passthrough
-  riverctl map passthrough Super F11 enter-mode normal
+  riverctl map normal      Super       F11 enter-mode passthrough
+  riverctl map passthrough Super+Shift F11 enter-mode normal
 
   for mode in normal locked; do
       riverctl map $mode None XF86Eject spawn '${pkgs.util-linux}/bin/eject -T'
