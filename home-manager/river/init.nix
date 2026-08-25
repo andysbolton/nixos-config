@@ -1,5 +1,17 @@
 { pkgs, scripts }:
-
+let
+  # Marker file + waybar refresh signal so custom/river-passthrough can show live state.
+  riverPassthroughOn = pkgs.writeShellScript "river-passthrough-on" ''
+    riverctl enter-mode passthrough
+    touch "''${XDG_RUNTIME_DIR:-/tmp}/river-passthrough"
+    ${pkgs.procps}/bin/pkill -RTMIN+8 -x .waybar-wrapped || true
+  '';
+  riverPassthroughOff = pkgs.writeShellScript "river-passthrough-off" ''
+    riverctl enter-mode normal
+    rm -f "''${XDG_RUNTIME_DIR:-/tmp}/river-passthrough"
+    ${pkgs.procps}/bin/pkill -RTMIN+8 -x .waybar-wrapped || true
+  '';
+in
 ''
   layout_generator=rivertile
   layout_cmd=${pkgs.river-classic}/bin/rivertile
@@ -100,8 +112,8 @@
 
   # Passthrough Mode
   riverctl declare-mode passthrough
-  riverctl map normal Super F11 enter-mode passthrough
-  riverctl map passthrough Super F11 enter-mode normal
+  riverctl map normal Super F11 spawn ${riverPassthroughOn}
+  riverctl map passthrough Super F11 spawn ${riverPassthroughOff}
 
   for mode in normal locked; do
       riverctl map $mode None XF86Eject spawn '${pkgs.util-linux}/bin/eject -T'

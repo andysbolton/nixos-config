@@ -36,6 +36,15 @@ let
     };
   '';
 
+  # river/init.nix's Super+F11 mode toggle touches/removes this marker file.
+  riverPassthroughCheck = pkgs.writeShellScript "river-passthrough-check" ''
+    if [ -e "''${XDG_RUNTIME_DIR:-/tmp}/river-passthrough" ]; then
+      echo "<span color='${RED}'>Passthrough</span>"
+    else
+      echo "<span color='${SUBTEXT}'>Passthrough</span>"
+    fi
+  '';
+
   netTools = pkgs.lib.makeBinPath [
     pkgs.iw
     pkgs.iproute2
@@ -145,6 +154,7 @@ in
           "river/tags"
           "river/window"
           "custom/lan-mouse"
+          "custom/river-passthrough"
           "systemd-failed-units"
         ];
 
@@ -198,6 +208,14 @@ in
           exec = networkStatus;
           format = "{}";
           tooltip = true;
+        };
+
+        "custom/river-passthrough" = {
+          interval = 5;
+          signal = 8;
+          exec = riverPassthroughCheck;
+          format = "{}";
+          "tooltip-format" = "River input passthrough (Super+F11)";
         };
 
         battery = {
