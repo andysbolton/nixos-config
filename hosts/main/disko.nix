@@ -1,4 +1,8 @@
+{ lib, ... }:
 {
+  # A build-vm guest has no such partition, and systemd initrd waits for it.
+  virtualisation.vmVariant.boot.resumeDevice = lib.mkVMOverride "";
+
   disko.devices = {
     disk = {
       main = {
