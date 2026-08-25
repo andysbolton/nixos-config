@@ -23,6 +23,21 @@
     shell = pkgs.fish;
   };
 
+  # Real hosts keep andy's password in /etc/shadow; a build-vm guest starts empty.
+  virtualisation.vmVariant.users.users = {
+    andy.initialPassword = "vm";
+    root.initialPassword = "vm";
+  };
+
+  # Real hosts force a GPU renderer (see home-manager/linux.nix); a build-vm guest has no GPU,
+  # so wlroots needs the software renderer or river fails to start.
+  virtualisation.vmVariant.home-manager.users.andy.xdg.configFile."uwsm/env-river".text =
+    lib.mkVMOverride ''
+      export WLR_NO_HARDWARE_CURSORS=1
+      export WLR_RENDERER=pixman
+      export WLR_RENDERER_ALLOW_SOFTWARE=1
+    '';
+
   programs.fish = {
     enable = true;
   };

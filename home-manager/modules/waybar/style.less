@@ -52,6 +52,7 @@ window#waybar .modules-right {
 #custom-system,
 #disk,
 #memory,
+#mode,
 #pulseaudio,
 #pulseaudio-slider,
 #systemd-failed-units,
@@ -106,6 +107,15 @@ window#waybar .modules-right {
 #temperature.critical {
   color: @colors[red];
 } // alert state
+#mode.normal {
+  color: @colors[subtext];
+}
+#mode.passthrough {
+  color: @colors[red];
+}
+#mode.locked {
+  color: @colors[yellow];
+}
 #custom-system {
   font-weight: normal;
 }
