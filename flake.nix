@@ -15,6 +15,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-darwin.url = "github:NixOS/nixpkgs/nixpkgs-26.05-darwin";
+    nixpkgs-unstable-darwin.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     claude-code.url = "github:sadjow/claude-code-nix";
 
@@ -83,12 +85,11 @@
       home-manager,
       nix-darwin,
       nix-homebrew,
-      nixos-generators,
       nixpkgs,
       nixpkgs-unstable,
+      nixpkgs-darwin,
+      nixpkgs-unstable-darwin,
       opnix,
-      self,
-      sops-nix,
       stylix,
       ...
     }@inputs:
@@ -110,16 +111,18 @@
         claude-code.overlays.default
       ];
 
+      isDarwin = system: nixpkgs.lib.hasSuffix "-darwin" system;
+
       mkPkgs =
         system:
-        import nixpkgs {
+        import (if isDarwin system then nixpkgs-darwin else nixpkgs) {
           inherit system overlays;
           config.allowUnfree = true;
         };
 
       mkUnstablePkgs =
         system:
-        import nixpkgs-unstable {
+        import (if isDarwin system then nixpkgs-unstable-darwin else nixpkgs-unstable) {
           inherit system;
           config.allowUnfree = true;
         };

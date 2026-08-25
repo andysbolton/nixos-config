@@ -281,11 +281,6 @@ in
         path = ".ssh/id_rsa.pub";
         mode = "0600";
       };
-      hi = {
-        reference = "op://nix/andy-ssh-rsa/hi/password";
-        path = "hi";
-        mode = "0600";
-      };
       sshEd25519 = {
         reference = "op://nix/andy-ssh-ed25519/private key?ssh-format=openssh";
         path = ".ssh/id_ed25519";
