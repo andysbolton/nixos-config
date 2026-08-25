@@ -6,7 +6,6 @@
 }:
 let
   netns = "vpn";
-  dns = "10.2.0.1";
   qbittorrentWebuiPort = 4292;
   downloadPath = "/mnt/media/Seeding";
 in
@@ -139,8 +138,6 @@ in
       ExecStart = "${pkgs.unpackerr}/bin/unpackerr";
     };
   };
-
-  environment.etc."netns/${netns}/resolv.conf".text = "nameserver ${dns}";
 
   systemd.services.qbittorrent-bridge = {
     description = "Tailnet bridge for qBittorrent (port ${toString qbittorrentWebuiPort})";

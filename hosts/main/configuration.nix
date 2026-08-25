@@ -16,6 +16,7 @@
     ../../modules/steam.nix
     ../../modules/vpn.nix
     ../../modules/wireless.nix
+    ../../modules/monitoring.nix
     inputs.sops-nix.nixosModules.sops
     # inputs.wayland-pipewire-idle-inhibit.nixosModules.default
   ];
@@ -30,6 +31,7 @@
   boot.kernelParams = [ "acpi_enforce_resources=lax" ];
 
   networking.hostName = "main";
+  networking.interfaces.enp12s0.wakeOnLan.enable = true;
 
   modules.wireless = {
     enable = true;
@@ -101,8 +103,11 @@
     };
   };
 
+  modules.monitoring.enable = true;
+
   modules.vpn = {
     enable = true;
+    portForwarding.enable = true;
     dns = "10.2.0.1";
     ip = "10.2.0.2/32";
     netns = "vpn";

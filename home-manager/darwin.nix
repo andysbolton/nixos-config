@@ -92,39 +92,10 @@ in
       azure-cli-extensions.quota
       azure-cli-extensions.resource-graph
     ])
-    (pkgs.writeShellScriptBin "jetkvm-kiosk" ''
-      set -e
-
-      mkdir -p "${config.home.homeDirectory}/vms"
-      # --out-link roots the image against GC; the overlay's backing file lives
-      # in the store, so without a root a GC would corrupt the overlay.
-      nix build ${config.repoPath}#nixosConfigurations.jetkvm-kiosk.config.system.build.images.qemu-efi \
-        --out-link "${config.home.homeDirectory}/vms/jetkvm-kiosk-base"
-      base=$(echo "$(readlink -f "${config.home.homeDirectory}/vms/jetkvm-kiosk-base")"/*.qcow2)
-      overlay="${config.home.homeDirectory}/vms/jetkvm-kiosk-overlay.qcow2"
-      cur=$(${pkgs.qemu}/bin/qemu-img info --output=json "$overlay" 2>/dev/null | ${pkgs.jq}/bin/jq -r '."backing-filename" // empty')
-
-      if [ "$cur" != "$base" ]; then
-        echo "New base image, recreating overlay..."
-        ${pkgs.qemu}/bin/qemu-img create -f qcow2 -F qcow2 -b "$base" "$overlay"
-      fi
-
-      exec ${pkgs.qemu}/bin/qemu-system-aarch64 \
-        -machine virt \
-        -accel hvf \
-        -cpu host \
-        -m 2G \
-        -smp 2 \
-        -nic user,model=virtio-net-pci \
-        -drive file="$overlay",if=virtio \
-        -drive if=pflash,format=raw,readonly=on,file=${pkgs.qemu}/share/qemu/edk2-aarch64-code.fd \
-        -device virtio-gpu-pci \
-        -display cocoa,full-screen=on,full-grab=on \
-        -device qemu-xhci \
-        -device usb-kbd \
-        -device usb-tablet \
-        "$@"
-    '')
+    (pkgs.callPackage ../pkgs/jetkvm-kiosk.nix {
+      inherit (config) repoPath;
+      vmDir = "${config.home.homeDirectory}/vms";
+    })
     desktoppr
     gatherv2
     jira-cli-go

@@ -41,7 +41,7 @@
     };
 
     opnix = {
-      url = "github:brizzbuzz/opnix";
+      url = "github:andysbolton/opnix/fix-hm-network";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -126,6 +126,13 @@
           inherit system;
           config.allowUnfree = true;
         };
+
+      mkKiosk =
+        system:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [ ./hosts/jetkvm-kiosk.nix ];
+        };
     in
     {
       nixosConfigurations.main =
@@ -188,10 +195,8 @@
           ];
         };
 
-      nixosConfigurations.jetkvm-kiosk = nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
-        modules = [ ./hosts/jetkvm-kiosk.nix ];
-      };
+      nixosConfigurations.jetkvm-kiosk-aarch64 = mkKiosk "aarch64-linux";
+      nixosConfigurations.jetkvm-kiosk-x86_64 = mkKiosk "x86_64-linux";
 
       darwinConfigurations.work-darwin =
         let

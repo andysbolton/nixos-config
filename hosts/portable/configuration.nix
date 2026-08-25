@@ -11,6 +11,7 @@
     ../../modules/theme.nix
     ../../modules/desktop.nix
     ../../modules/steam.nix
+    ../../modules/vpn.nix
     ../../modules/wireless.nix
     inputs.sops-nix.nixosModules.sops
   ];
@@ -100,6 +101,16 @@
       group = "wpa_supplicant";
       mode = "0440";
     };
+    secrets."proton-vpn.conf" = { };
+  };
+
+  modules.vpn = {
+    enable = true;
+    dns = "10.2.0.1";
+    ip = "10.2.0.2/32";
+    ip6 = "2a07:b944::2:2/128";
+    netns = "vpn";
+    wgConfPath = config.sops.secrets."proton-vpn.conf".path;
   };
 
   services.keyd = {
