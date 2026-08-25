@@ -65,25 +65,6 @@ local tab_title = function(tab_info)
 	return baseexe .. " @ " .. fmt_dir
 end
 
-wezterm.on("gui-startup", function(cmd)
-	if not is_mac() then
-		return
-	end
-
-	local _, _, window = wezterm.mux.spawn_window(cmd or {})
-	local gui = window:gui_window()
-
-	local screen = wezterm.gui.screens().active
-
-	local dims = gui:get_dimensions()
-
-	local center_x = screen.x + ((screen.width - dims.pixel_width) / 2)
-	local center_y = screen.y + ((screen.height - dims.pixel_height) / 2)
-
-	-- 4. Snap it into place before the first frame renders
-	gui:set_position(center_x, center_y)
-end)
-
 if is_mac() then
 	config.initial_rows = 30
 	config.initial_cols = 100

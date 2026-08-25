@@ -249,7 +249,7 @@ in
                   focus_follows_mouse off \
                   display_arrangement_order default \
                   menubar_opacity 0.0 \
-                  window_origin_display default \
+                  window_origin_display focused \
                   window_placement second_child \
                   window_insertion_point focused \
                   window_zoom_persist on \
@@ -374,7 +374,6 @@ in
 
   security.pam.services.sudo_local.touchIdAuth = false;
 
-  # Ensure the utilities are in your environment
   environment.systemPackages = with pkgs; [
     desktoppr
     yabai
