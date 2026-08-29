@@ -75,6 +75,7 @@ let
         ) &
 
         trap 'riverctl enter-mode normal' EXIT
+        trap 'exit' INT TERM
         riverctl enter-mode passthrough
 
         if [ -n "$cursor" ]; then set -- --after-cursor "$cursor"; else set -- -n0; fi
