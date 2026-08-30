@@ -33,6 +33,9 @@
     - Make minimal changes. If something can be written better, bring it up but don't implement it immediately.
     - Don't force the reader to skim with a large wall of text. Present easily digestible responses so that a natural question and answer format can be acheived.
 
+    ## Documentation
+    - Always show the comment or description you're going to post to an external service and wait for confirmation before applying it. If you're updating a comment, show the relevant diff.
+
     ## Code comments
 
     Add a comment only when one of these applies:

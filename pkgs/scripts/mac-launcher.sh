@@ -1,11 +1,18 @@
 # Change title so yabai can track
 echo -ne "\033]0;launcher\007" >/dev/tty
 
-bookmarks=$(bookmarks "$HOME/Library/Application Support/Firefox/Profiles/home/" &)
-apps=$(mac-apps &)
-azure_resource_types=$(azure-resource-types &)
+catalog_dir=$(mktemp -d)
+trap 'rm -rf "$catalog_dir"' EXIT
+
+bookmarks "$HOME/Library/Application Support/Firefox/Profiles/home/" >"$catalog_dir/bookmarks" &
+mac-apps >"$catalog_dir/apps" &
+azure-resource-types >"$catalog_dir/azure" &
 
 wait
+
+bookmarks=$(<"$catalog_dir/bookmarks")
+apps=$(<"$catalog_dir/apps")
+azure_resource_types=$(<"$catalog_dir/azure")
 
 export bookmarks
 export apps
@@ -100,7 +107,7 @@ handle_selection() {
 options=$(
 	{
 		echo "$apps" |
-			xargs -I {} basename {} |
+			sed 's#/*$##; s#.*/##' |
 			sort -u
 		echo "$bookmarks"
 		echo "$azure_resource_types"

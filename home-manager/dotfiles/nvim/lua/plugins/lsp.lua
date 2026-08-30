@@ -157,6 +157,7 @@ return {
         }
 
         if ls.on_init then config.on_init = ls.on_init end
+        if ls.handlers then config.handlers = ls.handlers end
 
         vim.lsp.config(ls.name, config)
         vim.lsp.enable(ls.name)

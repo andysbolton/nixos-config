@@ -15,7 +15,9 @@ output=$(
 )
 
 # Store in cache
-echo "$output" >"$cache_file"
+if [ -n "$output" ]; then
+	echo "$output" >"$cache_file"
+fi
 
 # Output the result
 echo "$output"

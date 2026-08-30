@@ -2,6 +2,7 @@
   lib,
   stdenv,
   writeShellApplication,
+  azureCli ? null,
   bat,
   claude-code,
   coreutils,
@@ -11,7 +12,6 @@
   gawk,
   jira-cli-go,
   jq,
-  perl,
   python3,
   sqlite,
   wl-clipboard,
@@ -33,14 +33,15 @@ let
 
   # Consumed by the launchers, never invoked directly.
   catalogs = {
-    azure-resource-types = mkScript "azure-resource-types" [
-      coreutils
-      jq
-    ];
+    azure-resource-types = mkScript "azure-resource-types" (
+      [
+        coreutils
+        jq
+      ]
+      ++ lib.optional (azureCli != null) azureCli
+    );
     bookmarks = mkScript "bookmarks" [
       coreutils
-      gawk
-      perl
       sqlite
     ];
     mac-apps = mkScript "mac-apps" [
