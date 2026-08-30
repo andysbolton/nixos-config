@@ -122,14 +122,14 @@
   riverctl border-width 3
   riverctl set-repeat 50 300
 
-  riverctl rule-add -app-id 'float*' -title 'foo' float
-  riverctl rule-add -app-id "bar" csd
-
   # Firefox draws CSD by default; force SSD so river draws its border.
   riverctl rule-add -app-id "firefox" ssd
 
   riverctl rule-add -app-id "nixpkgs-search" float
   riverctl rule-add -app-id "nixpkgs-search" dimensions 1280 800
+
+  riverctl rule-add -app-id "nixos-launcher" float
+  riverctl rule-add -app-id "nixos-launcher" dimensions 1280 800
 
   riverctl default-layout "$layout_generator"
   $layout_cmd -view-padding 18 -outer-padding 18 &

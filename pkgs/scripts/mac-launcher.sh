@@ -2,7 +2,7 @@
 echo -ne "\033]0;launcher\007" >/dev/tty
 
 bookmarks=$(bookmarks "$HOME/Library/Application Support/Firefox/Profiles/home/" &)
-apps=$(apps &)
+apps=$(mac-apps &)
 azure_resource_types=$(azure-resource-types &)
 
 wait
