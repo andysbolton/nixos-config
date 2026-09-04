@@ -123,7 +123,6 @@ end)
 config.leader = { key = " ", mods = "CMD" }
 config.keys = {
 	{ key = "F", mods = "CTRL|SHIFT", action = act.Search("CurrentSelectionOrEmptyString") },
-	{ key = "X", mods = "CTRL|SHIFT", action = act.ActivateCopyMode },
 	{ key = "8", mods = "CTRL", action = act.PaneSelect },
 	{
 		key = "h",
@@ -195,5 +194,34 @@ config.keys = {
 		action = wezterm.action.DisableDefaultAssignment,
 	},
 }
+
+-- the config-file directory is not on package.path, and ~/.wezterm.lua is a
+-- chain of symlinks into the repo (via /nix/store); resolve it fully so
+-- modal.lua can live next to this file
+do
+	local path = wezterm.config_file
+	for _ = 1, 8 do
+		local f = io.popen('readlink "' .. path .. '"')
+		local target = f and f:read("*l")
+		if f then
+			f:close()
+		end
+		if not target or #target == 0 then
+			break
+		end
+		if not target:match("^/") then
+			target = path:gsub("[^/]*$", "") .. target
+		end
+		path = target
+	end
+	local dir = path:gsub("[^/]*$", "")
+	package.path = package.path .. ";" .. dir .. "?.lua"
+	if wezterm.add_to_config_reload_watch_list then
+		wezterm.add_to_config_reload_watch_list(dir .. "modal.lua")
+		wezterm.add_to_config_reload_watch_list(dir .. "motions.lua")
+	end
+end
+
+require("modal").apply_to_config(config)
 
 return config

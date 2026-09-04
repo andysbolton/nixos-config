@@ -1,7 +1,13 @@
-bookmarks=$(bookmarks "$HOME/.mozilla/firefox/home/" &)
-apps=$(nixos-apps &)
+catalog_dir=$(mktemp -d)
+trap 'rm -rf "$catalog_dir"' EXIT
+
+bookmarks "$HOME/.mozilla/firefox/home/" >"$catalog_dir/bookmarks" &
+nixos-apps >"$catalog_dir/apps" &
 
 wait
+
+bookmarks=$(<"$catalog_dir/bookmarks")
+apps=$(<"$catalog_dir/apps")
 
 export bookmarks
 export apps
