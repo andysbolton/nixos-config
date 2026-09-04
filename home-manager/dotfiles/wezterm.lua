@@ -185,6 +185,11 @@ config.keys = {
 		action = wezterm.action.DisableDefaultAssignment,
 	},
 	{
+		key = "N",
+		mods = "CTRL",
+		action = wezterm.action.DisableDefaultAssignment,
+	},
+	{
 		key = "n",
 		mods = "CMD",
 		action = wezterm.action.DisableDefaultAssignment,
