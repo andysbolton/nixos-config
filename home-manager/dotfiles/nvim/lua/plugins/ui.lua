@@ -79,17 +79,7 @@ return {
     -- branch = "buffer-scoped-cursorlines",
     config = function()
       local modes = require "modes"
-      -- Its WinLeave handler strips cursorline from any window it leaves,
-      -- without consulting ignore_filetypes; exempt neo-tree so the tree
-      -- keeps its own cursorline (current-file tracking) when unfocused.
-      -- Must wrap before setup(): the autocmd captures the fn by value.
-      -- local disable_managed_ui = modes.disable_managed_ui
-      -- modes.disable_managed_ui = function(...)
-      --   if vim.bo.filetype == "neo-tree" then return end
-      --   return disable_managed_ui(...)
-      -- end
-      modes.setup {} --{ ignore = { "neo-tree" } }
-      -- modes.setup { ignore = function() return vim.bo.filetype == "neo-tree" end }
+      modes.setup {}
     end,
   },
 
