@@ -187,7 +187,7 @@ in
               --config "window_decorations='RESIZE'" \
               start -- '${scripts.search-nix-pkgs}/bin/search-nix-pkgs' &
 
-            cmd - a : open -na WezTerm -- '${scripts.ask-claude}/bin/ask-claude' &
+            cmd + ctrl - a : open -na WezTerm -- '${scripts.ask-claude}/bin/ask-claude' &
 
             cmd - s : screencapture -ic
 
