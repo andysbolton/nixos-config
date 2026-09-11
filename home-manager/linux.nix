@@ -41,6 +41,7 @@ in
     slskd
     slurp # select region of screen
     sqlite
+    supercollider-with-plugins
     swappy # screenshot annotation tool
     tcpdump
     traceroute

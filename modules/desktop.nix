@@ -16,7 +16,26 @@
   services.pipewire = {
     enable = true;
     pulse.enable = true;
+    jack.enable = true;
   };
+
+  security.rtkit.enable = true;
+
+  # SuperCollider's scsynth requests realtime scheduling directly (not via rtkit).
+  security.pam.loginLimits = [
+    {
+      domain = "@audio";
+      item = "rtprio";
+      type = "-";
+      value = "99";
+    }
+    {
+      domain = "@audio";
+      item = "memlock";
+      type = "-";
+      value = "unlimited";
+    }
+  ];
 
   users.users.andy = {
     isNormalUser = true;
@@ -122,6 +141,7 @@
   users.users.andy.extraGroups = [
     "ssh-keys"
     "1password"
+    "audio"
   ];
   systemd.tmpfiles.rules = [
     "f /etc/ssh/ssh_host_ed25519_key 0640 root ssh-keys -"
