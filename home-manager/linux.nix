@@ -31,12 +31,15 @@ in
     scripts.search-nix-pkgs
   ]
   ++ (with pkgs; [
+    arp-scan
     cliphist
     grim # screenshot tool
     imv # command-line image viewer
+    iw
     killall
     mangohud
     mpv # command-line media player
+    nmap
     reaper
     slskd
     slurp # select region of screen
@@ -44,9 +47,9 @@ in
     supercollider-with-plugins
     swappy # screenshot annotation tool
     tcpdump
+    thunar
     traceroute
     trash-cli
-    thunar
     waypipe
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       SUDO_ASKPASS=${askPass}/bin/ask-pass \

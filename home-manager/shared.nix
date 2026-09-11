@@ -79,6 +79,7 @@ in
     go
     httpie # user-friendly HTTP client
     hwatch
+    iperf
     jo
     jq
     killall

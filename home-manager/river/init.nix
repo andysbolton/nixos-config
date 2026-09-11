@@ -98,12 +98,9 @@
   riverctl map normal Super Down send-layout-cmd "$layout_generator" "main-location bottom"
   riverctl map normal Super Left send-layout-cmd "$layout_generator" "main-location left"
 
-  # Passthrough Mode. Only "enter" is mapped in normal and only "exit" in
-  # passthrough, so once grabbed a bare Super+F11 falls through to the
-  # focused client instead of being caught here — letting a nested guest
-  # running this same config catch it and enter its own passthrough mode.
+  # Passthrough Mode.
   riverctl declare-mode passthrough
-  riverctl map normal      Super       F11 enter-mode passthrough
+  riverctl map normal Super F11 enter-mode passthrough
   riverctl map passthrough Super+Shift F11 enter-mode normal
 
   for mode in normal locked; do
@@ -125,14 +122,14 @@
   riverctl border-width 3
   riverctl set-repeat 50 300
 
-  riverctl rule-add -app-id 'float*' -title 'foo' float
-  riverctl rule-add -app-id "bar" csd
-
   # Firefox draws CSD by default; force SSD so river draws its border.
   riverctl rule-add -app-id "firefox" ssd
 
   riverctl rule-add -app-id "nixpkgs-search" float
   riverctl rule-add -app-id "nixpkgs-search" dimensions 1280 800
+
+  riverctl rule-add -app-id "nixos-launcher" float
+  riverctl rule-add -app-id "nixos-launcher" dimensions 1280 800
 
   riverctl default-layout "$layout_generator"
   $layout_cmd -view-padding 18 -outer-padding 18 &
