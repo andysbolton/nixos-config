@@ -1,4 +1,5 @@
 {
+  config,
   inputs,
   lib,
   pkgs,
@@ -84,6 +85,27 @@ let
     }
   );
 
+  # Both backends park forever after a disconnect: the wayland event queue is
+  # never drained, so the compositor eventually kills the connection and the
+  # task waits on a Reenable that only ever comes from the CLI.
+  linuxWatchdog = lib.getExe (
+    pkgs.writeShellApplication {
+      name = "lan-mouse-watchdog";
+      runtimeInputs = [
+        pkgs.systemd
+        config.programs.lan-mouse.package
+      ];
+      text = ''
+        journalctl --user -u lan-mouse.service -f -n0 -o cat | while read -r line; do
+          case "$line" in
+            *"input emulation exited"*) lan-mouse cli enable-emulation || true ;;
+            *"input capture exited"*) lan-mouse cli enable-capture || true ;;
+          esac
+        done
+      '';
+    }
+  );
+
   topology = {
     main = [
       {
@@ -140,6 +162,20 @@ in
   systemd.user.services.lan-mouse = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     Unit.After = [ "graphical-session.target" ];
     Install.WantedBy = lib.mkForce [ "graphical-session.target" ];
+  };
+
+  systemd.user.services.lan-mouse-watchdog = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
+    Unit = {
+      Description = "Re-enable lan-mouse emulation/capture after a backend disconnect";
+      BindsTo = [ "lan-mouse.service" ];
+      After = [ "lan-mouse.service" ];
+    };
+    Service = {
+      ExecStart = linuxWatchdog;
+      Restart = "always";
+      RestartSec = 5;
+    };
+    Install.WantedBy = [ "lan-mouse.service" ];
   };
 
   launchd.agents.lan-mouse.config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
