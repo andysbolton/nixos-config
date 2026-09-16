@@ -167,7 +167,6 @@ in
   systemd.user.services.lan-mouse-watchdog = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
     Unit = {
       Description = "Re-enable lan-mouse emulation/capture after a backend disconnect";
-      BindsTo = [ "lan-mouse.service" ];
       After = [ "lan-mouse.service" ];
     };
     Service = {
@@ -175,7 +174,7 @@ in
       Restart = "always";
       RestartSec = 5;
     };
-    Install.WantedBy = [ "lan-mouse.service" ];
+    Install.WantedBy = [ "graphical-session.target" ];
   };
 
   launchd.agents.lan-mouse.config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
