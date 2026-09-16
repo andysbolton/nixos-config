@@ -31,10 +31,10 @@
   riverctl map normal Control+Shift+Alt H swap left
   riverctl map normal Control+Shift+Alt L swap right
 
-  riverctl map normal Control Period focus-output next
-  riverctl map normal Control Comma focus-output previous
-  riverctl map normal Control+Shift Period send-to-output next
-  riverctl map normal Control+Shift Comma send-to-output previous
+  # riverctl map normal Control Period focus-output next
+  # riverctl map normal Control Comma focus-output previous
+  # riverctl map normal Control+Shift Period send-to-output next
+  # riverctl map normal Control+Shift Comma send-to-output previous
 
   riverctl map normal Control Return zoom
   riverctl map normal Control+Shift MINUS send-layout-cmd "$layout_generator" "main-ratio -0.05"
