@@ -124,6 +124,7 @@
         ''
         + (
           if pkgs.stdenv.hostPlatform.isDarwin then
+            # bash
             ''
               # env vars sidestep AppleScript string escaping
               MSG="$msg" TITLE="$title" /usr/bin/osascript -e \
@@ -131,18 +132,27 @@
 
               # Mark the session's space in the bar; space.sh un-marks it on
               # focus. The nearest ancestor owning a yabai window is the
-              # session's terminal window.
+              # session's terminal process — but WezTerm is one process for
+              # every window, so prefer the window titled like this pane's
+              # OS window. PATH wezterm, not nix-pinned: the cli must
+              # version-match the running GUI.
               command -v yabai >/dev/null && command -v sketchybar >/dev/null || exit 0
               windows=$(yabai -m query --windows)
+              wt=""
+              [ -n "$WEZTERM_PANE" ] && command -v wezterm >/dev/null && \
+                wt=$(wezterm cli list --format json 2>/dev/null | ${pkgs.jq}/bin/jq -r --argjson p "$WEZTERM_PANE" \
+                  '[.[] | select(.pane_id == $p) | .window_title] | first // empty')
               pid=$$ space=""
               while [ "$pid" -gt 1 ] 2>/dev/null; do
-                space=$(${pkgs.jq}/bin/jq -r --argjson pid "$pid" \
-                  '[.[] | select(.pid == $pid) | .space] | first // empty' <<<"$windows")
+                space=$(${pkgs.jq}/bin/jq -r --argjson pid "$pid" --arg t "$wt" \
+                  '[.[] | select(.pid == $pid)] | ([.[] | select(.title == $t)] + .) | (first | .space) // empty' <<<"$windows")
                 [ -z "$space" ] || break
                 pid=$(ps -o ppid= -p "$pid" | tr -d ' ')
               done
-              focused=$(yabai -m query --spaces --space | ${pkgs.jq}/bin/jq -r .index)
-              if [ -n "$space" ] && [ "$space" != "$focused" ]; then
+              # skip spaces visible on any display; space.sh clears those on
+              # the next space event anyway
+              if [ -n "$space" ] && ! yabai -m query --spaces | ${pkgs.jq}/bin/jq -e --argjson s "$space" \
+                  'any(.[]; ."is-visible" and .index == $s)' >/dev/null; then
                 sketchybar --set "space.$space" icon.color=${osConfig.palette.ORANGE} 2>/dev/null || true
               fi
             ''

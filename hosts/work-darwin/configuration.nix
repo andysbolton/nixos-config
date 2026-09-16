@@ -175,19 +175,19 @@ in
             # # expand window to the right OR shrink from the left
             # alt + shift - l : yabai -m window --resize right:20:0 || yabai -m window --resize left:20:0
 
-            cmd - return : wezterm-gui start --always-new-process &
+            cmd - return : open -na WezTerm &
 
             cmd - t : open -na WezTerm --args \
               --config "enable_tab_bar=false" \
               --config "window_decorations='RESIZE'" \
-              start --always-new-process -- '${scripts.mac-launcher}/bin/mac-launcher' &
+              start -- '${scripts.mac-launcher}/bin/mac-launcher' &
 
             cmd - n : open -na WezTerm --args \
               --config "enable_tab_bar=false" \
               --config "window_decorations='RESIZE'" \
-              start --always-new-process -- '${scripts.search-nix-pkgs}/bin/search-nix-pkgs' &
+              start -- '${scripts.search-nix-pkgs}/bin/search-nix-pkgs' &
 
-            cmd - a : wezterm-gui start --always-new-process -- '${scripts.ask-claude}/bin/ask-claude' &
+            cmd + ctrl - a : open -na WezTerm -- '${scripts.ask-claude}/bin/ask-claude' &
 
             cmd - s : screencapture -ic
 

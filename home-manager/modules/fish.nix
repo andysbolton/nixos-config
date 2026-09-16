@@ -91,6 +91,14 @@ in
         '';
       };
 
+      az-refresh = {
+        body = ''
+          jq '.AccessToken = {}' ~/.azure/msal_token_cache.json > /tmp/msal_token_cache
+          and mv /tmp/msal_token_cache ~/.azure/msal_token_cache.json
+          and az account get-access-token --query expiresOn -o tsv
+        '';
+      };
+
       bat = {
         body = ''
           if command -v batcat
