@@ -10,16 +10,30 @@ let
   downloadPath = "/mnt/media/Seeding";
 in
 {
-  users.groups.media = { };
-  users.groups.unpackerr = { };
-  users.users.andy.extraGroups = [ "media" ];
-  users.users.plex.extraGroups = [ "media" ];
-  users.users.qbittorrent.extraGroups = [ "media" ];
-  users.users.unpackerr = {
-    isSystemUser = true;
-    group = "unpackerr";
-    extraGroups = [ "media" ];
+  users = {
+    groups = {
+      media = { };
+      unpackerr = { };
+    };
+    users = {
+      andy = {
+        extraGroups = [ "media" ];
+      };
+      plex = {
+        extraGroups = [ "media" ];
+      };
+      qbittorrent = {
+        extraGroups = [ "media" ];
+      };
+      unpackerr = {
+        extraGroups = [ "media" ];
+        group = "unpackerr";
+        isSystemUser = true;
+      };
+    };
   };
+
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ qbittorrentWebuiPort ];
 
   services.qbittorrent = {
     enable = true;
@@ -64,13 +78,40 @@ in
       "wg-proton.service"
       "proton-port-forwarding.service"
     ];
-    serviceConfig = {
-      User = "qbittorrent";
-      Group = lib.mkForce "media";
-      NetworkNamespacePath = "/var/run/netns/${netns}";
-      UMask = "0002";
-      BindReadOnlyPaths = [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
-    };
+    serviceConfig =
+      let
+        injectForwardedPort =
+          pkgs.writers.writeBash "inject-forwarded-port"
+            {
+              makeWrapperArgs = [
+                "--prefix"
+                "PATH"
+                ":"
+                "${lib.makeBinPath [ pkgs.busybox ]}"
+              ];
+            }
+            ''
+              port=$(cat /run/proton-forwarded-port)
+              echo "Editing /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf with forwarded port."
+              sed -E -i \
+                -e "s/Session\\\Port=[0-9]*/Session\\\Port=$port/" \
+                -e "s/PortRangeMax=[0-9]*/PortRangeMax=$port/" \
+                -e "s/PortRangeMin=[0-9]*/PortRangeMin=$port/" \
+                /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
+            '';
+      in
+      {
+        User = "qbittorrent";
+        Group = lib.mkForce "media";
+        NetworkNamespacePath = "/var/run/netns/${netns}";
+        UMask = "0002";
+        BindReadOnlyPaths = [ "/etc/netns/${netns}/resolv.conf:/etc/resolv.conf:norbind" ];
+        ExecStartPre = lib.mkIf config.modules.vpn.enable (
+          lib.mkAfter [
+            "${injectForwardedPort}"
+          ]
+        );
+      };
   };
 
   services.plex.enable = true;
@@ -89,9 +130,6 @@ in
     wants = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
 
-    # unitConfig = {
-    #   ConditionDirectoryNotEmpty = requiredPaths;
-    # };
     environment =
       let
         # Global settings
@@ -161,5 +199,34 @@ in
     };
   };
 
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ qbittorrentWebuiPort ];
+  systemd.services."proton-port-forwarding" = lib.mkIf config.modules.vpn.enable {
+    description = "Acquire incoming port from protonvpn natpmp and update qBittorrent.";
+    after = [ "wg-proton.service" ];
+    bindsTo = [ "wg-proton.service" ];
+    partOf = [ "qbittorrent.service" ];
+    serviceConfig = {
+      NetworkNamespacePath = "/var/run/netns/${config.modules.vpn.netns}";
+      User = "root";
+      ExecStartPre = pkgs.writers.writeBash "aquire-and-set-port" ''
+        port=$(
+          (${pkgs.libnatpmp}/bin/natpmpc -a 1 0 udp 60 -g ${config.modules.vpn.dns} && ${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g ${config.modules.vpn.dns}) |
+            ${pkgs.busybox}/bin/grep -E "^Mapped public port ([0-9]+).*" |
+            ${pkgs.busybox}/bin/sed -E "s/^[^0-9]*([0-9]+).+/\1/" |
+            ${pkgs.busybox}/bin/uniq
+        )
+        ${pkgs.busybox}/bin/echo "Acquired port $port, writing to /run/proton-forwarded-port."
+        echo $port > /run/proton-forwarded-port
+      '';
+      ExecStart = pkgs.writers.writeBash "keep-port-open" ''
+        ${pkgs.busybox}/bin/echo "Starting port loop."
+        while true; do
+          (${pkgs.libnatpmp}/bin/natpmpc -a 1 0 udp 60 -g ${config.modules.vpn.dns} && ${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g ${config.modules.vpn.dns}) > /dev/null
+          ${pkgs.busybox}/bin/sleep 45
+        done
+      '';
+      Type = "simple";
+      Restart = "on-failure";
+    };
+
+  };
 }

@@ -7,20 +7,23 @@
 let
   modules = config.modules;
 
-  services = [
-    "prowlarr"
-    "radarr"
-    "sonarr"
-  ];
-
-  arrPorts = {
-    radarr = 7878;
-    sonarr = 8989;
-    prowlarr = 9696;
+  arrs = {
+    bazarr = {
+      port = 6767;
+    };
+    prowlarr = {
+      port = 9696;
+    };
+    radarr = {
+      port = 7878;
+    };
+    sonarr = {
+      port = 8989;
+    };
   };
 
   mkArrConfig =
-    name:
+    name: arrCfg:
     lib.mkIf (modules.vpn.enable && modules.arrs.${name}.enable) {
       services.${name}.enable = true;
       systemd.services.${name} = {
@@ -36,14 +39,18 @@ let
           "netns@${modules.vpn.netns}.service"
           "wg-proton.service"
         ];
-        serviceConfig.NetworkNamespacePath = "/run/netns/${modules.vpn.netns}";
+        serviceConfig = {
+          NetworkNamespacePath = "/run/netns/${modules.vpn.netns}";
+          Group = lib.mkForce "media";
+          UMask = lib.mkForce "0002";
+        };
       };
       users.users = lib.mkIf modules.arrs.${name}.addUserToMediaGroup {
         ${name}.extraGroups = [ "media" ];
       };
 
       systemd.services."${name}-bridge" = {
-        description = "Tailnet bridge for ${name} (port ${toString arrPorts.${name}})";
+        description = "Tailnet bridge for ${name} (port ${toString arrCfg.port})";
         wantedBy = [ "multi-user.target" ];
         after = [
           "wg-proton.service"
@@ -56,19 +63,19 @@ let
         serviceConfig = {
           ExecStart = pkgs.writeShellScript "${name}-bridge" ''
             exec ${pkgs.socat}/bin/socat \
-              TCP6-LISTEN:${toString arrPorts.${name}},fork,reuseaddr,ipv6only=0 \
-              EXEC:"${pkgs.iproute2}/bin/ip netns exec ${modules.vpn.netns} ${pkgs.socat}/bin/socat - TCP\:127.0.0.1\:${toString arrPorts.${name}}"
+              TCP6-LISTEN:${toString arrCfg.port},fork,reuseaddr,ipv6only=0 \
+              EXEC:"${pkgs.iproute2}/bin/ip netns exec ${modules.vpn.netns} ${pkgs.socat}/bin/socat - TCP\:127.0.0.1\:${toString arrCfg.port}"
           '';
           Restart = "on-failure";
           RestartSec = "5s";
         };
       };
 
-      networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ arrPorts.${name} ];
+      networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ arrCfg.port ];
     };
 in
 {
-  options.modules.arrs = lib.genAttrs services (
+  options.modules.arrs = lib.genAttrs (lib.attrNames arrs) (
     name:
     lib.mkOption {
       type = lib.types.submodule {
@@ -85,5 +92,5 @@ in
     }
   );
 
-  config = lib.mkMerge (map mkArrConfig services);
+  config = lib.mkMerge (lib.mapAttrsToList mkArrConfig arrs);
 }
