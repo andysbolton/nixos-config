@@ -84,55 +84,59 @@ in
       export WLR_RENDERER=vulkan
     '';
 
-  programs.rofi = {
-    enable = true;
-    font = lib.mkForce "CaskaydiaCove Nerd Font 14";
-    theme = {
-      "*" = {
-        padding = config.lib.formats.rasi.mkLiteral "3px";
+  programs = {
+    rofi = {
+      enable = true;
+      font = lib.mkForce "CaskaydiaCove Nerd Font 14";
+      theme = {
+        "*" = {
+          padding = config.lib.formats.rasi.mkLiteral "3px";
+        };
+      };
+      extraConfig = {
+        markup-rows = true;
+        kb-cancel = "Escape,Control+c";
+        kb-secondary-copy = "Control+Shift+c";
       };
     };
-    extraConfig = {
-      markup-rows = true;
-      kb-cancel = "Escape,Control+c";
-      kb-secondary-copy = "Control+Shift+c";
+    foot = {
+      enable = true;
+      settings = {
+        main.font = lib.mkForce "CaskaydiaCove Nerd Font:size=14";
+        colors-light.alpha = lib.mkForce "0.95";
+      };
     };
-  };
-
-  programs.foot = {
-    enable = true;
-    settings.main.font = lib.mkForce "CaskaydiaCove Nerd Font:size=14";
-  };
-
-  programs.git = {
-    settings = {
-      user = {
-        email = "andy.s.bolton@gmail.com";
+    git = {
+      settings = {
+        user = {
+          email = "andy.s.bolton@gmail.com";
+        };
       };
     };
   };
 
-  services.swayidle = {
-    enable = true;
-    systemdTargets = [ "graphical-session.target" ];
-    timeouts = [
-      {
-        timeout = 1740;
-        command = "${pkgs.dunst}/bin/dunstify --urgency=normal 'Locking session in 1 minute'";
-      }
-      {
-        timeout = 1800;
-        command = "${pkgs.wlopm}/bin/wlopm --off '*'";
-        resumeCommand = "${pkgs.wlopm}/bin/wlopm --on '*'";
-      }
-    ];
-  };
-
-  services.udiskie = {
-    enable = true;
-    settings = {
-      program_options = {
-        file_manager = "${pkgs.thunar}/bin/thunar";
+  services = {
+    swayidle = {
+      enable = true;
+      systemdTargets = [ "graphical-session.target" ];
+      timeouts = [
+        {
+          timeout = 1740;
+          command = "${pkgs.dunst}/bin/dunstify --urgency=normal 'Locking session in 1 minute'";
+        }
+        {
+          timeout = 1800;
+          command = "${pkgs.wlopm}/bin/wlopm --off '*'";
+          resumeCommand = "${pkgs.wlopm}/bin/wlopm --on '*'";
+        }
+      ];
+    };
+    udiskie = {
+      enable = true;
+      settings = {
+        program_options = {
+          file_manager = "${pkgs.thunar}/bin/thunar";
+        };
       };
     };
   };

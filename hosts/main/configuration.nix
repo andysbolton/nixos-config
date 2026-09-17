@@ -86,28 +86,20 @@
     ))
   ];
 
-  # Revisit, this may all be set by programs.river.enable = true;
-  # xdg.portal = {
-  #   enable = true;
-  #   wlr.enable = true;
-  #   configPackages =
-  #     [ pkgs.xdg-desktop-portal-wlr pkgs.xdg-desktop-portal-gtk ];
-  # };
-
   modules.arrs = {
-    radarr.enable = true;
-    sonarr.enable = true;
+    bazarr.enable = true;
     prowlarr = {
       enable = true;
       addUserToMediaGroup = false;
     };
+    radarr.enable = true;
+    sonarr.enable = true;
   };
 
   modules.monitoring.enable = true;
 
   modules.vpn = {
     enable = true;
-    portForwarding.enable = true;
     dns = "10.2.0.1";
     ip = "10.2.0.2/32";
     netns = "vpn";

@@ -29,8 +29,6 @@
       description = "Name of the network namespace to use with the VPN.";
     };
 
-    portForwarding.enable = lib.mkEnableOption "the ProtonVPN NAT-PMP port forwarding loop for qBittorrent.";
-
     wgConfPath = lib.mkOption {
       type = lib.types.path;
       description = "Path to the WireGuard configuration file.";
@@ -109,41 +107,6 @@
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link del wg0 2>/dev/null || true
             ${iproute2}/bin/ip link del wg0 2>/dev/null || true
           '';
-      };
-    };
-
-    systemd.services."proton-port-forwarding" = lib.mkIf config.modules.vpn.portForwarding.enable {
-      description = "Acquire incoming port from protonvpn natpmp and update qBittorrent.";
-      after = [ "wg-proton.service" ];
-      bindsTo = [ "wg-proton.service" ];
-      partOf = [ "qbittorrent.service" ];
-      serviceConfig = {
-        NetworkNamespacePath = "/var/run/netns/${config.modules.vpn.netns}";
-        User = "root";
-        ExecStartPre = pkgs.writers.writeBash "aquire-and-set-port" ''
-          port=$(
-            (${pkgs.libnatpmp}/bin/natpmpc -a 1 0 udp 60 -g ${config.modules.vpn.dns} && ${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g ${config.modules.vpn.dns}) |
-              ${pkgs.busybox}/bin/grep -E "^Mapped public port ([0-9]+).*" |
-              ${pkgs.busybox}/bin/sed -E "s/^[^0-9]*([0-9]+).+/\1/" |
-              ${pkgs.busybox}/bin/uniq
-          )
-          ${pkgs.busybox}/bin/echo "Acquired port $port."
-          ${pkgs.busybox}/bin/echo "Editing /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf with forwarded port."
-          ${pkgs.busybox}/bin/sed -E -i \
-            -e "s/Session\\\Port=[0-9]*/Session\\\Port=$port/" \
-            -e "s/PortRangeMax=[0-9]*/PortRangeMax=$port/" \
-            -e "s/PortRangeMin=[0-9]*/PortRangeMin=$port/" \
-            /var/lib/qBittorrent/qBittorrent/config/qBittorrent.conf
-        '';
-        ExecStart = pkgs.writers.writeBash "keep-port-open" ''
-          ${pkgs.busybox}/bin/echo "Starting port loop."
-          while true; do
-            (${pkgs.libnatpmp}/bin/natpmpc -a 1 0 udp 60 -g ${config.modules.vpn.dns} && ${pkgs.libnatpmp}/bin/natpmpc -a 1 0 tcp 60 -g ${config.modules.vpn.dns}) > /dev/null
-            ${pkgs.busybox}/bin/sleep 45
-          done
-        '';
-        Type = "simple";
-        Restart = "on-failure";
       };
     };
 
