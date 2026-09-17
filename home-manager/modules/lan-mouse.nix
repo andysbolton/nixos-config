@@ -170,10 +170,10 @@ in
   };
 
   systemd.user.services.lan-mouse-watchdog = lib.mkIf pkgs.stdenv.hostPlatform.isLinux {
-    Unit = {
-      Description = "Re-enable lan-mouse emulation/capture after a backend disconnect";
-      After = [ "lan-mouse.service" ];
-    };
+    # No After=lan-mouse.service: that closes an ordering cycle through
+    # graphical-session.target and systemd drops lan-mouse's start job. The
+    # journalctl follower matches by unit name, so ordering is not needed.
+    Unit.Description = "Re-enable lan-mouse emulation/capture after a backend disconnect";
     Service = {
       ExecStart = linuxWatchdog;
       Restart = "always";

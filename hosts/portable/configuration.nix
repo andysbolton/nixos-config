@@ -24,7 +24,10 @@
   users.users.andy.extraGroups = [
     "wheel"
     "wpa_supplicant"
+    "ydotool"
   ];
+
+  programs.ydotool.enable = true;
 
   modules.wireless = {
     enable = true;
