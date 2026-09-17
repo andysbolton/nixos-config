@@ -1,5 +1,4 @@
 {
-  config,
   inputs,
   lib,
   pkgs,
@@ -88,18 +87,24 @@ let
   # Both backends park forever after a disconnect: the wayland event queue is
   # never drained, so the compositor eventually kills the connection and the
   # task waits on a Reenable that only ever comes from the CLI.
+  #
+  # Restart rather than `lan-mouse cli enable-{emulation,capture}`: re-enabling
+  # one backend leaves it desynced from the other, which strands the cursor at
+  # the barrier with both hosts claiming it.
   linuxWatchdog = lib.getExe (
     pkgs.writeShellApplication {
       name = "lan-mouse-watchdog";
-      runtimeInputs = [
-        pkgs.systemd
-        config.programs.lan-mouse.package
-      ];
+      runtimeInputs = [ pkgs.systemd ];
       text = ''
+        last=0
         journalctl --user -u lan-mouse.service -f -n0 -o cat | while read -r line; do
           case "$line" in
-            *"input emulation exited"*) lan-mouse cli enable-emulation || true ;;
-            *"input capture exited"*) lan-mouse cli enable-capture || true ;;
+            *"input emulation exited"* | *"input capture exited"*)
+              # Debounce, so a backend that fails on startup cannot loop.
+              if [ $((EPOCHSECONDS - last)) -lt 60 ]; then continue; fi
+              last=$EPOCHSECONDS
+              systemctl --user restart lan-mouse.service
+              ;;
           esac
         done
       '';
