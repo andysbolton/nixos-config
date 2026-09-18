@@ -64,25 +64,22 @@ return {
       }
     end,
   },
-
   {
     "folke/tokyonight.nvim",
     lazy = false,
     priority = 1000,
     config = function() vim.cmd [[colorscheme tokyonight-storm]] end,
   },
-
   {
-    "modes.nvim",
+    "andysbolton/modes.nvim",
     event = "VeryLazy",
-    dir = "/home/andy/code/modes.nvim",
-    -- branch = "buffer-scoped-cursorlines",
+    -- dir = "/home/andy/code/modes.nvim",
+    branch = "window-scoped-cursorline",
     config = function()
       local modes = require "modes"
       modes.setup {}
     end,
   },
-
   {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
@@ -105,7 +102,6 @@ return {
       }
     end,
   },
-
   {
     -- Add indentation guides even on blank lines
     "lukas-reineke/indent-blankline.nvim",
@@ -115,7 +111,6 @@ return {
       indent = { char = "┊" },
     },
   },
-
   {
     "goolord/alpha-nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
@@ -125,7 +120,6 @@ return {
       require("alpha").setup(startify.config)
     end,
   },
-
   {
     "rcarriga/nvim-notify",
     event = "VeryLazy",
@@ -146,7 +140,6 @@ return {
       vim.notify = require "notify"
     end,
   },
-
   {
     "mrjones2014/smart-splits.nvim",
     keys = {

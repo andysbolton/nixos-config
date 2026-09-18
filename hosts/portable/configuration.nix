@@ -69,6 +69,9 @@
       {
         ssid = "Unitedwifi.com";
       }
+      {
+        ssid = "Amtrak_WiFi";
+      }
     ];
   };
 

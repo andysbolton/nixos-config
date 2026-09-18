@@ -395,6 +395,8 @@ in
 
       gp = "git pull";
       mm = "git checkout main && gp && git checkout - && git merge main";
+
+      docker = "podman";
     };
 
     shellAbbrs =
