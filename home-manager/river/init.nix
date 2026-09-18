@@ -131,6 +131,9 @@
   riverctl rule-add -app-id "nixos-launcher" float
   riverctl rule-add -app-id "nixos-launcher" dimensions 1280 800
 
+  # lxqt-policykit-agent sets no app-id, so the title is the only handle.
+  riverctl rule-add -title "Authentication Required" float
+
   riverctl default-layout "$layout_generator"
   $layout_cmd -view-padding 18 -outer-padding 18 &
 

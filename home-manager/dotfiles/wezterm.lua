@@ -193,6 +193,11 @@ config.keys = {
 		mods = "CMD",
 		action = wezterm.action.DisableDefaultAssignment,
 	},
+	{
+		key = "n",
+		mods = "CMD",
+		action = wezterm.action.DisableDefaultAssignment,
+	},
 }
 
 -- the config-file directory is not on package.path, and ~/.wezterm.lua is a

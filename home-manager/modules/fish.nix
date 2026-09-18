@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   osConfig,
   ...
@@ -65,6 +64,14 @@ in
     ];
 
     functions = {
+      fish_user_key_bindings = {
+        body = ''
+          set -g fish_sequence_key_delay_ms 200
+
+          bind -M insert -m default j,k cancel repaint-mode
+        '';
+      };
+
       add = {
         argumentNames = [ "message" ];
         body = ''
