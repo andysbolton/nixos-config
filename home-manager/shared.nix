@@ -104,6 +104,7 @@ in
     rlwrap # readline wrapper for interactive programs
     roswell # Common Lisp environment manager
     rsync
+    ruby
     sd # sed replacement
     sops # secrets editor/manager
     starship # cross-shell prompt

@@ -41,6 +41,7 @@ in
 
       # Key bindings
       bind \cS 'history-pager'
+      bind -M insert \cF forward-token
 
       # Initialize login shell
       if status is-login
@@ -54,6 +55,8 @@ in
 
       starship init fish | source
       enable_transience
+
+      fzf_configure_bindings --history=ctrl-r,r
     '';
 
     plugins = [

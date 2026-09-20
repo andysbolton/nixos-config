@@ -23,6 +23,7 @@ disabled = false
 [os.symbols]
 Linux = ""
 Macos = ""
+NixOS = "❄ "
 
 [shell]
 fish_indicator = '><>'

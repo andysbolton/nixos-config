@@ -69,6 +69,8 @@
   environment.systemPackages = with pkgs; [
     brightnessctl
     lxqt.lxqt-policykit
+    man-pages
+    man-pages-posix
     pavucontrol
     swaylock
     wl-clipboard
@@ -175,4 +177,9 @@
     enable = true;
   };
 
+  documentation = {
+    enable = true;
+    man.enable = true;
+    dev.enable = true;
+  };
 }

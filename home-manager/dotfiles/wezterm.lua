@@ -9,6 +9,7 @@ if wezterm.config_builder then
 end
 
 config.term = "xterm-256color"
+config.unicode_version = 14
 config.adjust_window_size_when_changing_font_size = false
 -- config.enable_wayland = true
 
