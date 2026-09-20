@@ -45,6 +45,7 @@ let
           UMask = lib.mkForce "0002";
         };
       };
+
       users.users = lib.mkIf modules.arrs.${name}.addUserToMediaGroup {
         ${name}.extraGroups = [ "media" ];
       };
