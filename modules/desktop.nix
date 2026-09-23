@@ -85,7 +85,6 @@
     nerd-fonts.caskaydia-cove
     nerd-fonts.symbols-only
     noto-fonts-color-emoji
-    last-resort
   ];
 
   services.gnome.gnome-keyring.enable = true;
@@ -108,12 +107,12 @@
     enable = true;
     settings = {
       initial_session = {
-        command = "uwsm start river-uwsm.desktop";
+        command = "uwsm start river.desktop";
         user = "andy";
       };
       default_session = {
         command = ''
-          ${pkgs.tuigreet}/bin/tuigreet --time --cmd "uwsm start river-uwsm.desktop"
+          ${pkgs.tuigreet}/bin/tuigreet --time --cmd "uwsm start river.desktop"
         '';
         user = "greeter";
       };

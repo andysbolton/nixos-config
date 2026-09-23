@@ -10,6 +10,7 @@
   riverctl map normal Super N spawn "uwsm app -- ${pkgs.foot}/bin/foot --app-id=nixpkgs-search ${scripts.search-nix-pkgs}/bin/search-nix-pkgs"
   riverctl map normal Super T spawn "uwsm app -- ${pkgs.foot}/bin/foot --app-id=nixos-launcher ${scripts.nixos-launcher}/bin/nixos-launcher"
   riverctl map normal Super S spawn "uwsm app -- ${pkgs.grim}/bin/grim -g \"\$(${pkgs.slurp}/bin/slurp)\" - | ${pkgs.wl-clipboard}/bin/wl-copy"
+  riverctl map normal Super P spawn "uwsm app -- 1password --quick-access"
 
   riverctl map normal Super Q close
   riverctl map normal Control+Shift+Super Q spawn "uwsm stop"
@@ -81,8 +82,6 @@
   riverctl map normal Super G set-focused-tags $games_tag
 
   pass_tag=$((1 << 6))
-  riverctl rule-add -app-id "1password" tags $pass_tag
-  riverctl map normal Super G set-focused-tags $pass_tag
 
   # All tags/Global
   all_tags=$(((1 << 9) - 1))
@@ -131,6 +130,8 @@
   riverctl rule-add -app-id "nixos-launcher" float
   riverctl rule-add -app-id "nixos-launcher" dimensions 1280 800
 
+  riverctl rule-add -app-id "1password" -title "Quick Access - 1Password"
+
   # lxqt-policykit-agent sets no app-id, so the title is the only handle.
   riverctl rule-add -title "Authentication Required" float
 
@@ -145,7 +146,17 @@
   uwsm app -- ${pkgs.blueman}/bin/blueman-applet &
   uwsm app -- ${pkgs.blueman}/bin/blueman-manager &
   uwsm app -- vesktop.desktop &
-  uwsm app -- 1password &
+  # Quick Access shares 1password's app-id and its map-time title, so the tag rule
+  # only lives long enough to catch the main window.
+  (
+    riverctl rule-add -app-id "1password" tags $pass_tag
+    uwsm app -- 1password &
+    for _ in $(seq 1 100); do
+      ${pkgs.lswt}/bin/lswt | grep -q '^1password' && break
+      sleep 0.2
+    done
+    riverctl rule-del -app-id "1password" tags
+  ) &
   uwsm app -- steam -silent &
   uwsm app -- lxqt-policykit-agent &
 

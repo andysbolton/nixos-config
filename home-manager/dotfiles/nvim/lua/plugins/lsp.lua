@@ -165,7 +165,14 @@ return {
 
       vim.lsp.config("*", {
         capabilities = capabilities,
-        on_attach = on_attach,
+      })
+
+      -- Not `on_attach` in the "*" config: a server's own lsp/<name>.lua on the
+      -- runtimepath replaces that key outright.
+      vim.api.nvim_create_autocmd("LspAttach", {
+        callback = function(args)
+          on_attach(assert(vim.lsp.get_client_by_id(args.data.client_id)), args.buf)
+        end,
       })
 
       require("lspkind").init {

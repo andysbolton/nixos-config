@@ -56,7 +56,7 @@ in
       starship init fish | source
       enable_transience
 
-      fzf_configure_bindings --history=ctrl-r,r
+      fzf_configure_bindings --history=ctrl-r,ctrl-r
     '';
 
     plugins = [

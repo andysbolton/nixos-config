@@ -134,6 +134,7 @@ in
         tree-sitter
 
         # Language servers
+        basedpyright
         bash-language-server # bashls
         clang-tools # clangd (also provides clang-format)
         clojure-lsp
@@ -147,14 +148,12 @@ in
         marksman
         nixd
         omnisharp-roslyn # omnisharp
-        pyright
         svelte-language-server
         terraform-ls # terraformls
         typescript # tsserver, required by ts_ls
         typescript-language-server # ts_ls
         vscode-langservers-extracted # cssls, html, jsonls
         yaml-language-server # yamlls
-
         # Formatters
         black
         csharpier
