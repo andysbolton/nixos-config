@@ -111,6 +111,29 @@
         claude-code.overlays.default
       ];
 
+      # macOS 27 offsets + scripting-addition load fix; drop once upstream lands them.
+      unstableOverlays = [
+        (final: prev: {
+          yabai = prev.yabai.overrideAttrs (old: {
+            version = "7.1.26";
+            src = prev.fetchFromGitHub {
+              owner = "VenusCrazy";
+              repo = "yabai";
+              rev = "21a461726cfa84052cae48165f1a46c3b70839fa";
+              hash = "sha256-mr84vr7yXrZe4UBUayaXwmdlozREpmsDWeOmLEz2dPQ=";
+            };
+            patches = (old.patches or [ ]) ++ [ ./pkgs/yabai-osax-seal-order.patch ];
+
+            # macOS 27 dyld refuses to dlopen a Mach-O without LC_UUID, which
+            # nixpkgs strips for reproducibility; the scripting addition is
+            # dlopen'd into Dock, so it must keep its UUID.
+            postPatch = (old.postPatch or "") + ''
+              substituteInPlace makefile --replace-fail " -Wl,-no_uuid" ""
+            '';
+          });
+        })
+      ];
+
       isDarwin = system: nixpkgs.lib.hasSuffix "-darwin" system;
 
       mkPkgs =
@@ -124,6 +147,7 @@
         system:
         import (if isDarwin system then nixpkgs-unstable-darwin else nixpkgs-unstable) {
           inherit system;
+          overlays = unstableOverlays;
           config.allowUnfree = true;
         };
 
