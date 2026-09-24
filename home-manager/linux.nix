@@ -37,7 +37,9 @@ in
     imv # command-line image viewer
     iw
     killall
+    lswt # list Wayland toplevels
     mangohud
+    moar # pager
     mpv # command-line media player
     nmap
     reaper
