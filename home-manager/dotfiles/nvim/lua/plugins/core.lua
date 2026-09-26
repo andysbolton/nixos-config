@@ -21,6 +21,7 @@ return {
   -- Detect tabstop and shiftwidth automatically
   "tpope/vim-sleuth",
   "romainl/vim-cool",
+  "pteroctopus/faster.nvim",
   {
     "rmagatti/auto-session",
     priority = 100,
