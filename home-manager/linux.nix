@@ -66,6 +66,7 @@ in
   ]);
 
   home.sessionVariables = {
+    PODMAN_COMPOSE_WARNING_LOGS = "false";
     SOPS_AGE_SSH_PRIVATE_KEY_FILE = "/etc/ssh/ssh_host_ed25519_key";
   };
 

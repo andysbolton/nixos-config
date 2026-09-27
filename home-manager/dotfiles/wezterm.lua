@@ -121,7 +121,7 @@ wezterm.on("format-tab-title", function(tab, tabs)
 	end
 end)
 
-config.leader = { key = " ", mods = "CMD" }
+config.leader = { key = " ", mods = "ALT" }
 config.keys = {
 	{ key = "F", mods = "CTRL|SHIFT", action = act.Search("CurrentSelectionOrEmptyString") },
 	{ key = "8", mods = "CTRL", action = act.PaneSelect },
