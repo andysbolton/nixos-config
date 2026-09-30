@@ -174,6 +174,7 @@
 
   virtualisation.podman = {
     enable = true;
+    dockerCompat = true;
   };
 
   documentation = {
