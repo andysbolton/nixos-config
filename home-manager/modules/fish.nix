@@ -283,7 +283,7 @@ in
             set snapshot "$XDG_CACHE_HOME/nixpkgs-snapshot"
 
             # refresh the dump only when nixpkgs changed (flake.lock newer than the dump)
-            if test $flake -nt $snapshot
+            if test $flake -nt $snapshot; or not test -e $snapshot
                 echo "$flake newer than $snapshot; refreshing snapshot."
                 set tmp (mktemp)
                 nix search nixpkgs '^' --json | jq -rj '
