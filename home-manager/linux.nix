@@ -42,7 +42,9 @@ in
     moar # pager
     mpv # command-line media player
     nmap
+    pinta # image editor
     reaper
+    shotwell # image viewer
     slskd
     slurp # select region of screen
     sqlite
