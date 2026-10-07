@@ -28,3 +28,4 @@
                                   #(vim.cmd (.. "!rm "
                                                 (vim.lsp.log.get_filename)))
                                   {:desc "Clear LSP logfile."})
+

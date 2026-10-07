@@ -9,6 +9,7 @@ if wezterm.config_builder then
 end
 
 config.term = "xterm-256color"
+config.unicode_version = 14
 config.adjust_window_size_when_changing_font_size = false
 -- config.enable_wayland = true
 
@@ -120,7 +121,7 @@ wezterm.on("format-tab-title", function(tab, tabs)
 	end
 end)
 
-config.leader = { key = " ", mods = "CMD" }
+config.leader = { key = " ", mods = "ALT" }
 config.keys = {
 	{ key = "F", mods = "CTRL|SHIFT", action = act.Search("CurrentSelectionOrEmptyString") },
 	{ key = "8", mods = "CTRL", action = act.PaneSelect },
@@ -186,6 +187,11 @@ config.keys = {
 	{
 		key = "N",
 		mods = "CTRL",
+		action = wezterm.action.DisableDefaultAssignment,
+	},
+	{
+		key = "n",
+		mods = "CMD",
 		action = wezterm.action.DisableDefaultAssignment,
 	},
 	{

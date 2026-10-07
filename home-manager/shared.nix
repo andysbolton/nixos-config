@@ -104,6 +104,7 @@ in
     rlwrap # readline wrapper for interactive programs
     roswell # Common Lisp environment manager
     rsync
+    ruby
     sd # sed replacement
     sops # secrets editor/manager
     starship # cross-shell prompt
@@ -115,188 +116,187 @@ in
     wezterm
     wget
     whois
-    zoxide # smarter cd command
   ];
 
-  programs.neovim = {
-    enable = true;
-    sideloadInitLua = true;
-    withRuby = false;
-    withPython3 = false;
-    # All language servers, formatters, linters and debug adapters are
-    # managed here via nix (previously a mix of nix and mason.nvim).
-    extraPackages = with pkgs; [
-      # Runtimes / build tooling needed by various servers & plugins
-      cargo
-      luaPackages.luarocks
-      nodejs_24
-      tree-sitter
+  programs = {
+    neovim = {
+      enable = true;
+      sideloadInitLua = true;
+      withRuby = false;
+      withPython3 = false;
+      # All language servers, formatters, linters and debug adapters are
+      # managed here via nix (previously a mix of nix and mason.nvim).
+      extraPackages = with pkgs; [
+        # Runtimes / build tooling needed by various servers & plugins
+        cargo
+        luaPackages.luarocks
+        nodejs_24
+        tree-sitter
 
-      # Language servers
-      bash-language-server # bashls
-      clang-tools # clangd (also provides clang-format)
-      clojure-lsp
-      dockerfile-language-server # dockerls (docker-langserver)
-      fennel-ls # fennel_ls
-      fish-lsp
-      fsautocomplete
-      gopls
-      jq-lsp # jqls
-      lua-language-server # lua_ls
-      marksman
-      nixd
-      omnisharp-roslyn # omnisharp
-      pyright
-      svelte-language-server
-      terraform-ls # terraformls
-      typescript # tsserver, required by ts_ls
-      typescript-language-server # ts_ls
-      vscode-langservers-extracted # cssls, html, jsonls
-      yaml-language-server # yamlls
+        # Language servers
+        basedpyright
+        bash-language-server # bashls
+        clang-tools # clangd (also provides clang-format)
+        clojure-lsp
+        dockerfile-language-server # dockerls (docker-langserver)
+        fennel-ls # fennel_ls
+        fish-lsp
+        fsautocomplete
+        gopls
+        jq-lsp # jqls
+        lua-language-server # lua_ls
+        marksman
+        nixd
+        omnisharp-roslyn # omnisharp
+        svelte-language-server
+        terraform-ls # terraformls
+        typescript # tsserver, required by ts_ls
+        typescript-language-server # ts_ls
+        vscode-langservers-extracted # cssls, html, jsonls
+        yaml-language-server # yamlls
+        # Formatters
+        black
+        csharpier
+        fantomas
+        fixjson
+        fnlfmt
+        gofumpt
+        nixfmt
+        prettierd
+        shfmt
+        stylua
+        zprint
 
-      # Formatters
-      black
-      csharpier
-      fantomas
-      fixjson
-      fnlfmt
-      gofumpt
-      nixfmt
-      prettierd
-      shfmt
-      stylua
-      zprint
+        # Linters
+        cpplint
+        markdownlint-cli # markdownlint
+        shellcheck
 
-      # Linters
-      cpplint
-      markdownlint-cli # markdownlint
-      shellcheck
+        # Debug adapters
+        delve # dlv, used by nvim-dap-go
+      ];
+    };
+    btop.enable = true;
+    fish.enable = true;
+    tmux = {
+      enable = true;
+      keyMode = "vi";
+      terminal = "tmux-256color";
+      plugins = [ pkgs.tmuxPlugins.yank ];
+      extraConfig = ''
+        set -as terminal-features ",*:RGB"
+        set -g copy-mode-match-style 'bg=yellow,fg=black'
+        set -g copy-mode-current-match-style 'bg=red,fg=white'
 
-      # Debug adapters
-      delve # dlv, used by nvim-dap-go
-    ];
-  };
-
-  programs.btop.enable = true;
-  programs.fish.enable = true;
-
-  programs.tmux = {
-    enable = true;
-    keyMode = "vi";
-    terminal = "tmux-256color";
-    plugins = [ pkgs.tmuxPlugins.yank ];
-    extraConfig = ''
-      set -as terminal-features ",*:RGB"
-      set -g copy-mode-match-style 'bg=yellow,fg=black'
-      set -g copy-mode-current-match-style 'bg=red,fg=white'
-
-      set -g set-clipboard on
-      bind -T copy-mode-vi v send -X begin-selection
-      bind -T copy-mode-vi C-v send -X rectangle-toggle
-    '';
-  };
-
-  programs.git = {
-    enable = true;
-    settings = {
-      user = {
-        name = "Andy Bolton";
-      };
-      core = {
-        editor = "nvim";
-        longpaths = true;
-        pager = "delta";
-      };
-      interactive = {
-        diffFilter = "delta --color-only";
-      };
-      delta = {
-        navigate = true;
-        light = false;
-        line-numbers = true;
-      };
-      push = {
-        autoSetupRemote = true;
-      };
-      mergetool = {
-        keepBackup = false;
-      };
-      pull = {
-        rebase = false;
+        set -g set-clipboard on
+        bind -T copy-mode-vi v send -X begin-selection
+        bind -T copy-mode-vi C-v send -X rectangle-toggle
+      '';
+    };
+    git = {
+      enable = true;
+      settings = {
+        user = {
+          name = "Andy Bolton";
+        };
+        core = {
+          editor = "nvim";
+          longpaths = true;
+          pager = "delta";
+        };
+        interactive = {
+          diffFilter = "delta --color-only";
+        };
+        delta = {
+          navigate = true;
+          light = false;
+          line-numbers = true;
+        };
+        push = {
+          autoSetupRemote = true;
+        };
+        mergetool = {
+          keepBackup = false;
+        };
+        pull = {
+          rebase = false;
+        };
       };
     };
-  };
+    ssh = {
+      enable = true;
+      enableDefaultConfig = false;
+      extraConfig = ''
+        Include ~/.ssh/config.local
+        ServerAliveInterval 15
+        ServerAliveCountMax 4
+        TCPKeepAlive yes
+      '';
+      settings = {
+        "*" = { };
+        main = {
+          hostname = "main.tail4b1b78.ts.net";
+          user = "andy";
+          identityfile = "~/.ssh/id_ed25519";
+        };
+        portable = {
+          hostname = "portable.tail4b1b78.ts.net";
+          user = "andy";
+          identityfile = "~/.ssh/id_ed25519";
+        };
+        work = {
+          hostname = "work.tail4b1b78.ts.net";
+          user = "andybolton";
+          identityfile = "~/.ssh/id_ed25519";
+        };
+        jetkvm = {
+          hostname = "jetkvm.tail4b1b78.ts.net";
+          user = "root";
+          identityfile = "~/.ssh/id_ed25519";
+        };
 
-  programs.ssh = {
-    enable = true;
-    enableDefaultConfig = false;
-    extraConfig = ''
-      Include ~/.ssh/config.local
-      ServerAliveInterval 15
-      ServerAliveCountMax 4
-      TCPKeepAlive yes
-    '';
-    settings = {
-      "*" = { };
-      main = {
-        hostname = "main.tail4b1b78.ts.net";
-        user = "andy";
-        identityfile = "~/.ssh/id_ed25519";
       };
-      portable = {
-        hostname = "portable.tail4b1b78.ts.net";
-        user = "andy";
-        identityfile = "~/.ssh/id_ed25519";
-      };
-      work = {
-        hostname = "work.tail4b1b78.ts.net";
-        user = "andybolton";
-        identityfile = "~/.ssh/id_ed25519";
-      };
-      jetkvm = {
-        hostname = "jetkvm.tail4b1b78.ts.net";
-        user = "root";
-        identityfile = "~/.ssh/id_ed25519";
-      };
-
     };
-  };
-
-  programs.onepassword-secrets = {
-    enable = true;
-    tokenFile = "${config.home.homeDirectory}/.config/opnix/token";
-    service.enable = true;
-    secrets = {
-      ageKey = {
-        reference = "op://nix/age-secret-key/password";
-        path = ".config/sops/age/keys.txt";
-        mode = "0600";
+    onepassword-secrets = {
+      enable = true;
+      tokenFile = "${config.home.homeDirectory}/.config/opnix/token";
+      service.enable = true;
+      secrets = {
+        ageKey = {
+          reference = "op://nix/age-secret-key/password";
+          path = ".config/sops/age/keys.txt";
+          mode = "0600";
+        };
+        sshRsa = {
+          reference = "op://nix/andy-ssh-rsa/private key";
+          path = ".ssh/id_rsa";
+          mode = "0600";
+        };
+        sshRsaPub = {
+          reference = "op://nix/andy-ssh-rsa/public key";
+          path = ".ssh/id_rsa.pub";
+          mode = "0600";
+        };
+        sshEd25519 = {
+          reference = "op://nix/andy-ssh-ed25519/private key?ssh-format=openssh";
+          path = ".ssh/id_ed25519";
+          mode = "0600";
+        };
+        sshEd25519Pub = {
+          reference = "op://nix/andy-ssh-ed25519/public key";
+          path = ".ssh/id_ed25519.pub";
+          mode = "0600";
+        };
+        sshConfig = {
+          reference = "op://nix/SSH Config/notesPlain";
+          path = ".ssh/config.local";
+          mode = "0600";
+        };
       };
-      sshRsa = {
-        reference = "op://nix/andy-ssh-rsa/private key";
-        path = ".ssh/id_rsa";
-        mode = "0600";
-      };
-      sshRsaPub = {
-        reference = "op://nix/andy-ssh-rsa/public key";
-        path = ".ssh/id_rsa.pub";
-        mode = "0600";
-      };
-      sshEd25519 = {
-        reference = "op://nix/andy-ssh-ed25519/private key?ssh-format=openssh";
-        path = ".ssh/id_ed25519";
-        mode = "0600";
-      };
-      sshEd25519Pub = {
-        reference = "op://nix/andy-ssh-ed25519/public key";
-        path = ".ssh/id_ed25519.pub";
-        mode = "0600";
-      };
-      sshConfig = {
-        reference = "op://nix/SSH Config/notesPlain";
-        path = ".ssh/config.local";
-        mode = "0600";
-      };
+    };
+    zoxide = {
+      enable = true;
+      enableFishIntegration = true;
     };
   };
 

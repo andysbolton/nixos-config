@@ -37,10 +37,14 @@ in
     imv # command-line image viewer
     iw
     killall
+    lswt # list Wayland toplevels
     mangohud
+    moar # pager
     mpv # command-line media player
     nmap
+    pinta # image editor
     reaper
+    shotwell # image viewer
     slskd
     slurp # select region of screen
     sqlite
@@ -64,6 +68,7 @@ in
   ]);
 
   home.sessionVariables = {
+    PODMAN_COMPOSE_WARNING_LOGS = "false";
     SOPS_AGE_SSH_PRIVATE_KEY_FILE = "/etc/ssh/ssh_host_ed25519_key";
   };
 

@@ -30,6 +30,10 @@
   boot.extraModulePackages = [ pkgs.linuxPackages_zen.nct6687d ];
   boot.kernelModules = [ "nct6687" ];
   boot.kernelParams = [ "acpi_enforce_resources=lax" ];
+  boot.kernel.sysctl = {
+    "net.core.default_qdisc" = "fq";
+    "net.ipv4.tcp_congestion_control" = "bbr";
+  };
 
   networking.hostName = "main";
   networking.interfaces.enp12s0.wakeOnLan.enable = true;

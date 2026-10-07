@@ -3,9 +3,9 @@
 [:gpanders/fennel-repl.nvim
  :gpanders/nvim-parinfer
  :vlime/vlime
- {:dir "~/code/conjure"
-  :config (fn [] (set vim.g.conjure#extract#tree_sitter#enabled true)
-            (set vim.g.conjure#client#lua#neovim#persistent :debug))}
+ ; {:dir "~/code/conjure"
+ ;  :config (fn [] (set vim.g.conjure#extract#tree_sitter#enabled true)
+ ;            (set vim.g.conjure#client#lua#neovim#persistent :debug))}
  (tx :andysbolton/nvim-paredit
      {:branch :feature/support-fennel-if-pair
       :ft [:fennel]

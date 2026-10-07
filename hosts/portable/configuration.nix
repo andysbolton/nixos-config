@@ -1,7 +1,7 @@
 {
   config,
-  pkgs,
   inputs,
+  pkgs,
   ...
 }:
 {
@@ -16,15 +16,20 @@
     inputs.sops-nix.nixosModules.sops
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
-  networking.hostName = "portable";
+  boot = {
+    loader = {
+      systemd-boot.enable = true;
+      efi.canTouchEfiVariables = true;
+    };
+  };
 
   users.users.andy.extraGroups = [
     "wheel"
     "wpa_supplicant"
+    "ydotool"
   ];
+
+  programs.ydotool.enable = true;
 
   modules.wireless = {
     enable = true;
@@ -65,6 +70,9 @@
       }
       {
         ssid = "Unitedwifi.com";
+      }
+      {
+        ssid = "Amtrak_WiFi";
       }
     ];
   };
@@ -129,8 +137,13 @@
     };
   };
 
-  networking.firewall.trustedInterfaces = [ "tailscale0" ];
-  networking.firewall.allowedUDPPorts = [ config.services.tailscale.port ];
+  networking = {
+    hostName = "portable";
+    firewall = {
+      allowedUDPPorts = [ config.services.tailscale.port ];
+      trustedInterfaces = [ "tailscale0" ];
+    };
+  };
 
   system.stateVersion = "26.05";
 }

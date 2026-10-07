@@ -1,0 +1,26 @@
+--- a/src/sa.m
++++ b/src/sa.m
+@@ -123,16 +123,19 @@
+ {
+     char cmd[MAXLEN];
+ 
+-    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_loader);
++    // payload.bundle is nested inside yabai.osax, so it must be signed first:
++    // signing the loader seals the outer bundle, and any later write below it
++    // invalidates that seal. macOS 27 refuses to load a bundle with a stale seal.
++    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_payload);
+     system(cmd);
+ 
+-    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_loader, "2>/dev/null");
++    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_payload, "2>/dev/null");
+     system(cmd);
+ 
+-    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_payload);
++    snprintf(cmd, sizeof(cmd), "%s %s", "chmod +x", osax_bin_loader);
+     system(cmd);
+ 
+-    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_payload, "2>/dev/null");
++    snprintf(cmd, sizeof(cmd), "%s %s %s", "codesign -f -s -", osax_bin_loader, "2>/dev/null");
+     system(cmd);
+ }
+ 

@@ -1,5 +1,4 @@
 {
-  config,
   pkgs,
   osConfig,
   ...
@@ -42,6 +41,7 @@ in
 
       # Key bindings
       bind \cS 'history-pager'
+      bind -M insert \cF forward-token
 
       # Initialize login shell
       if status is-login
@@ -55,6 +55,8 @@ in
 
       starship init fish | source
       enable_transience
+
+      fzf_configure_bindings --history=ctrl-r,ctrl-r
     '';
 
     plugins = [
@@ -65,6 +67,14 @@ in
     ];
 
     functions = {
+      fish_user_key_bindings = {
+        body = ''
+          set -g fish_sequence_key_delay_ms 200
+
+          bind -M insert -m default j,k cancel repaint-mode
+        '';
+      };
+
       add = {
         argumentNames = [ "message" ];
         body = ''
@@ -273,7 +283,7 @@ in
             set snapshot "$XDG_CACHE_HOME/nixpkgs-snapshot"
 
             # refresh the dump only when nixpkgs changed (flake.lock newer than the dump)
-            if test $flake -nt $snapshot
+            if test $flake -nt $snapshot; or not test -e $snapshot
                 echo "$flake newer than $snapshot; refreshing snapshot."
                 set tmp (mktemp)
                 nix search nixpkgs '^' --json | jq -rj '

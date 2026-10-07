@@ -2,7 +2,7 @@ return {
   name = "python",
   ft = { "python" },
   ls = {
-    name = "pyright",
+    name = "basedpyright",
     settings = {},
   },
   formatter = {
