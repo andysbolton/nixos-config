@@ -191,6 +191,11 @@ in
         set -g set-clipboard on
         bind -T copy-mode-vi v send -X begin-selection
         bind -T copy-mode-vi C-v send -X rectangle-toggle
+
+        bind h select-pane -L
+        bind j select-pane -D
+        bind k select-pane -U
+        bind l select-pane -R
       '';
     };
     git = {

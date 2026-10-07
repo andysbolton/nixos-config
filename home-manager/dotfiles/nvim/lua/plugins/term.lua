@@ -14,6 +14,7 @@ return {
         on_open = start_insert,
         start_in_insert = true,
         persist_mode = false,
+        on_stdout = require("term-wraps").on_stdout,
       }
 
       -- Exit terminal mode with <Esc>
