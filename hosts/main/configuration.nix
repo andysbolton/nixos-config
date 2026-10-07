@@ -12,6 +12,7 @@
     ../../modules/desktop.nix
     ../../modules/nvidia4070.nix
     ../../modules/arrs.nix
+    ../../modules/tailnet-bridge.nix
     ../../modules/torrenting.nix
     ../../modules/steam.nix
     ../../modules/vpn.nix
@@ -75,6 +76,8 @@
   networking.firewall.allowedTCPPorts = [
     32400 # Plex Media Server
   ];
+
+  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ 32400 ]; # Plex Media Server
 
   environment.systemPackages = with pkgs; [
     # TODO: move or remove this.

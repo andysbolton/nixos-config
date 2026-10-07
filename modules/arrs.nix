@@ -1,7 +1,6 @@
 {
   lib,
   config,
-  pkgs,
   ...
 }:
 let
@@ -49,29 +48,10 @@ let
         ${name}.extraGroups = [ "media" ];
       };
 
-      systemd.services."${name}-bridge" = {
-        description = "Tailnet bridge for ${name} (port ${toString arrCfg.port})";
-        wantedBy = [ "multi-user.target" ];
-        after = [
-          "wg-proton.service"
-          "${name}.service"
-        ];
-        wants = [
-          "wg-proton.service"
-          "${name}.service"
-        ];
-        serviceConfig = {
-          ExecStart = pkgs.writeShellScript "${name}-bridge" ''
-            exec ${pkgs.socat}/bin/socat \
-              TCP6-LISTEN:${toString arrCfg.port},fork,reuseaddr,ipv6only=0 \
-              EXEC:"${pkgs.iproute2}/bin/ip netns exec ${modules.vpn.netns} ${pkgs.socat}/bin/socat - TCP\:127.0.0.1\:${toString arrCfg.port}"
-          '';
-          Restart = "on-failure";
-          RestartSec = "5s";
-        };
+      modules.tailnetBridge.bridges.${name} = {
+        port = arrCfg.port;
+        netns = modules.vpn.netns;
       };
-
-      networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ arrCfg.port ];
     };
 in
 {
