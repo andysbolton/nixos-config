@@ -111,6 +111,22 @@ let
     }
   );
 
+  releaseButton = pkgs.runCommandCC "lan-mouse-release-button" {
+    nativeBuildInputs = [
+      pkgs.wayland-scanner
+      pkgs.pkg-config
+    ];
+    buildInputs = [ pkgs.wayland ];
+  } ''
+    xml=${pkgs.wlr-protocols}/share/wlr-protocols/unstable/wlr-virtual-pointer-unstable-v1.xml
+    wayland-scanner client-header "$xml" wlr-virtual-pointer-unstable-v1-client-protocol.h
+    wayland-scanner private-code  "$xml" protocol.c
+    mkdir -p "$out/bin"
+    # shellcheck disable=SC2046
+    $CC -o "$out/bin/lan-mouse-release-button" ${./lan-mouse-release-button.c} protocol.c \
+      -I. $(pkg-config --cflags --libs wayland-client)
+  '';
+
   topology = {
     main = [
       {
@@ -181,6 +197,8 @@ in
     };
     Install.WantedBy = [ "graphical-session.target" ];
   };
+
+  home.packages = lib.mkIf pkgs.stdenv.hostPlatform.isLinux [ releaseButton ];
 
   launchd.agents.lan-mouse.config = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
     StandardOutPath = "/tmp/lan-mouse.log";

@@ -9,6 +9,15 @@
 ;; Sync clipboard between OS and Neovim.
 (set vim.o.clipboard :unnamedplus)
 
+;; Over SSH there's no local clipboard daemon, so route +/* through OSC 52
+;; (the terminal intercepts it) instead of the normal system-clipboard provider.
+(when (or (os.getenv :SSH_TTY) (os.getenv :SSH_CONNECTION))
+  (let [osc52 (require :vim.ui.clipboard.osc52)]
+    (set vim.g.clipboard
+         {:name "OSC 52"
+          :copy {:+ (osc52.copy "+") :* (osc52.copy "*")}
+          :paste {:+ (osc52.paste "+") :* (osc52.paste "*")}})))
+
 ;; Enable break indent
 (set vim.o.breakindent true)
 

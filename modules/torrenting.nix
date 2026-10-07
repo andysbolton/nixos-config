@@ -5,11 +5,13 @@
   ...
 }:
 let
-  netns = "vpn";
+  netns = config.modules.vpn.netns;
   qbittorrentWebuiPort = 4292;
   downloadPath = "/mnt/media/Seeding";
 in
 {
+  environment.systemPackages = [ pkgs.qbit-manage ];
+
   users = {
     groups = {
       media = { };
@@ -32,8 +34,6 @@ in
       };
     };
   };
-
-  networking.firewall.interfaces.tailscale0.allowedTCPPorts = [ qbittorrentWebuiPort ];
 
   services.qbittorrent = {
     enable = true;
@@ -177,26 +177,9 @@ in
     };
   };
 
-  systemd.services.qbittorrent-bridge = {
-    description = "Tailnet bridge for qBittorrent (port ${toString qbittorrentWebuiPort})";
-    wantedBy = [ "multi-user.target" ];
-    after = [
-      "wg-proton.service"
-      "qbittorrent.service"
-    ];
-    wants = [
-      "wg-proton.service"
-      "qbittorrent.service"
-    ];
-    serviceConfig = {
-      ExecStart = pkgs.writeShellScript "qbittorrent-bridge" ''
-        exec ${pkgs.socat}/bin/socat \
-          TCP6-LISTEN:${toString qbittorrentWebuiPort},fork,reuseaddr,ipv6only=0 \
-          EXEC:"${pkgs.iproute2}/bin/ip netns exec ${netns} ${pkgs.socat}/bin/socat - TCP\:127.0.0.1\:${toString qbittorrentWebuiPort}"
-      '';
-      Restart = "on-failure";
-      RestartSec = "5s";
-    };
+  modules.tailnetBridge.bridges.qbittorrent = {
+    inherit netns;
+    port = qbittorrentWebuiPort;
   };
 
   systemd.services."proton-port-forwarding" = lib.mkIf config.modules.vpn.enable {

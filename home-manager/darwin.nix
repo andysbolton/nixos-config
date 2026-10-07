@@ -12,6 +12,7 @@ let
   azureCli = pkgs.azure-cli.withExtensions (
     with pkgs.azure-cli-extensions;
     [
+      application-insights
       azure-devops
       durabletask
       quota
@@ -98,16 +99,16 @@ in
     scripts.yabai-spaces
   ]
   ++ (with pkgs; [
-    _1password-cli
-    _1password-gui
     (pkgs.callPackage ../pkgs/jetkvm-kiosk.nix {
       inherit (config) repoPath;
       vmDir = "${config.home.homeDirectory}/vms";
     })
+    _1password-cli
+    _1password-gui
+    clipboard-jh
     desktoppr
     gatherv2
     jira-cli-go
-    maccy
     moonlight-qt
     pngpaste
     powershell

@@ -4,6 +4,11 @@ vim.wo.number = true
 vim.wo.relativenumber = true
 vim.o.mouse = "a"
 vim.o.clipboard = "unnamedplus"
+if (os.getenv("SSH_TTY") or os.getenv("SSH_CONNECTION")) then
+  local osc52 = require("vim.ui.clipboard.osc52")
+  vim.g.clipboard = {name = "OSC 52", copy = {["+"] = osc52.copy("+"), ["*"] = osc52.copy("*")}, paste = {["+"] = osc52.paste("+"), ["*"] = osc52.paste("*")}}
+else
+end
 vim.o.breakindent = true
 vim.o.undofile = true
 vim.o.ignorecase = true
@@ -21,14 +26,14 @@ vim.o.shiftwidth = 4
 vim.o.softtabstop = 4
 vim.o.expandtab = true
 vim.o.autoread = true
-local function _1_()
+local function _2_()
   if ((vim.fn.mode() ~= "c") and (vim.bo.buftype ~= "nofile")) then
     return vim.cmd("checktime")
   else
     return nil
   end
 end
-vim.api.nvim_create_autocmd({"BufEnter", "CursorHold", "CursorHoldI", "FocusGained"}, {pattern = {"*"}, callback = _1_, desc = "Reload buffer on focus/hold unless in command-line window"})
+vim.api.nvim_create_autocmd({"BufEnter", "CursorHold", "CursorHoldI", "FocusGained"}, {pattern = {"*"}, callback = _2_, desc = "Reload buffer on focus/hold unless in command-line window"})
 vim.opt.list = true
 vim.opt.listchars:append({extends = "\226\128\186", precedes = "\226\128\185", eol = "\226\143\142", trail = "\194\183", nbsp = "\226\142\181", space = " "})
 vim.o.scrolloff = 1
