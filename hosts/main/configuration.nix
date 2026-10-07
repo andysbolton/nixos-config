@@ -27,7 +27,16 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   boot.kernelPackages = pkgs.linuxPackages_zen;
-  boot.extraModulePackages = [ pkgs.linuxPackages_zen.nct6687d ];
+  boot.extraModulePackages = [
+    # This kernel's <linux/string.h> dropped strncpy() entirely (replaced by
+    # strscpy()); upstream still calls strncpy(), so swap it for the
+    # drop-in-safe replacement.
+    (pkgs.linuxPackages_zen.nct6687d.overrideAttrs (old: {
+      postPatch = (old.postPatch or "") + ''
+        sed -i 's/strncpy(valcp, val, 16);/strscpy(valcp, val, 16);/' nct6687.c
+      '';
+    }))
+  ];
   boot.kernelModules = [ "nct6687" ];
   boot.kernelParams = [ "acpi_enforce_resources=lax" ];
   boot.kernel.sysctl = {

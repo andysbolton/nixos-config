@@ -10,6 +10,8 @@ let
   downloadPath = "/mnt/media/Seeding";
 in
 {
+  environment.systemPackages = [ pkgs.qbit-manage ];
+
   users = {
     groups = {
       media = { };
