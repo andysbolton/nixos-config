@@ -37,6 +37,8 @@
     }
   ];
 
+  services.weechat.enable = true;
+
   users.users.andy = {
     isNormalUser = true;
     shell = pkgs.fish;
