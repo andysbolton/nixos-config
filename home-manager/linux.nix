@@ -39,7 +39,7 @@ in
     killall
     lswt # list Wayland toplevels
     mangohud
-    moar # pager
+    moor # pager
     mpv # command-line media player
     nmap
     pinta # image editor

@@ -96,6 +96,11 @@
     extraPackages = [ ];
   };
 
+  xdg.portal.wlr.settings.screencast = {
+    chooser_type = "dmenu";
+    chooser_cmd = "${pkgs.rofi}/bin/rofi -dmenu -p share";
+  };
+
   programs.uwsm = {
     enable = true;
     waylandCompositors.river = {
