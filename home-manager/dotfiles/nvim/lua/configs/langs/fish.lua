@@ -1,4 +1,3 @@
--- TODO: all this is untested, need to revisit.
 return {
   name = "fish",
   ft = { "fish" },

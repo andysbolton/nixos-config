@@ -119,6 +119,11 @@ in
   ];
 
   programs = {
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
+
     neovim = {
       enable = true;
       sideloadInitLua = true;
@@ -154,6 +159,8 @@ in
         typescript-language-server # ts_ls
         vscode-langservers-extracted # cssls, html, jsonls
         yaml-language-server # yamlls
+        zls
+
         # Formatters
         black
         csharpier

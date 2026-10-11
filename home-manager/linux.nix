@@ -55,6 +55,7 @@ in
     traceroute
     trash-cli
     waypipe
+    zig
     (pkgs.writeShellScriptBin "firefox-vpn" ''
       SUDO_ASKPASS=${askPass}/bin/ask-pass \
          sudo -A -E ip netns exec vpn \
