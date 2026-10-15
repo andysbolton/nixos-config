@@ -22,11 +22,11 @@ default=(
   background.height=$((HEIGHT - GAP))
   padding_left="$PAD"
   padding_right="$PAD"
-  icon.color="$TEXT"
+  icon.color="$FOREGROUND"
   icon.font="$ICON_FONT"
   icon.padding_left="$GAP"
   icon.padding_right="$GAP"
-  label.color="$TEXT"
+  label.color="$FOREGROUND"
   label.font="$LABEL_FONT"
   label.padding_left="$GAP"
   label.padding_right="$GAP"
@@ -34,8 +34,8 @@ default=(
 
 block=(
   background.drawing=on
-  background.color="$SURFACE"
-  background.border_color="$OVERLAY"
+  background.color="$LIGHTER_BACKGROUND"
+  background.border_color="$COMMENT"
   background.border_width=2
   background.corner_radius=8
 )

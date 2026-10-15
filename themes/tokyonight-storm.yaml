@@ -1,0 +1,29 @@
+system: "base24"
+name: "Tokyo Night Storm (tokyonight.nvim)"
+author: "folke (https://github.com/folke/tokyonight.nvim), converted from extras/lua/tokyonight_storm.lua v4.14.1"
+variant: "dark"
+palette:
+  base00: "#24283b" # Default background
+  base01: "#292e42" # Lighter background
+  base02: "#2e3c64" # Selection background
+  base03: "#565f89" # Comments, invisibles
+  base04: "#737aa2" # Dark foreground
+  base05: "#c0caf5" # Default foreground
+  base06: "#c0caf5" # Light foreground
+  base07: "#c0caf5" # Lightest foreground
+  base08: "#f7768e" # Red
+  base09: "#ff9e64" # Orange
+  base0A: "#e0af68" # Yellow
+  base0B: "#9ece6a" # Green
+  base0C: "#7dcfff" # Cyan
+  base0D: "#7aa2f7" # Blue
+  base0E: "#bb9af7" # Magenta
+  base0F: "#db4b4b" # Dark red
+  base10: "#1f2335" # Darker background
+  base11: "#1b1e2d" # Darkest background
+  base12: "#ff899d" # Bright red
+  base13: "#faba4a" # Bright yellow
+  base14: "#9fe044" # Bright green
+  base15: "#a4daff" # Bright cyan
+  base16: "#8db0ff" # Bright blue
+  base17: "#c7a9ff" # Bright magenta

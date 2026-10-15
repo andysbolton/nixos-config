@@ -5,13 +5,6 @@ return {
     event = "VeryLazy",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-      vim.keymap.set("n", "<leader><tab>", ":BufferLineCycleNext<cr>", { desc = "Cycle to next tab", silent = true })
-      vim.keymap.set(
-        "n",
-        "<leader><s-tab>",
-        ":BufferLineCyclePrev<cr>",
-        { desc = "Cycle to previous tab", silent = true }
-      )
       vim.keymap.set(
         "n",
         "<leader>bd",
@@ -65,12 +58,6 @@ return {
     end,
   },
   {
-    "folke/tokyonight.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function() vim.cmd [[colorscheme tokyonight-storm]] end,
-  },
-  {
     "andysbolton/modes.nvim",
     event = "VeryLazy",
     -- dir = "/home/andy/code/modes.nvim",
@@ -87,7 +74,7 @@ return {
       require("lualine").setup {
         options = {
           icons_enabled = true,
-          theme = "tokyonight-storm",
+          theme = vim.g.theme and vim.g.theme.lualine or "auto",
           disabled_filetypes = { "neo-tree" },
         },
         extensions = { "lazy" },

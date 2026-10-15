@@ -6,7 +6,7 @@ source "$CONFIG_DIR/colors.sh"
 # the space invoking this script (with name: $NAME) is currently selected:
 # https://felixkratz.github.io/SketchyBar/config/components#space----associate-mission-control-spaces-with-an-item
 
-color="$TEXT"
+color="$FOREGROUND"
 yabai -m query --windows --space "${NAME#space.}" |
   jq -e 'any(.[]; .title | test("^[✳◐◑◒◓] "))' >/dev/null && color="$GREEN"
 

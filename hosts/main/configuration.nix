@@ -9,6 +9,7 @@
     ./hardware-configuration.nix
     ./disko.nix
     ../../modules/theme.nix
+    ../../modules/optnix.nix
     ../../modules/desktop.nix
     ../../modules/nvidia4070.nix
     ../../modules/arrs.nix

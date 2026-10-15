@@ -4,6 +4,7 @@
   pkgs,
   pkgs-unstable,
   inputs,
+  osConfig,
   ...
 }:
 let
@@ -37,6 +38,10 @@ in
       run install -m 600 ${keysFile} "$HOME/.ssh/authorized_keys"
     '';
 
+  home.file.".digrc".text = ''
+    +search
+  '';
+
   home.shell.enableFishIntegration = true;
   home.sessionVariables = {
     # DOTNET_HOST_PATH = "${dotnetSdks}/share/dotnet/dotnet";
@@ -55,10 +60,6 @@ in
     # fennel-ls docset: hover docs + completion for the vim/nvim API.
     # Pinned via the flake input; `nix flake update fennel-ls-nvim-docs` to bump.
     dataFile."fennel-ls/docsets/nvim.lua".source = "${inputs.fennel-ls-nvim-docs}/nvim.lua";
-  };
-
-  home.file = {
-    ".wezterm.lua".source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/wezterm.lua";
   };
 
   home.packages = with pkgs; [
@@ -106,6 +107,7 @@ in
     rsync
     ruby
     sd # sed replacement
+    sshpass
     sops # secrets editor/manager
     starship # cross-shell prompt
     tinyxxd
@@ -113,12 +115,16 @@ in
     tree # recursive directory listing
     unzip
     vesktop
-    wezterm
     wget
     whois
   ];
 
   programs = {
+    direnv = {
+      enable = true;
+      nix-direnv.enable = true;
+    };
+
     neovim = {
       enable = true;
       sideloadInitLua = true;
@@ -154,6 +160,8 @@ in
         typescript-language-server # ts_ls
         vscode-langservers-extracted # cssls, html, jsonls
         yaml-language-server # yamlls
+        zls
+
         # Formatters
         black
         csharpier
@@ -305,19 +313,40 @@ in
     };
   };
 
+  programs.neovim.initLua = lib.mkBefore ''
+    vim.g.theme = ${lib.generators.toLua { } osConfig.theme.native.nvim}
+  '';
+
+  programs.wezterm = {
+    enable = true;
+    # Loaded at runtime so edits apply without a rebuild.
+    extraConfig = ''
+      theme = ${lib.generators.toLua { } osConfig.theme.css}
+      local dir = "${config.dotfilesPath}/"
+      package.path = package.path .. ";" .. dir .. "?.lua"
+      for _, file in ipairs({ "wezterm.lua", "modal.lua", "motions.lua" }) do
+        wezterm.add_to_config_reload_watch_list(dir .. file)
+      end
+      return dofile(dir .. "wezterm.lua")
+    '';
+  };
+
   stylix.enable = true;
-  stylix.autoEnable = true;
+  stylix.autoEnable = false;
 
-  stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-moon.yaml";
-
-  stylix.targets.eog.enable = false;
-  stylix.targets.fish.enable = false;
-  stylix.targets.gnome-text-editor.enable = false;
-  stylix.targets.gnome.enable = false;
-  stylix.targets.gtk.enable = false;
-  stylix.targets.neovim.enable = false;
-  stylix.targets.river.enable = false;
-  stylix.targets.waybar.enable = false;
+  stylix.targets.btop.enable = true;
+  stylix.targets.dunst.enable = true;
+  stylix.targets.firefox.enable = true;
+  stylix.targets.font-packages.enable = true;
+  stylix.targets.fontconfig.enable = true;
+  stylix.targets.fish.enable = osConfig.theme.native.fish == null;
+  stylix.targets.neovim.enable = osConfig.theme.native.nvim == null;
+  stylix.targets.foot.enable = true;
+  stylix.targets.rofi.enable = true;
+  stylix.targets.tmux.enable = true;
+  stylix.targets.waybar.addCss = false;
+  stylix.targets.waybar.enable = true;
+  stylix.targets.wezterm.enable = true;
 
   stylix.targets.firefox.profileNames = [ "home" ];
   stylix.targets.firefox.colorTheme.enable = true;

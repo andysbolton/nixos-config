@@ -7,6 +7,26 @@
 {
   programs.claude-code.enable = true;
 
+  programs.claude-code.lspServers = {
+    lua = {
+      command = lib.getExe pkgs.lua-language-server;
+      extensionToLanguage.".lua" = "lua";
+    };
+    nix = {
+      command = lib.getExe pkgs.nixd;
+      extensionToLanguage.".nix" = "nix";
+    };
+    fennel = {
+      command = lib.getExe pkgs.fennel-ls;
+      extensionToLanguage.".fnl" = "fennel";
+    };
+    fish = {
+      command = lib.getExe pkgs.fish-lsp;
+      args = [ "start" ];
+      extensionToLanguage.".fish" = "fish";
+    };
+  };
+
   # Companion to plan mode: keeps its read-only enforcement but defers the
   # plan-drafting behaviour so the session stays conversational.
   programs.claude-code.commands.discuss = ''

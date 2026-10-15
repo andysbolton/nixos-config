@@ -8,13 +8,18 @@ return {
     version = "*",
     config = function()
       require("toggleterm").setup {
-        open_mapping = "<F7>",
+        open_mapping = [[<C-\>]],
         terminal_mappings = false,
         insert_mappings = false,
         on_open = start_insert,
         start_in_insert = true,
         persist_mode = false,
         on_stdout = require("term-wraps").on_stdout,
+
+        float_opts = {
+          width = 500,
+          height = 500,
+        },
       }
 
       -- Exit terminal mode with <Esc>
@@ -71,10 +76,17 @@ return {
       end
 
       vim.keymap.set({ "n", "t" }, "<leader>tb", function()
-        vim.cmd "ToggleTerm size=10 direction=horizontal"
+        vim.cmd "1ToggleTerm size=10 direction=horizontal"
         realign_bottom()
         vim.schedule(repaint_cli)
       end, { silent = true, desc = "[T]oggle [b]ottom terminal" })
+
+      vim.keymap.set(
+        { "n", "t" },
+        "<leader>tf",
+        function() vim.cmd "9ToggleTerm direction=float" end,
+        { silent = true, desc = "[T]oggle [f]loat terminal" }
+      )
 
       -- Opening/re-toggling neo-tree while the terminal is up would let it reclaim full
       -- height; re-align after it settles.

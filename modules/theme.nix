@@ -1,10 +1,127 @@
-{ config, lib, pkgs, ... }:
 {
-  options.palette = lib.mkOption {
+  config,
+  lib,
+  pkgs,
+  options,
+  ...
+}:
+let
+  # Each theme pairs a base16/24 scheme (Stylix and the colors.nix roles) with native ports for
+  # apps whose own theme looks better than the generic base16 mapping. Without `nvim`, or with
+  # fish = null, Stylix's own target themes that app.
+  themes = {
+    tokyonight-storm = {
+      scheme = ../themes/tokyonight-storm.yaml;
+      nvim = {
+        plugin = "folke/tokyonight.nvim";
+        colorscheme = "tokyonight-storm";
+        lualine = "tokyonight-storm";
+      };
+      fish = "tokyonight_storm";
+    };
+    catppuccin-mocha = {
+      scheme = "${pkgs.base16-schemes.src}/base24/catppuccin-mocha.yaml";
+      nvim = {
+        plugin = "catppuccin/nvim";
+        name = "catppuccin";
+        colorscheme = "catppuccin-mocha";
+        lualine = "catppuccin-mocha";
+      };
+      fish = null;
+    };
+  };
+  selected = themes.tokyonight-storm;
+  colors = import ../home-manager/colors.nix config.lib.stylix.colors;
+in
+{
+  options.theme = lib.mkOption {
     type = lib.types.attrs;
-    default = import ../home-manager/colors.nix config.lib.stylix.colors;
-    description = "Color palette derived from the active base16 scheme.";
+    description = "Color palette derived from the active base16 or 24 scheme, plus the active theme's native app settings.";
   };
 
-  config.stylix.base16Scheme = "${pkgs.base16-schemes}/share/themes/tokyo-night-moon.yaml";
+  config = lib.mkMerge [
+    {
+      theme = colors // {
+        wallpaper =
+          pkgs.runCommand "wallpaper.png" { nativeBuildInputs = [ pkgs.imagemagick ]; }
+            "magick -size 3840x2400 radial-gradient:'${colors.css.DARKER_BACKGROUND}'-'${colors.css.DESKTOP}' -attenuate 0.4 +noise Gaussian $out";
+        native = {
+          inherit (selected) fish;
+          nvim = selected.nvim or null;
+        };
+      };
+      stylix.base16Scheme = selected.scheme;
+      stylix.fonts = {
+        monospace = {
+          package = pkgs.nerd-fonts.caskaydia-cove;
+          name = "CaskaydiaCove Nerd Font";
+        };
+        sansSerif = {
+          package = pkgs.nerd-fonts.noto;
+          name = "NotoSans Nerd Font";
+        };
+        serif = {
+          package = pkgs.nerd-fonts.noto;
+          name = "NotoSerif Nerd Font";
+        };
+        sizes = {
+          applications = 13;
+          desktop = 13;
+          popups = 13;
+          terminal = 13;
+        };
+      };
+      fonts = {
+        packages = [
+          config.stylix.fonts.monospace.package
+          config.stylix.fonts.sansSerif.package
+          config.stylix.fonts.serif.package
+          config.stylix.fonts.emoji.package
+          pkgs.noto-fonts
+          pkgs.nerd-fonts.symbols-only
+          pkgs.last-resort
+        ];
+      }
+      # nix-darwin has no fontconfig options.
+      // lib.optionalAttrs (options.fonts ? fontconfig) {
+        fontconfig.defaultFonts = {
+          monospace = [ config.stylix.fonts.monospace.name ];
+          sansSerif = [ config.stylix.fonts.sansSerif.name ];
+          serif = [ config.stylix.fonts.serif.name ];
+          emoji = [ config.stylix.fonts.emoji.name ];
+        };
+      };
+      home-manager.sharedModules = [
+        {
+          stylix.base16Scheme = config.stylix.base16Scheme;
+          stylix.fonts = {
+            inherit (config.stylix.fonts)
+              monospace
+              sansSerif
+              serif
+              sizes
+              ;
+          };
+        }
+      ];
+    }
+    # nix-darwin's Stylix has no cursor option.
+    (lib.optionalAttrs (options.stylix ? cursor) {
+      stylix.cursor = {
+        name = "phinger-cursors-dark";
+        package = pkgs.phinger-cursors;
+        size = 32;
+      };
+      home-manager.sharedModules = [ { stylix.cursor = config.stylix.cursor; } ];
+    })
+    # nix-darwin has no console options.
+    (lib.optionalAttrs (options ? console) {
+      console = {
+        font = "ter-v24n";
+        packages = [ pkgs.terminus_font ];
+        # Load the font in the initrd, so early systemd status lines use it too.
+        earlySetup = true;
+      };
+    })
+  ];
 }
