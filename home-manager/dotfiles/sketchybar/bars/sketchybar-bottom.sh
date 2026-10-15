@@ -5,11 +5,11 @@
 "$BAR_NAME" --bar "${bar[@]}" position=bottom color="#000000"
 
 "$BAR_NAME" --add item network.up left \
-  --set network.up icon="↑" width=95 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
+  --set network.up icon="[up]" icon.color="$YELLOW" icon.font="$LABEL_FONT" width=115 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item network.down left \
-  --set network.down icon="↓" width=95 \
+  --set network.down icon="[down]" icon.color="$CYAN" icon.font="$LABEL_FONT" width=130 \
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item disk left \

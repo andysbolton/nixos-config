@@ -16,6 +16,8 @@ in
 
   networking.hostName = "work";
 
+  theme.fontSize = 14;
+
   users.users.andybolton = {
     home = "/Users/andybolton";
   };
@@ -285,6 +287,11 @@ in
                   yabai -m window $YABAI_WINDOW_ID --focus
               '
 
+              # Dock restarts (e.g. nix-darwin activation) unload the scripting addition.
+              yabai -m signal --add label="dock_did_restart" event=dock_did_restart action='
+                  sudo ${config.services.yabai.package}/bin/yabai --load-sa
+              '
+
               ${ensureDisplays}
 
               for event in display_added display_removed system_woke; do
@@ -378,13 +385,10 @@ in
   system.activationScripts.postActivation.text =
     let
       user = config.system.primaryUser;
-      wallpaper = pkgs.runCommand "wallpaper.png" {
-        nativeBuildInputs = [ pkgs.imagemagick ];
-      } "magick -size 1x1 xc:\"${config.theme.css.BACKGROUND}\" $out";
     in
     ''
       sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr scale stretch
-      sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr ${wallpaper}
+      sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr ${config.theme.wallpaper}
     '';
 
   system.stateVersion = 6;

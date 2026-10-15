@@ -35,7 +35,13 @@ let
 in
 {
   options.theme = lib.mkOption {
-    type = lib.types.attrs;
+    type = lib.types.submodule {
+      freeformType = lib.types.attrsOf lib.types.anything;
+      options.fontSize = lib.mkOption {
+        type = lib.types.int;
+        default = 13;
+      };
+    };
     description = "Color palette derived from the active base16 or 24 scheme, plus the active theme's native app settings.";
   };
 
@@ -65,10 +71,10 @@ in
           name = "NotoSerif Nerd Font";
         };
         sizes = {
-          applications = 13;
-          desktop = 13;
-          popups = 13;
-          terminal = 13;
+          applications = config.theme.fontSize;
+          desktop = config.theme.fontSize;
+          popups = config.theme.fontSize;
+          terminal = config.theme.fontSize;
         };
       };
       fonts = {

@@ -62,6 +62,7 @@ colors: rec {
     WARN = YELLOW;
     ATTENTION = ORANGE;
     ERROR = RED;
+    OK = GREEN;
   };
 
   css = builtins.mapAttrs (_: fmt.css) (palette // roles);
