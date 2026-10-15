@@ -29,3 +29,19 @@
                                                 (vim.lsp.log.get_filename)))
                                   {:desc "Clear LSP logfile."})
 
+
+; window title gets a ✳ prefix while any terminal buffer runs Claude Code
+(fn claude-term? [buf]
+  (and (= (. vim.bo buf :buftype) :terminal)
+       (>= (vim.fn.match (or (. vim.b buf :term_title) "") "^[✳◐◑◒◓] ") 0)))
+
+(fn update-title []
+  (set vim.o.titlestring
+       (.. (if (: (vim.iter (vim.api.nvim_list_bufs)) :any claude-term?) "✳ " "")
+           "nvim " (vim.fn.fnamemodify (vim.fn.getcwd) ":~"))))
+
+(set vim.o.title true)
+(vim.api.nvim_create_autocmd [:VimEnter :DirChanged :FocusLost :TermOpen :TermClose]
+                             {:callback update-title
+                              :group (vim.api.nvim_create_augroup :claude_title
+                                                                  {:clear true})})
