@@ -11,6 +11,7 @@ in
 {
   imports = [
     ../../modules/theme.nix
+    ../../modules/optnix.nix
   ];
 
   networking.hostName = "work";
@@ -80,13 +81,6 @@ in
       "protonvpn"
     ];
   };
-
-  fonts.packages = with pkgs; [
-    nerd-fonts.caskaydia-cove
-    nerd-fonts.symbols-only
-    noto-fonts-color-emoji
-    last-resort
-  ];
 
   services =
     let
@@ -386,7 +380,7 @@ in
       user = config.system.primaryUser;
       wallpaper = pkgs.runCommand "wallpaper.png" {
         nativeBuildInputs = [ pkgs.imagemagick ];
-      } "magick -size 1x1 xc:\"${config.palette.hex.BASE}\" $out";
+      } "magick -size 1x1 xc:\"${config.theme.css.BACKGROUND}\" $out";
     in
     ''
       sudo -u ${user} ${pkgs.desktoppr}/bin/desktoppr scale stretch

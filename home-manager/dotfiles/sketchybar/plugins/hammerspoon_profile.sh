@@ -2,4 +2,4 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-$BAR_NAME --set "$NAME" label="$(hs -c "Profile")" background.border_color="$OVERLAY"
+$BAR_NAME --set "$NAME" label="$(hs -c "Profile")" background.border_color="$COMMENT"

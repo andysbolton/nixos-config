@@ -5,11 +5,12 @@
   ...
 }:
 {
+  imports = [ ./monitors.nix ];
+
   time.timeZone = "America/New_York";
 
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
-    font = "Lat2-Terminus16";
     keyMap = "us";
   };
 
@@ -83,11 +84,12 @@
   ];
 
   fonts.fontDir.enable = true;
-  fonts.packages = with pkgs; [
-    nerd-fonts.caskaydia-cove
-    nerd-fonts.symbols-only
-    noto-fonts-color-emoji
-  ];
+
+  stylix.enable = true;
+  stylix.autoEnable = false;
+  stylix.homeManagerIntegration.autoImport = false;
+  stylix.targets.console.enable = true;
+  stylix.targets.kmscon.enable = true;
 
   services.gnome.gnome-keyring.enable = true;
 
@@ -108,6 +110,12 @@
       comment = "River compositor managed by UWSM";
       binPath = "/run/current-system/sw/bin/river";
     };
+  };
+
+  # Truecolor TTYs with TTF fonts on VT2 and up; greetd keeps VT1.
+  services.kmscon = {
+    enable = true;
+    term = "xterm-256color";
   };
 
   services.greetd = {

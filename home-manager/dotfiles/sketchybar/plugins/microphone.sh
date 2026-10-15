@@ -24,9 +24,9 @@ if [ "$SENDER" = "mouse.clicked" ]; then
 fi
 
 if mic_on; then
-  "$BAR_NAME" --set "$NAME" icon="$MIC" icon.color="$GREEN"
+  "$BAR_NAME" --set "$NAME" icon="$MIC" icon.color="$OK"
   sh "$HOME"/.config/borders/bordersrc
 else
-  "$BAR_NAME" --set "$NAME" icon="$MIC_OFF" icon.color="$RED"
-  borders active_color="$RED"
+  "$BAR_NAME" --set "$NAME" icon="$MIC_OFF" icon.color="$ERROR"
+  borders active_color="$ERROR"
 fi

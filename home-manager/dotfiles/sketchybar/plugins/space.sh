@@ -9,4 +9,4 @@ source "$CONFIG_DIR/colors.sh"
 "$BAR_NAME" --set "$NAME" background.drawing="$SELECTED"
 
 # focusing a space dismisses any claude-attention mark on it
-[ "$SELECTED" = "true" ] && "$BAR_NAME" --set "$NAME" icon.color="$TEXT"
+[ "$SELECTED" = "true" ] && "$BAR_NAME" --set "$NAME" icon.color="$FOREGROUND"

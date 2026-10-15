@@ -1,10 +1,27 @@
-{ pkgs, scripts }:
-
+{
+  pkgs,
+  scripts,
+  osConfig,
+}:
+let
+  inherit (pkgs) lib;
+  wlr-randr = lib.getExe pkgs.wlr-randr;
+  monitorsWith = attr: lib.filterAttrs (_: m: m.${attr} != null) osConfig.monitors;
+in
+# bash
 ''
   layout_generator=rivertile
   layout_cmd=${pkgs.river-classic}/bin/rivertile
 
-  riverctl map normal Super Return spawn "uwsm app -- wezterm"
+  ${lib.concatMapAttrsStringSep "\n" (
+    output: m: "${wlr-randr} --output ${output} --scale ${toString m.scale}"
+  ) (monitorsWith "scale")}
+  ${lib.concatMapAttrsStringSep "\n" (
+    output: m: "${wlr-randr} --output ${output} --right-of ${m.rightOf}"
+  ) (monitorsWith "rightOf")}
+
+  riverctl map normal Super Return spawn "uwsm app -- wezterm start --always-new-process"
+  riverctl map normal Super+Control Return spawn "uwsm app -- wezterm start --class scratch --always-new-process"
   riverctl map normal Alt+Shift F spawn "killall .firefox-wrapped || uwsm app -- firefox"
   riverctl map normal Alt+Shift+Control F spawn "killall .firefox-wrapped || uwsm app -- firefox-vpn"
   riverctl map normal Super N spawn "uwsm app -- ${pkgs.foot}/bin/foot --app-id=nixpkgs-search ${scripts.search-nix-pkgs}/bin/search-nix-pkgs"
@@ -32,10 +49,10 @@
   riverctl map normal Control+Shift+Alt H swap left
   riverctl map normal Control+Shift+Alt L swap right
 
-  # riverctl map normal Control Period focus-output next
-  # riverctl map normal Control Comma focus-output previous
-  # riverctl map normal Control+Shift Period send-to-output next
-  # riverctl map normal Control+Shift Comma send-to-output previous
+  riverctl map normal Super Period focus-output next
+  riverctl map normal Super Comma focus-output previous
+  riverctl map normal Super+Shift Period send-to-output next
+  riverctl map normal Super+Shift Comma send-to-output previous
 
   riverctl map normal Control Return zoom
   riverctl map normal Control+Shift MINUS send-layout-cmd "$layout_generator" "main-ratio -0.05"
@@ -68,10 +85,6 @@
       riverctl map normal Super+Control "$i" toggle-focused-tags $tags
       riverctl map normal Super+Shift+Control "$i" toggle-view-tags $tags
   done
-
-  bluetooth_tag=$((1 << 9))
-  riverctl rule-add -title "Bluetooth Devices" tags $bluetooth_tag
-  riverctl map normal Super B set-focused-tags $bluetooth_tag
 
   vesktop_tag=$((1 << 8))
   riverctl rule-add -title "Discord" tags $vesktop_tag
@@ -115,14 +128,22 @@
       riverctl map $mode None XF86MonBrightnessDown spawn '${pkgs.brightnessctl}/bin/brightnessctl set 5%-'
   done
 
-  riverctl background-color 0x1a1b26
-  riverctl border-color-focused 0x93a1a1
-  riverctl border-color-unfocused 0x586e75
-  riverctl border-width 3
+  riverctl background-color ${osConfig.theme.literal.DESKTOP}
+  riverctl border-color-focused ${osConfig.theme.literal.FOCUS}
+  riverctl border-color-unfocused ${osConfig.theme.literal.UNFOCUSED}
+  riverctl border-color-urgent ${osConfig.theme.literal.ERROR}
+  riverctl border-width 2
+  riverctl xcursor-theme ${osConfig.stylix.cursor.name} ${toString osConfig.stylix.cursor.size}
   riverctl set-repeat 50 300
 
   # Firefox draws CSD by default; force SSD so river draws its border.
   riverctl rule-add -app-id "firefox" ssd
+
+  riverctl rule-add -app-id "*pavucontrol*" float
+  riverctl rule-add -app-id "*blueman*" float
+
+  riverctl rule-add -app-id "scratch" float
+  riverctl rule-add -app-id "scratch" dimensions 1280 1280
 
   riverctl rule-add -app-id "nixpkgs-search" float
   riverctl rule-add -app-id "nixpkgs-search" dimensions 1280 800
@@ -136,15 +157,15 @@
   riverctl rule-add -title "Authentication Required" float
 
   riverctl default-layout "$layout_generator"
-  $layout_cmd -view-padding 18 -outer-padding 18 &
+  $layout_cmd -view-padding 9 -outer-padding 9 &
 
   # It makes sure WAYLAND_DISPLAY is shared and unblocks graphical-session.target.
   uwsm finalize
 
   # Using 'uwsm app --' ensures these stay alive correctly and die on logout.
+  uwsm app -- ${lib.getExe pkgs.swaybg} -m fill -i ${osConfig.theme.wallpaper} &
   uwsm app -- wezterm &
   uwsm app -- ${pkgs.blueman}/bin/blueman-applet &
-  uwsm app -- ${pkgs.blueman}/bin/blueman-manager &
   uwsm app -- vesktop.desktop &
   # Quick Access shares 1password's app-id and its map-time title, so the tag rule
   # only lives long enough to catch the main window.

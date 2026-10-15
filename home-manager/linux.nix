@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  osConfig,
   pkgs,
   ...
 }:
@@ -18,7 +19,7 @@ in
 {
   imports = [
     ./shared.nix
-    ./modules/dunst.nix
+    ./modules/notifications.nix
     ./modules/firefox.nix
     ./modules/waybar/waybar.nix
   ];
@@ -48,6 +49,7 @@ in
     slskd
     slurp # select region of screen
     sqlite
+    sshfs
     supercollider-with-plugins
     swappy # screenshot annotation tool
     tcpdump
@@ -80,7 +82,7 @@ in
   wayland.windowManager.river = {
     enable = true;
     systemd.enable = false;
-    extraConfig = import ./river/init.nix { inherit pkgs scripts; };
+    extraConfig = import ./river/init.nix { inherit pkgs scripts osConfig; };
   };
 
   xdg.configFile."uwsm/env-river".text =
@@ -93,7 +95,6 @@ in
   programs = {
     rofi = {
       enable = true;
-      font = lib.mkForce "CaskaydiaCove Nerd Font 14";
       theme = {
         "*" = {
           padding = config.lib.formats.rasi.mkLiteral "3px";
@@ -108,7 +109,6 @@ in
     foot = {
       enable = true;
       settings = {
-        main.font = lib.mkForce "CaskaydiaCove Nerd Font:size=14";
         colors-light.alpha = lib.mkForce "0.95";
       };
     };

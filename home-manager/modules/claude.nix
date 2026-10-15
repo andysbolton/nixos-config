@@ -7,6 +7,26 @@
 {
   programs.claude-code.enable = true;
 
+  programs.claude-code.lspServers = {
+    lua = {
+      command = lib.getExe pkgs.lua-language-server;
+      extensionToLanguage.".lua" = "lua";
+    };
+    nix = {
+      command = lib.getExe pkgs.nixd;
+      extensionToLanguage.".nix" = "nix";
+    };
+    fennel = {
+      command = lib.getExe pkgs.fennel-ls;
+      extensionToLanguage.".fnl" = "fennel";
+    };
+    fish = {
+      command = lib.getExe pkgs.fish-lsp;
+      args = [ "start" ];
+      extensionToLanguage.".fish" = "fish";
+    };
+  };
+
   # Companion to plan mode: keeps its read-only enforcement but defers the
   # plan-drafting behaviour so the session stays conversational.
   programs.claude-code.commands.discuss = ''
@@ -153,7 +173,7 @@
               # the next space event anyway
               if [ -n "$space" ] && ! yabai -m query --spaces | ${pkgs.jq}/bin/jq -e --argjson s "$space" \
                   'any(.[]; ."is-visible" and .index == $s)' >/dev/null; then
-                sketchybar --set "space.$space" icon.color=${osConfig.palette.ORANGE} 2>/dev/null || true
+                sketchybar --set "space.$space" icon.color=${osConfig.theme.argb.ATTENTION} 2>/dev/null || true
               fi
             ''
           else

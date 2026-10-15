@@ -10,8 +10,8 @@ power=(
   "${block[@]}"
   script="$PLUGIN_DIR/power.sh"
   click_script="\"$BAR_NAME\" --set power popup.drawing=toggle"
-  popup.background.color="$SURFACE"
-  popup.background.border_color="$OVERLAY"
+  popup.background.color="$LIGHTER_BACKGROUND"
+  popup.background.border_color="$COMMENT"
   popup.background.border_width=1
   popup.background.corner_radius=8
 )
@@ -131,8 +131,8 @@ set_volume=(
   background.padding_right=0
   slider.background.height=6
   slider.background.corner_radius=3
-  slider.background.color="$OVERLAY"
-  slider.highlight_color="$CYAN"
+  slider.background.color="$TRACK"
+  slider.highlight_color="$FILL"
   slider.knob=⬤
 )
 
