@@ -173,7 +173,7 @@
               # the next space event anyway
               if [ -n "$space" ] && ! yabai -m query --spaces | ${pkgs.jq}/bin/jq -e --argjson s "$space" \
                   'any(.[]; ."is-visible" and .index == $s)' >/dev/null; then
-                sketchybar --set "space.$space" icon.color=${osConfig.theme.argb.ATTENTION} 2>/dev/null || true
+                sketchybar --set "space.$space" icon.highlight=on 2>/dev/null || true
               fi
             ''
           else

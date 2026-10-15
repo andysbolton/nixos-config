@@ -10,7 +10,7 @@ fi
 
 if scutil --nc list 2>/dev/null | grep -q "^\* (Connected)" ||
   netstat -rn 2>/dev/null | grep -q "^0/1"; then
-  "$BAR_NAME" --set vpn label="$IP" background.border_color=$OK
+  "$BAR_NAME" --set vpn label="$IP" background.border_color=$TOGGLE_ON
 else
   "$BAR_NAME" --set vpn label="$IP" background.border_color=$COMMENT
 fi

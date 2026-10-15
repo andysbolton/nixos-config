@@ -17,4 +17,19 @@ vim.api.nvim_create_user_command("LspLog", view_lsp_logs, {desc = "View LSP logf
 local function _2_()
   return vim.cmd(("!rm " .. vim.lsp.log.get_filename()))
 end
-return vim.api.nvim_create_user_command("LspLogClear", _2_, {desc = "Clear LSP logfile."})
+vim.api.nvim_create_user_command("LspLogClear", _2_, {desc = "Clear LSP logfile."})
+local function claude_term_3f(buf)
+  return ((vim.bo[buf].buftype == "terminal") and (vim.fn.match((vim.b[buf].term_title or ""), "^[\226\156\179\226\151\144\226\151\145\226\151\146\226\151\147] ") >= 0))
+end
+local function update_title()
+  local _3_
+  if vim.iter(vim.api.nvim_list_bufs()):any(claude_term_3f) then
+    _3_ = "\226\156\179 "
+  else
+    _3_ = ""
+  end
+  vim.o.titlestring = (_3_ .. "nvim " .. vim.fn.fnamemodify(vim.fn.getcwd(), ":~"))
+  return nil
+end
+vim.o.title = true
+return vim.api.nvim_create_autocmd({"VimEnter", "DirChanged", "FocusLost", "TermOpen", "TermClose"}, {callback = update_title, group = vim.api.nvim_create_augroup("claude_title", {clear = true})})

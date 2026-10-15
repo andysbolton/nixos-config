@@ -45,6 +45,7 @@ for did in $(yabai -m query --displays 2>/dev/null | jq '.[].index'); do
       "${icon_only[@]}"
       background.color="$HIGHLIGHT"
       background.corner_radius=5
+      icon.highlight_color="$ORANGE"
       script="$PLUGIN_DIR/space.sh"
       click_script="yabai -m space --focus $sid"
     )
@@ -58,6 +59,7 @@ for did in $(yabai -m query --displays | jq '.[].index'); do
     display="$did"
     "${label_only[@]}"
     "${block[@]}"
+    label.color="$CYAN"
     script="$PLUGIN_DIR/front_app.sh"
   )
   "$BAR_NAME" --add item "front_app.$did" left \
