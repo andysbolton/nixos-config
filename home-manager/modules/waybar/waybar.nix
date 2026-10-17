@@ -306,19 +306,34 @@ in
         position = "bottom";
         spacing = 0;
 
-        modules-left = [
-          "disk"
-          "memory"
-          "cpu"
-          "temperature"
-          # "custom/gpu-utilization"
-          # "custom/gpu-temperature"
-        ];
+        modules-left = [ "group/stats" ];
 
         modules-right = [
           "custom/system"
           "custom/primary"
         ];
+
+        "group/stats" = {
+          orientation = "horizontal";
+          modules = [
+            "network#traffic"
+            "disk"
+            "memory"
+            "cpu"
+            "temperature"
+            # "custom/gpu-utilization"
+            # "custom/gpu-temperature"
+          ];
+        };
+
+        "network#traffic" = {
+          interval = 1;
+          format = "${colorWrap BRIGHT_CYAN "[net]"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
+          format-disconnected = "${colorWrap BRIGHT_CYAN "[net]"} offline";
+          tooltip-format = "{ifname}";
+          # Rates change width every second; reserve room so the pill doesn't jitter.
+          # min-length = 28;
+        };
 
         disk = {
           states = loadStates;

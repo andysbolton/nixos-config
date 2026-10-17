@@ -84,16 +84,26 @@ in
           config.stylix.fonts.serif.package
           config.stylix.fonts.emoji.package
           pkgs.noto-fonts
+          pkgs.noto-fonts-cjk-sans
           pkgs.nerd-fonts.symbols-only
-          pkgs.last-resort
         ];
       }
       # nix-darwin has no fontconfig options.
       // lib.optionalAttrs (options.fonts ? fontconfig) {
+        enableDefaultPackages = false;
         fontconfig.defaultFonts = {
-          monospace = [ config.stylix.fonts.monospace.name ];
-          sansSerif = [ config.stylix.fonts.sansSerif.name ];
-          serif = [ config.stylix.fonts.serif.name ];
+          monospace = [
+            config.stylix.fonts.monospace.name
+            config.stylix.fonts.emoji.name
+          ];
+          sansSerif = [
+            config.stylix.fonts.sansSerif.name
+            config.stylix.fonts.emoji.name
+          ];
+          serif = [
+            config.stylix.fonts.serif.name
+            config.stylix.fonts.emoji.name
+          ];
           emoji = [ config.stylix.fonts.emoji.name ];
         };
       };

@@ -45,18 +45,15 @@ window#waybar .modules-right {
 // the pill — every module is its own floating island
 #audio,
 #battery,
-#cpu,
 #custom-lan-mouse,
 #custom-network,
 #custom-primary,
 #custom-system,
-#disk,
-#memory,
 #mode,
 #pulseaudio-slider,
+#stats,
 #systemd-failed-units,
 #tags,
-#temperature,
 #window {
   background-color: @colors[surface];
   border: @border-width solid @colors[edge];
@@ -97,6 +94,18 @@ window#waybar .modules-right {
   font-weight: normal;
   color: @colors[cyan];
 }
+// #stats padding + its parts' padding = @pill-pad
+#stats {
+  padding: 6px 7px;
+}
+#stats #network,
+#stats #disk,
+#stats #memory,
+#stats #cpu,
+#stats #temperature {
+  padding: 0 7px;
+}
+
 // #audio padding + its parts' padding = @pill-pad
 #audio {
   padding: 4px 8px;

@@ -18,7 +18,7 @@ in
 {
   imports = [
     ./options/shared.nix
-    ./modules/claude.nix
+    ./modules/claude/claude.nix
     ./modules/fish.nix
     ./modules/lan-mouse.nix
   ];
@@ -91,6 +91,7 @@ in
     lua
     luaPackages.fennel
     lynx # terminal web browser
+    mdcat
     nh # helper CLI for Nix/Home Manager workflows
     nix-tree
     nixfmt
