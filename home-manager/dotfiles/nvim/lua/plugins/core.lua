@@ -9,15 +9,6 @@ return {
     "mg979/vim-visual-multi",
     branch = "master",
   },
-  {
-    "numToStr/Comment.nvim",
-    config = function()
-      require("Comment").setup()
-      local ft = require "Comment.ft"
-      -- Formatting for jq files
-      ft.jq = "#%s"
-    end,
-  },
   -- Detect tabstop and shiftwidth automatically
   "tpope/vim-sleuth",
   "romainl/vim-cool",
@@ -44,6 +35,13 @@ return {
           close_neotree,
         },
         post_restore_cmds = {
+          -- localoptions restores a winfixwidth that leaked from neo-tree; with it, a new
+          -- full-height split (e.g. CodeCompanion CLI) takes all its width from neo-tree
+          function()
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+              vim.wo[win][0].winfixwidth = false
+            end
+          end,
           function()
             if not vim.tbl_contains(vim.v.argv, "DiffviewOpen") then
               require("workspaces").neotree { action = "show" }

@@ -51,7 +51,13 @@ in
 
     interactiveShellInit = ''
       batman --export-env | source
-      fish_config theme choose tokyonight_night
+      # kmscon supports truecolor but sets COLORTERM=kmscon, which apps don't recognise.
+      if test "$COLORTERM" = kmscon
+        set -gx COLORTERM truecolor
+      end
+      ${pkgs.lib.optionalString (
+        osConfig.theme.native.fish != null
+      ) "fish_config theme choose ${osConfig.theme.native.fish}"}
 
       starship init fish | source
       enable_transience

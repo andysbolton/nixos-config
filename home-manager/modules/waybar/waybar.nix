@@ -3,7 +3,7 @@
   osConfig,
   ...
 }:
-with osConfig.palette.hex;
+with osConfig.theme.css;
 let
   systemctl = "${pkgs.systemd}/bin/systemctl --user";
 
@@ -25,12 +25,20 @@ let
   # The @colors map style.less imports, so the stylesheet tracks the scheme
   # instead of carrying its own copy of the hex values.
   paletteLess = pkgs.writeText "palette.less" ''
+    @font-mono: "${osConfig.stylix.fonts.monospace.name}";
     @colors: {
       ${pkgs.lib.concatStringsSep "\n  " (
-        pkgs.lib.mapAttrsToList (name: hex: "${pkgs.lib.toLower name}: ${hex};") osConfig.palette.hex
+        pkgs.lib.mapAttrsToList (name: color: "${pkgs.lib.toLower name}: ${color};") osConfig.theme.css
       )}
     };
   '';
+
+  # Load thresholds (%), styled as WARN / ATTENTION / ERROR in style.less.
+  loadStates = {
+    warning = 70;
+    urgent = 85;
+    critical = 95;
+  };
 
   netTools = pkgs.lib.makeBinPath [
     pkgs.iw
@@ -88,7 +96,7 @@ let
 
             esc_ssid=$(printf '%s' "$ssid" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
             if [ "$class" = "ok" ]; then
-              label="$icon $esc_ssid"
+              label="<span color='${OK}'>$icon</span> $esc_ssid"
             else
               label="$icon dns resolving…"
             fi
@@ -99,11 +107,11 @@ let
         tsstate=$(printf '%s' "$ts" | jq -r '.BackendState // "down"' 2>/dev/null)
         exitnode=$(printf '%s' "$ts" | jq -r 'first(.Peer[]? | select(.ExitNode == true) | .HostName) // ""' 2>/dev/null)
         if [ "$tsstate" = "Running" ]; then
-          tscolor="${GREEN}"
+          tscolor="${TOGGLE_ON}"
           tstip="Running"
           [ -n "$exitnode" ] && tstip="Running (exit: $exitnode)"
         else
-          tscolor="${SUBTEXT}"
+          tscolor="${TOGGLE_OFF}"
           tstip="''${tsstate:-down}"
         fi
         tsseg="<span color='$tscolor'>󰦝</span>"
@@ -146,18 +154,22 @@ in
         modules-right = [
           "custom/network"
           "battery"
-          "pulseaudio"
+          "group/audio"
           "pulseaudio/slider"
         ];
 
         clock = {
           tooltip-format = "<tt><small>{calendar}</small></tt>";
           interval = 1;
-          format = "${colorWrap OVERLAY "{0:%A, %B %d}"} | ${colorWrap TEXT "{0:%I:%M:%S %Z}"}";
+          format = "${colorWrap TEXT_ALT "{0:%A, %B %d}"} | ${colorWrap TEXT "{0:%I:%M:%S %Z}"}";
         };
 
         "river/window" = {
           "max-length" = 60;
+        };
+
+        "systemd-failed-units" = {
+          format-ok = "{system_state}/{user_state}";
         };
 
         "river/tags" = {
@@ -169,9 +181,9 @@ in
           interval = 5;
           exec = pkgs.writeShellScript "lan-mouse-check" ''
             if ${systemctl} is-active --quiet "lan-mouse.service"; then
-              echo "󰍽"
+              echo "<span color='${TOGGLE_ON}'>󰍽</span>"
             else
-              echo "󰍾"
+              echo "<span color='${TOGGLE_OFF}'>󰍾</span>"
             fi
           '';
           format = "{}";
@@ -198,7 +210,17 @@ in
         };
 
         battery = {
-          format = "{icon} {capacity}%";
+          # Battery states match at or below the value.
+          states = {
+            warning = 60;
+            urgent = 20;
+            critical = 10;
+          };
+          format = "${colorWrap OK "{icon}"} {capacity}%";
+          # Low states drop the green so style.less colours the whole pill.
+          format-warning = "{icon} {capacity}%";
+          format-urgent = "{icon} {capacity}%";
+          format-critical = "{icon} {capacity}%";
           format-icons = {
             default = [
               "󰂎"
@@ -229,13 +251,34 @@ in
           };
         };
 
+        "group/audio" = {
+          orientation = "horizontal";
+          modules = [
+            "bluetooth"
+            "pulseaudio"
+          ];
+        };
+
+        bluetooth = {
+          format = "󰂯";
+          format-off = "${colorWrap TOGGLE_OFF "󰂲"}";
+          format-disabled = "${colorWrap TOGGLE_OFF "󰂲"}";
+          format-connected = "${colorWrap OK "󰂱"}";
+          format-connected-battery = "${colorWrap OK "󰂱"} {device_battery_percentage}%";
+          tooltip-format = "{controller_alias}: {status}";
+          tooltip-format-connected = "{device_enumerate}";
+          tooltip-format-enumerate-connected = "{device_alias}";
+          tooltip-format-enumerate-connected-battery = "{device_alias} {device_battery_percentage}%";
+          on-click = "${pkgs.blueman}/bin/blueman-manager";
+        };
+
         pulseaudio = {
           "scroll-step" = 1;
-          format = "{icon} {volume}%{format_source}";
-          "format-bluetooth" = "{icon} {volume}%{format_source}";
+          format = "${colorWrap OK "{icon}"} {volume}%{format_source}";
+          "format-bluetooth" = "${colorWrap OK "{icon}"} {volume}%{format_source}";
           "format-bluetooth-muted" = " {icon}{format_source}";
           "format-muted" = " {format_source}";
-          "format-source" = "  {volume}%";
+          "format-source" = " ${colorWrap OK ""} {volume}%";
           "format-source-muted" = " ";
           "format-icons" = {
             headphone = "";
@@ -248,8 +291,7 @@ in
               ""
             ];
           };
-          "onclick" = "${pkgs.pavucontrol}/bin/pavucontrol";
-          "on-right-click" = "${pkgs.pavucontrol}/bin/pavucontrol";
+          "on-click" = "${pkgs.pavucontrol}/bin/pavucontrol";
         };
 
         "pulseaudio/slider" = {
@@ -264,32 +306,52 @@ in
         position = "bottom";
         spacing = 0;
 
-        modules-left = [
-          "disk"
-          "memory"
-          "cpu"
-          "temperature"
-          # "custom/gpu-utilization"
-          # "custom/gpu-temperature"
-        ];
+        modules-left = [ "group/stats" ];
 
         modules-right = [
           "custom/system"
           "custom/primary"
         ];
 
+        "group/stats" = {
+          orientation = "horizontal";
+          modules = [
+            "network#traffic"
+            "disk"
+            "memory"
+            "cpu"
+            "temperature"
+            # "custom/gpu-utilization"
+            # "custom/gpu-temperature"
+          ];
+        };
+
+        "network#traffic" = {
+          interval = 1;
+          format = "${colorWrap BRIGHT_CYAN "[net]"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
+          format-disconnected = "${colorWrap BRIGHT_CYAN "[net]"} offline";
+          tooltip-format = "{ifname}";
+          # Rates change width every second; reserve room so the pill doesn't jitter.
+          # min-length = 28;
+        };
+
         disk = {
-          format = " {used} / {total}";
+          states = loadStates;
+          format = "${colorWrap GREEN "[disk]"} {percentage_used}%";
+          tooltip-format = "{used} / {total}";
         };
 
         cpu = {
-          format = " {usage} %";
+          states = loadStates;
+          format = "${colorWrap BLUE "[cpu]"} {usage}%";
           tooltip = false;
           interval = 1;
         };
 
         memory = {
-          format = " {used:0.1f}G / {total:0.1f}G";
+          states = loadStates;
+          format = "${colorWrap MAGENTA "[mem]"} {percentage}%";
+          tooltip-format = "{used:0.1f}G / {total:0.1f}G";
           interval = 1;
         };
 
@@ -297,13 +359,7 @@ in
           "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
           interval = 1;
           "critical-threshold" = 80;
-          format = " {icon} {temperatureC}°C";
-          "format-icons" = [
-            ""
-            ""
-            ""
-            ""
-          ];
+          format = "${colorWrap CYAN "[temp]"} {temperatureC}°C";
         };
 
         # "custom/gpu-utilization" = {
@@ -336,7 +392,7 @@ in
           '';
           max-length = 30;
           min-length = 30;
-          format = "System: {}";
+          format = "${colorWrap CYAN "[s]"} {}";
           align = 0;
           escape = true;
         };
@@ -349,15 +405,20 @@ in
           max-length = 30;
           min-length = 30;
           align = 0;
-          format = "Primary: {}";
+          format = "${colorWrap MAGENTA "[p]"} {}";
           escape = true;
         };
       }
     ];
-    style = pkgs.runCommand "waybar-style.css" { nativeBuildInputs = [ pkgs.lessc ]; } ''
-      cp ${./style.less} style.less
-      cp ${paletteLess} palette.less
-      lessc style.less > $out
-    '';
+    # Read as text so it merges after Stylix's waybar CSS (import from derivation).
+    style = pkgs.lib.mkAfter (
+      builtins.readFile (
+        pkgs.runCommand "waybar-style.css" { nativeBuildInputs = [ pkgs.lessc ]; } ''
+          cp ${./style.less} style.less
+          cp ${paletteLess} palette.less
+          lessc style.less > $out
+        ''
+      )
+    );
   };
 }

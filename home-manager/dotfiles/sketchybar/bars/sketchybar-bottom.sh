@@ -5,23 +5,23 @@
 "$BAR_NAME" --bar "${bar[@]}" position=bottom color="#000000"
 
 "$BAR_NAME" --add item network.up left \
-  --set network.up icon="↑" width=95 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
+  --set network.up icon="[up]" icon.color="$YELLOW" icon.font="$LABEL_FONT" width=115 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item network.down left \
-  --set network.down icon="↓" width=95 \
+  --set network.down icon="[down]" icon.color="$CYAN" icon.font="$LABEL_FONT" width=130 \
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item disk left \
-  --set disk icon="$DISK" width=58 update_freq=60 script="$PLUGIN_DIR/stats/disk.sh" \
+  --set disk icon="[disk]" icon.color="$GREEN" icon.font="$LABEL_FONT" width=90 update_freq=60 script="$PLUGIN_DIR/stats/disk.sh" \
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item memory left \
-  --set memory icon="$MEMORY" width=58 update_freq=3 script="$PLUGIN_DIR/stats/ram.sh" \
+  --set memory icon="[mem]" icon.color="$MAGENTA" icon.font="$LABEL_FONT" width=82 update_freq=3 script="$PLUGIN_DIR/stats/ram.sh" \
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add item cpu left \
-  --set cpu icon="$CPU" width=76 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
+  --set cpu icon="[cpu]" icon.color="$BLUE" icon.font="$LABEL_FONT" width=100 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
   "${icon_with_label[@]}"
 
 "$BAR_NAME" --add bracket stats network.up network.down disk memory cpu \
@@ -40,7 +40,7 @@ clock_props=(
 
 "$BAR_NAME" --add item clock.date center \
   --set clock.date "${clock_props[@]}" \
-  label.color="$SUBTEXT" \
+  label.color="$DARK_FOREGROUND" \
   update_freq=1 \
   --subscribe clock.date mouse.clicked
 
@@ -68,8 +68,8 @@ clipboard=(
   script="$PLUGIN_DIR/clipboard.sh"
   "${block[@]}"
   "${icon_with_label[@]}"
-  popup.background.color="$SURFACE"
-  popup.background.border_color="$OVERLAY"
+  popup.background.color="$LIGHTER_BACKGROUND"
+  popup.background.border_color="$COMMENT"
   popup.background.border_width=1
   popup.background.corner_radius=8
   popup.align=right

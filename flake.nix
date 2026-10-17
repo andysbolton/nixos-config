@@ -40,6 +40,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    flake-parts.url = "github:hercules-ci/flake-parts";
+
+    optnix = {
+      url = "sourcehut:~watersucks/optnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     opnix = {
       url = "github:andysbolton/opnix/fix-hm-network";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -175,6 +182,7 @@
             ./hosts/main/configuration.nix
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
+            inputs.optnix.nixosModules.optnix
             stylix.nixosModules.stylix
             {
               home-manager.users.andy = ./home-manager/linux.nix;
@@ -205,6 +213,7 @@
             ./hosts/portable/configuration.nix
             disko.nixosModules.disko
             home-manager.nixosModules.home-manager
+            inputs.optnix.nixosModules.optnix
             stylix.nixosModules.stylix
             {
               home-manager.users.andy = ./home-manager/linux.nix;
@@ -237,6 +246,7 @@
           modules = [
             ./hosts/work-darwin/configuration.nix
             home-manager.darwinModules.home-manager
+            inputs.optnix.darwinModules.optnix
             stylix.darwinModules.stylix
             {
               home-manager.users.andybolton = ./home-manager/darwin.nix;

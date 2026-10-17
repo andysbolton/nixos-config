@@ -9,7 +9,7 @@ return {
 
   init = function()
     local ensure_installed = require("configs.util").get_treesitters()
-    local default_treesitters = { "vimdoc", "vim", "markdown_inline" }
+    local default_treesitters = { "vimdoc", "vim", "markdown_inline", "toml" }
 
     for _, v in ipairs(default_treesitters) do
       table.insert(ensure_installed, v)

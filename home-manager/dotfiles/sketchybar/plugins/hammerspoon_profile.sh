@@ -2,4 +2,11 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-$BAR_NAME --set "$NAME" label="$(hs -c "Profile")" background.border_color="$OVERLAY"
+PROFILE=$(hs -c "Profile")
+
+case "$PROFILE" in
+linux) COLOR="$ATTENTION" ;;
+*) COLOR="$UNFOCUSED" ;;
+esac
+
+$BAR_NAME --set "$NAME" label="$PROFILE" icon.color="$COLOR" label.color="$COLOR" background.border_color="$COMMENT"

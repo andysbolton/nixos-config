@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ ... }:
 {
   services.dunst = {
     enable = true;
@@ -7,24 +7,18 @@
         monitor = 0;
         follow = "mouse";
 
-        width = 800;
-        height = 300;
+        width = 400;
+        height = "(0, 300)";
         origin = "bottom-center";
 
-        gap_size = 0;
+        gap_size = 30;
         sort = "yes";
 
-        font = lib.mkForce "CaskaydiaCove Nerd Font 14";
         line_height = 0;
 
         markup = "full";
-        format = ''
-          <b>%s</b>
-          %a
-
-          %b'';
+        format = "<b>%s</b>\\n%a\\n\\n%b";
         alignment = "left";
-        vertical_alignment = "right";
         show_age_threshold = 60;
 
         show_indicators = "yes";

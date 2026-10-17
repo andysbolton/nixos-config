@@ -9,6 +9,7 @@
     ./hardware-configuration.nix
     ./disko.nix
     ../../modules/theme.nix
+    ../../modules/optnix.nix
     ../../modules/desktop.nix
     ../../modules/steam.nix
     ../../modules/vpn.nix
@@ -16,12 +17,25 @@
     inputs.sops-nix.nixosModules.sops
   ];
 
+  monitors = {
+    eDP-1.scale = 1.1;
+    HDMI-A-1.rightOf = "eDP-1";
+  };
+
   boot = {
+    # i915 taking over the framebuffer resets the console font, so set the font after it loads.
+    initrd.kernelModules = [ "i915" ];
+    initrd.systemd.services.systemd-vconsole-setup.after = [ "systemd-modules-load.service" ];
     loader = {
-      systemd-boot.enable = true;
+      limine = {
+        enable = true;
+        maxGenerations = 10;
+        style.wallpapers = [ config.theme.wallpaper ];
+      };
       efi.canTouchEfiVariables = true;
     };
   };
+  stylix.targets.limine.enable = true;
 
   users.users.andy.extraGroups = [
     "wheel"
