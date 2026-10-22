@@ -9,15 +9,6 @@ return {
     "mg979/vim-visual-multi",
     branch = "master",
   },
-  {
-    "numToStr/Comment.nvim",
-    config = function()
-      require("Comment").setup()
-      local ft = require "Comment.ft"
-      -- Formatting for jq files
-      ft.jq = "#%s"
-    end,
-  },
   -- Detect tabstop and shiftwidth automatically
   "tpope/vim-sleuth",
   "romainl/vim-cool",

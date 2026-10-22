@@ -1,6 +1,6 @@
 return {
   name = "css",
-  ft = { "css", "less" },
+  ft = { "css", "less", "scss" },
   ls = {
     name = "cssls",
     settings = {},

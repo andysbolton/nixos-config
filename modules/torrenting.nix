@@ -8,9 +8,65 @@ let
   netns = config.modules.vpn.netns;
   qbittorrentWebuiPort = 4292;
   downloadPath = "/mnt/media/Seeding";
+  qbitManageConfig =
+    pkgs.writeText "qbit-manage.yml"
+      # yaml
+      ''
+        commands:
+          dry_run: False
+          tag_update: True
+          skip_qb_version_check: True
+
+        qbt:
+          host: "localhost:${toString qbittorrentWebuiPort}"
+          user: !ENV QBIT_USER
+          pass: !ENV QBIT_PASS
+
+        cat:
+          radarr: "${downloadPath}"
+          sonarr: "${downloadPath}"
+          Uncategorized: "${downloadPath}"
+
+        directory:
+          root_dir: "${downloadPath}"
+
+        recyclebin:
+          enabled: False
+
+        tracker:
+          empirehost.me|stackoverflow.tech|bgp.technology:
+            tag: src:IPTorrents
+          cinemageddon:
+            tag: src:Cinemageddon
+          other:
+            tag: src:public
+      '';
 in
 {
   environment.systemPackages = [ pkgs.qbit-manage ];
+
+  sops.secrets."qbit-manage.env" = { };
+
+  systemd.services.qbit-manage = {
+    after = [ "qbittorrent.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      DynamicUser = true;
+      StateDirectory = "qbit-manage";
+      EnvironmentFile = config.sops.secrets."qbit-manage.env".path;
+      # qbit_manage rewrites its config and writes logs next to it.
+      ExecStartPre = "${pkgs.coreutils}/bin/install -m600 ${qbitManageConfig} %S/qbit-manage/config.yml";
+      ExecStart = "${pkgs.qbit-manage}/bin/qbit-manage -cd %S/qbit-manage -r --web-server=False";
+    };
+  };
+
+  systemd.timers.qbit-manage = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "hourly";
+      Persistent = true;
+    };
+  };
 
   users = {
     groups = {
@@ -44,6 +100,8 @@ in
       BitTorrent.Session = {
         QueueingSystemEnabled = false;
         DefaultSavePath = downloadPath;
+        GlobalUPSpeedLimit = 500; # KiB/s
+        ShareLimitAction = "Stop";
       };
 
       Network.PortForwarding.Enabled = false;

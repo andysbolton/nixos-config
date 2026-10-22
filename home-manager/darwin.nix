@@ -62,25 +62,6 @@ let
   sketchybarLinks = lib.foldl' (
     acc: instance: acc // mkSketchybarLinks instance
   ) { } sketchybarInstances;
-
-  # Workspace farms ($root/.workspaces/<TICKET>) are owned by the nvim
-  # workspaces plugin (dotfiles/nvim/lua/workspaces/). This PreToolUse hook is
-  # the entire Claude integration: before Edit/Write, run the plugin's generic
-  # guard, which claims a worktree for unclaimed farm repos and no-ops
-  # everywhere else. All decision logic lives in guard.lua; the bash prefilter
-  # only avoids a ~130ms headless-nvim spawn on edits outside the farm root.
-  workspaceGuardHook = pkgs.writeShellScript "hm-claude-workspace-guard" ''
-    input=$(cat)
-    file=$(${pkgs.jq}/bin/jq -r '.tool_input.file_path // .tool_input.notebook_path // empty' <<<"$input")
-    case "$file" in
-      "''${WORKTREE_SOURCE_ROOT:-$HOME/smartwyre}/.workspaces/"*) ;;
-      *) exit 0 ;;
-    esac
-    err=$(${config.programs.neovim.finalPackage}/bin/nvim -l ${config.dotfilesPath}/nvim/lua/workspaces/guard.lua "$file" 2>&1) || {
-      echo "workspaces guard blocked the edit: $err" >&2
-      exit 2
-    }
-  '';
 in
 {
   imports = [
@@ -123,29 +104,10 @@ in
     sketchybarBottom
   ]);
 
-  # Workspace hooks merged into ~/.claude/settings.json without letting nix
-  # own the file, same pattern as claudeNotifyHooks in modules/claude.nix.
-  home.activation.claudeWorkspaceHooks =
-    lib.hm.dag.entryAfter [ "writeBoundary" ]
-      # bash
-      ''
-        settings="$HOME/.claude/settings.json"
-        ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
-        [ -s "$settings" ] || echo '{}' > "$settings"
-
-        new=$(${pkgs.jq}/bin/jq --arg guard ${workspaceGuardHook} '
-          .hooks.PreToolUse |= [ { matcher: "Edit|Write|MultiEdit|NotebookEdit", hooks: [ { type: "command", command: $guard } ] } ]
-          | .skillOverrides."worktree-session" = "off"
-          | .claudeMdExcludes = (((.claudeMdExcludes // []) + ["**/infra-orchestrator/.claude/skills/worktree-session/SKILL.md"]) | unique)
-        ' "$settings" 2>/dev/null) || {
-          echo "claude-code: settings.json is not valid JSON, skipping workspace hook patch" >&2
-          new=""
-        }
-
-        if [ -n "$new" ] && [ "$new" != "$(${pkgs.coreutils}/bin/cat "$settings")" ]; then
-          printf '%s\n' "$new" > "$settings"
-        fi
-      '';
+  programs.claude-code.settings = {
+    skillOverrides.worktree-session = "off";
+    claudeMdExcludes = [ "**/infra-orchestrator/.claude/skills/worktree-session/SKILL.md" ];
+  };
 
   # Project context for ~/smartwyre (loaded by all work sessions, farm or root).
   home.file."smartwyre/CLAUDE.md" = {

@@ -96,7 +96,7 @@ let
 
             esc_ssid=$(printf '%s' "$ssid" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g')
             if [ "$class" = "ok" ]; then
-              label="<span color='${GREEN}'>$icon</span> $esc_ssid"
+              label="<span color='${OK}'>$icon</span> $esc_ssid"
             else
               label="$icon dns resolving…"
             fi
@@ -216,7 +216,7 @@ in
             urgent = 20;
             critical = 10;
           };
-          format = "${colorWrap GREEN "{icon}"} {capacity}%";
+          format = "${colorWrap OK "{icon}"} {capacity}%";
           # Low states drop the green so style.less colours the whole pill.
           format-warning = "{icon} {capacity}%";
           format-urgent = "{icon} {capacity}%";
@@ -263,8 +263,8 @@ in
           format = "󰂯";
           format-off = "${colorWrap TOGGLE_OFF "󰂲"}";
           format-disabled = "${colorWrap TOGGLE_OFF "󰂲"}";
-          format-connected = "${colorWrap GREEN "󰂱"}";
-          format-connected-battery = "${colorWrap GREEN "󰂱"} {device_battery_percentage}%";
+          format-connected = "${colorWrap OK "󰂱"}";
+          format-connected-battery = "${colorWrap OK "󰂱"} {device_battery_percentage}%";
           tooltip-format = "{controller_alias}: {status}";
           tooltip-format-connected = "{device_enumerate}";
           tooltip-format-enumerate-connected = "{device_alias}";
@@ -274,11 +274,11 @@ in
 
         pulseaudio = {
           "scroll-step" = 1;
-          format = "${colorWrap GREEN "{icon}"} {volume}%{format_source}";
-          "format-bluetooth" = "${colorWrap GREEN "{icon}"} {volume}%{format_source}";
+          format = "${colorWrap OK "{icon}"} {volume}%{format_source}";
+          "format-bluetooth" = "${colorWrap OK "{icon}"} {volume}%{format_source}";
           "format-bluetooth-muted" = " {icon}{format_source}";
           "format-muted" = " {format_source}";
-          "format-source" = " ${colorWrap ATTENTION ""} {volume}%";
+          "format-source" = " ${colorWrap OK ""} {volume}%";
           "format-source-muted" = " ";
           "format-icons" = {
             headphone = "";
@@ -306,19 +306,34 @@ in
         position = "bottom";
         spacing = 0;
 
-        modules-left = [
-          "disk"
-          "memory"
-          "cpu"
-          "temperature"
-          # "custom/gpu-utilization"
-          # "custom/gpu-temperature"
-        ];
+        modules-left = [ "group/stats" ];
 
         modules-right = [
           "custom/system"
           "custom/primary"
         ];
+
+        "group/stats" = {
+          orientation = "horizontal";
+          modules = [
+            "network#traffic"
+            "disk"
+            "memory"
+            "cpu"
+            "temperature"
+            # "custom/gpu-utilization"
+            # "custom/gpu-temperature"
+          ];
+        };
+
+        "network#traffic" = {
+          interval = 1;
+          format = "${colorWrap BRIGHT_CYAN "[net]"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
+          format-disconnected = "${colorWrap BRIGHT_CYAN "[net]"} offline";
+          tooltip-format = "{ifname}";
+          # Rates change width every second; reserve room so the pill doesn't jitter.
+          # min-length = 28;
+        };
 
         disk = {
           states = loadStates;

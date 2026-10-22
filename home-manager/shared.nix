@@ -18,7 +18,7 @@ in
 {
   imports = [
     ./options/shared.nix
-    ./modules/claude.nix
+    ./modules/claude/claude.nix
     ./modules/fish.nix
     ./modules/lan-mouse.nix
   ];
@@ -65,6 +65,7 @@ in
   home.packages = with pkgs; [
     (sbcl.withPackages (ps: [ ps.swank ]))
     age # simple modern file encryption tool
+    bandwhich
     bat # cat replacement with syntax highlighting
     bat-extras.core
     delta # syntax-highlighting pager for git diff output
@@ -91,6 +92,7 @@ in
     lua
     luaPackages.fennel
     lynx # terminal web browser
+    mdcat
     nh # helper CLI for Nix/Home Manager workflows
     nix-tree
     nixfmt
