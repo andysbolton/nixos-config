@@ -209,7 +209,7 @@ in
   ];
 
   home.sessionVariables = {
-    BROWSER = "${pkgs.firefox}/Applications/Firefox.app/Contents/MacOS/firefox";
+    BROWSER = "${config.programs.firefox.finalPackage}/Applications/Firefox.app/Contents/MacOS/firefox";
   };
 
   launchd.agents.sketchybar-bottom = {
