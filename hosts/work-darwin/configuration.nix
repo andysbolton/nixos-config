@@ -16,7 +16,7 @@ in
 
   networking.hostName = "work";
 
-  theme.fontSize = 14;
+  theme.fontSize = 13;
 
   users.users.andybolton = {
     home = "/Users/andybolton";

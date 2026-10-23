@@ -2,6 +2,7 @@
   ifstat-legacy,
   jq,
   lib,
+  macmon,
   pkgs-unstable,
   pngpaste,
   sketchybar,
@@ -13,6 +14,7 @@ writeShellScriptBin "sketchybar-bottom" ''
     lib.makeBinPath [
       jq
       ifstat-legacy
+      macmon
       pkgs-unstable.yabai
       pngpaste
     ]

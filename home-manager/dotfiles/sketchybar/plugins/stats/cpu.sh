@@ -3,6 +3,6 @@
 source "$CONFIG_DIR/colors.sh"
 source "$CONFIG_DIR/plugins/stats/level.sh"
 
-usage=$(top -l 2 | grep -E "^CPU" | tail -1 | awk '{ printf "%.2f", $3 + $5 }')
+usage=$(iostat -n0 -w2 -c2 | awk 'END { print 100 - $3 }')
 
-"$BAR_NAME" -m --set "$NAME" label="${usage}%" label.color="$(level_color "${usage%.*}")"
+"$BAR_NAME" -m --set "$NAME" label="${usage}%" label.color="$(level_color "$usage")"

@@ -328,8 +328,8 @@ in
 
         "network#traffic" = {
           interval = 1;
-          format = "${colorWrap BRIGHT_CYAN "[net]"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
-          format-disconnected = "${colorWrap BRIGHT_CYAN "[net]"} offline";
+          format = "${colorWrap BLUE "[net]"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
+          format-disconnected = "${colorWrap BLUE "[net]"} offline";
           tooltip-format = "{ifname}";
           # Rates change width every second; reserve room so the pill doesn't jitter.
           # min-length = 28;
@@ -337,7 +337,7 @@ in
 
         disk = {
           states = loadStates;
-          format = "${colorWrap GREEN "[disk]"} {percentage_used}%";
+          format = "${colorWrap BLUE "[disk]"} {percentage_used}%";
           tooltip-format = "{used} / {total}";
         };
 
@@ -350,7 +350,7 @@ in
 
         memory = {
           states = loadStates;
-          format = "${colorWrap MAGENTA "[mem]"} {percentage}%";
+          format = "${colorWrap BLUE "[mem]"} {percentage}%";
           tooltip-format = "{used:0.1f}G / {total:0.1f}G";
           interval = 1;
         };
@@ -359,7 +359,7 @@ in
           "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
           interval = 1;
           "critical-threshold" = 80;
-          format = "${colorWrap CYAN "[temp]"} {temperatureC}°C";
+          format = "${colorWrap BLUE "[temp]"} {temperatureC}°C";
         };
 
         # "custom/gpu-utilization" = {

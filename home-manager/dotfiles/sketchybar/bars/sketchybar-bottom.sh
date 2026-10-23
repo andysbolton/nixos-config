@@ -4,27 +4,37 @@
 
 "$BAR_NAME" --bar "${bar[@]}" position=bottom color="#000000"
 
-"$BAR_NAME" --add item network.up left \
-  --set network.up icon="[up]" icon.color="$YELLOW" icon.font="$LABEL_FONT" width=115 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
+stat=(
+  icon.color="$BLUE"
+  icon.font="CaskaydiaCove Nerd Font:Regular:14.0"
   "${icon_with_label[@]}"
+  icon.padding_right=10
+)
 
-"$BAR_NAME" --add item network.down left \
-  --set network.down icon="[down]" icon.color="$CYAN" icon.font="$LABEL_FONT" width=130 \
-  "${icon_with_label[@]}"
+"$BAR_NAME" --add item network left \
+  --set network icon="[net]" width=190 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
+  "${stat[@]}"
 
 "$BAR_NAME" --add item disk left \
-  --set disk icon="[disk]" icon.color="$GREEN" icon.font="$LABEL_FONT" width=90 update_freq=60 script="$PLUGIN_DIR/stats/disk.sh" \
-  "${icon_with_label[@]}"
+  --set disk icon="[disk]" width=94 update_freq=60 script="$PLUGIN_DIR/stats/disk.sh" \
+  "${stat[@]}"
 
 "$BAR_NAME" --add item memory left \
-  --set memory icon="[mem]" icon.color="$MAGENTA" icon.font="$LABEL_FONT" width=82 update_freq=3 script="$PLUGIN_DIR/stats/ram.sh" \
-  "${icon_with_label[@]}"
+  --set memory icon="[mem]" width=86 update_freq=3 script="$PLUGIN_DIR/stats/ram.sh" \
+  "${stat[@]}"
 
 "$BAR_NAME" --add item cpu left \
-  --set cpu icon="[cpu]" icon.color="$BLUE" icon.font="$LABEL_FONT" width=100 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
-  "${icon_with_label[@]}"
+  --set cpu icon="[cpu]" width=86 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
+  "${stat[@]}"
 
-"$BAR_NAME" --add bracket stats network.up network.down disk memory cpu \
+"$BAR_NAME" --add item gpu left \
+  --set gpu icon="[gpu]" width=86 \
+  "${stat[@]}"
+
+pkill -f "macmon pipe"
+"$PLUGIN_DIR/stats/macmon.sh" &
+
+"$BAR_NAME" --add bracket stats network disk memory cpu gpu \
   --set stats "${block[@]}"
 
 # Center
@@ -52,22 +62,21 @@ clock_props=(
 # Right
 
 vpn=(
-  icon="$NETWORK"
+  icon="[ip]"
   update_freq=10
   script="$PLUGIN_DIR/stats/vpn.sh"
-  icon.padding_right="$PAD"
   "${block[@]}"
-  "${icon_with_label[@]}"
+  "${stat[@]}"
 )
 
 "$BAR_NAME" --add item vpn right \
   --set vpn "${vpn[@]}"
 
 clipboard=(
-  icon="$CLIPBOARD"
+  icon="[s]"
   script="$PLUGIN_DIR/clipboard.sh"
   "${block[@]}"
-  "${icon_with_label[@]}"
+  "${stat[@]}"
   popup.background.color="$LIGHTER_BACKGROUND"
   popup.background.border_color="$COMMENT"
   popup.background.border_width=1
