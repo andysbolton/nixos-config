@@ -70,16 +70,18 @@ return {
           vim.keymap.set("n", keys, func, { buffer = bufnr, desc = desc })
         end
 
+        local bulitin = require "telescope.builtin"
+
         nmap("<leader>rn", vim.lsp.buf.rename, "[R]e[n]ame")
 
-        nmap("gd", require("telescope.builtin").lsp_definitions, "[G]oto [D]efinition")
+        nmap("gd", bulitin.lsp_definitions, "[G]oto [D]efinition")
         nmap("gD", vim.lsp.buf.declaration, "[G]oto [D]eclaration")
-        nmap("gr", require("telescope.builtin").lsp_references, "[G]oto [R]eferences")
-        nmap("gI", require("telescope.builtin").lsp_implementations, "[G]oto [I]mplementation")
+        nmap("gr", bulitin.lsp_references, "[G]oto [R]eferences")
+        nmap("gI", bulitin.lsp_implementations, "[G]oto [I]mplementation")
 
-        nmap("<leader>D", require("telescope.builtin").lsp_type_definitions, "Type [D]efinition")
-        nmap("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
-        nmap("<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, "[W]orkspace [S]ymbols")
+        nmap("<leader>D", bulitin.lsp_type_definitions, "Type [D]efinition")
+        nmap("<leader>ds", bulitin.lsp_document_symbols, "[D]ocument [S]ymbols")
+        nmap("<leader>ws", bulitin.lsp_dynamic_workspace_symbols, "[W]orkspace [S]ymbols")
 
         nmap(
           "K",
@@ -170,9 +172,7 @@ return {
       -- Not `on_attach` in the "*" config: a server's own lsp/<name>.lua on the
       -- runtimepath replaces that key outright.
       vim.api.nvim_create_autocmd("LspAttach", {
-        callback = function(args)
-          on_attach(assert(vim.lsp.get_client_by_id(args.data.client_id)), args.buf)
-        end,
+        callback = function(args) on_attach(assert(vim.lsp.get_client_by_id(args.data.client_id)), args.buf) end,
       })
 
       require("lspkind").init {

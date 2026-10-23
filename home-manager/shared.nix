@@ -84,6 +84,7 @@ in
     iperf
     jo
     jq
+    kakoune
     killall
     lazygit
     lf # terminal file manager

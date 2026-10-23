@@ -34,11 +34,12 @@ return {
 
       vim.keymap.set("t", "<C-r>", function()
         local key = vim.fn.getcharstr()
+        print(vim.fn.keytrans(key):lower())
         if vim.fn.keytrans(key):lower() == "<C-r>" then
           return "<C-r><C-r>" -- pass through to fish reverse-search
         end
         return [[<C-\><C-n>"]] .. key .. "pi"
-      end, { expr = true })
+      end, { desc = "Copy [r]egister in term", expr = true })
 
       -- When a bottom terminal is open, force it full-width along the bottom so neo-tree
       -- can't keep full height, then reclaim the CodeCompanion CLI's full-height right
