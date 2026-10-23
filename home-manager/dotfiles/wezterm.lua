@@ -44,7 +44,7 @@ if theme then
 	}
 end
 config.window_close_confirmation = "NeverPrompt"
-config.window_background_opacity = 0.5
+config.window_background_opacity = 0.75
 config.window_padding = { left = 18, right = 18, top = 6, bottom = 6 }
 config.use_fancy_tab_bar = false
 config.tab_max_width = 1000

@@ -73,6 +73,9 @@ in
   targets.darwin.copyApps.enable = true;
   targets.darwin.linkApps.enable = false;
 
+  # Installed as a Homebrew cask: the copied nix wrapper bundle makes macOS lose links opened from other apps.
+  programs.firefox.package = null;
+
   home.homeDirectory = "/Users/andybolton";
 
   xdg.configFile = sketchybarLinks;
@@ -131,8 +134,8 @@ in
 
   programs.claude-code.mcpServers = {
     atlassian = {
-      type = "sse";
-      url = "https://mcp.atlassian.com/v1/sse";
+      type = "http";
+      url = "https://mcp.atlassian.com/v2/mcp";
     };
 
     azure = {
@@ -158,11 +161,8 @@ in
 
     terraform = {
       type = "stdio";
-      command = "npx";
-      args = [
-        "-y"
-        "terraform-mcp-server"
-      ];
+      command = "${pkgs.terraform-mcp-server}/bin/terraform-mcp-server";
+      args = [ "stdio" ];
     };
   };
 
@@ -171,7 +171,7 @@ in
   ];
 
   home.sessionVariables = {
-    BROWSER = "${pkgs.firefox}/Applications/Firefox.app/Contents/MacOS/firefox";
+    BROWSER = "/Applications/Firefox.app/Contents/MacOS/firefox";
   };
 
   launchd.agents.sketchybar-bottom = {

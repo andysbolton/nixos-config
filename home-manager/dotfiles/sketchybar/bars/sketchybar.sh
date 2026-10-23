@@ -151,11 +151,10 @@ set_volume=(
   icon.drawing=off label.drawing=off
 
 hammerspoon_profile=(
-  icon="$KEYBOARD"
+  icon.drawing=off
   script="$PLUGIN_DIR/hammerspoon_profile.sh"
   "${block[@]}"
   update_freq=1
-  "${icon_with_label[@]}"
   background.padding_right=0
 )
 

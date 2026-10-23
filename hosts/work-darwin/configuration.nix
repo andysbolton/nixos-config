@@ -16,7 +16,7 @@ in
 
   networking.hostName = "work";
 
-  theme.fontSize = 14;
+  theme.fontSize = 13;
 
   users.users.andybolton = {
     home = "/Users/andybolton";
@@ -68,8 +68,8 @@ in
     onActivation = {
       # "zap" removes manually installed brews and casks
       cleanup = "zap";
-      autoUpdate = false;
-      upgrade = false;
+      autoUpdate = true;
+      upgrade = true;
     };
     taps = [ "koekeishiya/formulae" ];
     brews = [
@@ -78,6 +78,10 @@ in
     casks = [
       # "bot-framework-emulator"
       "docker-desktop"
+      {
+        name = "firefox";
+        greedy = true;
+      }
       "hammerspoon"
       "microsoft-teams"
       "protonvpn"
