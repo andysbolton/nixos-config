@@ -105,6 +105,12 @@ window#waybar .modules-right {
 #stats #temperature {
   padding: 0 7px;
 }
+#stats #disk,
+#stats #memory,
+#stats #cpu,
+#stats #temperature {
+  padding-left: 0;
+}
 
 // #audio padding + its parts' padding = @pill-pad
 #audio {
@@ -172,6 +178,17 @@ window#waybar .modules-right {
 }
 #custom-primary {
   font-weight: normal;
+  color: @colors[label];
+  animation-name: fade;
+  animation-duration: 2s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+@keyframes fade {
+  to {
+    color: @colors[surface];
+  }
 }
 
 // volume slider — GtkScale subnodes: trough / highlight / knob

@@ -328,8 +328,8 @@ in
 
         "network#traffic" = {
           interval = 1;
-          format = "${colorWrap BLUE "[net]"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
-          format-disconnected = "${colorWrap BLUE "[net]"} offline";
+          format = "${colorWrap LABEL "≈ net"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
+          format-disconnected = "${colorWrap LABEL "≈ net"} offline";
           tooltip-format = "{ifname}";
           # Rates change width every second; reserve room so the pill doesn't jitter.
           # min-length = 28;
@@ -337,20 +337,20 @@ in
 
         disk = {
           states = loadStates;
-          format = "${colorWrap BLUE "[disk]"} {percentage_used}%";
+          format = "${colorWrap DIVIDER "│"} ${colorWrap LABEL "◙ disk"} {percentage_used}%";
           tooltip-format = "{used} / {total}";
         };
 
         cpu = {
           states = loadStates;
-          format = "${colorWrap BLUE "[cpu]"} {usage}%";
+          format = "${colorWrap DIVIDER "│"} ${colorWrap LABEL "▣ cpu"} {usage}%";
           tooltip = false;
           interval = 1;
         };
 
         memory = {
           states = loadStates;
-          format = "${colorWrap BLUE "[mem]"} {percentage}%";
+          format = "${colorWrap DIVIDER "│"} ${colorWrap LABEL "≡ mem"} {percentage}%";
           tooltip-format = "{used:0.1f}G / {total:0.1f}G";
           interval = 1;
         };
@@ -359,7 +359,7 @@ in
           "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
           interval = 1;
           "critical-threshold" = 80;
-          format = "${colorWrap BLUE "[temp]"} {temperatureC}°C";
+          format = "${colorWrap DIVIDER "│"} ${colorWrap LABEL "☼ temp"} {temperatureC}°C";
         };
 
         # "custom/gpu-utilization" = {
@@ -392,7 +392,7 @@ in
           '';
           max-length = 30;
           min-length = 30;
-          format = "${colorWrap CYAN "[s]"} {}";
+          format = "${colorWrap RED "♥"}  {}";
           align = 0;
           escape = true;
         };
@@ -405,7 +405,7 @@ in
           max-length = 30;
           min-length = 30;
           align = 0;
-          format = "${colorWrap MAGENTA "[p]"} {}";
+          format = "█ ${colorWrap TEXT "{}"}";
           escape = true;
         };
       }

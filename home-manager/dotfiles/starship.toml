@@ -1,10 +1,6 @@
 [directory]
 format = '[ ](bold yellow)[$path]($style)[$read_only]($read_only_style) '
 
-[[battery.display]]
-threshold = 30
-style = "bold red"
-
 [memory_usage]
 format = "[${ram} @ $ram_pct]($style) "
 threshold = 50

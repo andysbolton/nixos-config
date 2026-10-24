@@ -55,7 +55,25 @@ in
       nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
       "opencode/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
-      "starship.toml".source = ./dotfiles/starship.toml;
+      # Battery levels mirror waybar's battery states.
+      "starship.toml".source = (pkgs.formats.toml { }).generate "starship.toml" (
+        lib.recursiveUpdate (fromTOML (builtins.readFile ./dotfiles/starship.toml)) {
+          battery.display = with osConfig.theme.css; [
+            {
+              threshold = 10;
+              style = "bold ${ERROR}";
+            }
+            {
+              threshold = 20;
+              style = "bold ${ATTENTION}";
+            }
+            {
+              threshold = 60;
+              style = "bold ${WARN}";
+            }
+          ];
+        }
+      );
     };
     # fennel-ls docset: hover docs + completion for the vim/nvim API.
     # Pinned via the flake input; `nix flake update fennel-ls-nvim-docs` to bump.
