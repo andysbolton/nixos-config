@@ -84,6 +84,7 @@
       modelSettings.claude-opus-5-5.effortLevel = "high";
       skipWorkflowUsageWarning = true;
       theme = "dark";
+      editorMode = "vim";
       statusLine = {
         type = "command";
         command = "${statusLineScript}";

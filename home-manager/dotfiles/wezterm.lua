@@ -25,6 +25,7 @@ config.front_end = "WebGpu"
 config.default_prog = { "fish" }
 
 config.line_height = 1.1
+config.animation_fps = 60
 config.use_dead_keys = false
 config.colors = {
 	cursor_fg = "black",

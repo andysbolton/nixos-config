@@ -31,6 +31,7 @@ do
   vim.ui.open = _2_
 end
 vim.o.breakindent = true
+vim.o.guicursor = (vim.o.guicursor .. ",a:blinkwait700-blinkoff400-blinkon250")
 vim.o.undofile = true
 vim.o.ignorecase = true
 vim.o.smartcase = true

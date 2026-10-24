@@ -38,6 +38,9 @@
 ;; Enable break indent
 (set vim.o.breakindent true)
 
+(set vim.o.guicursor
+     (.. vim.o.guicursor ",a:blinkwait700-blinkoff400-blinkon250"))
+
 ;; Save undo history
 (set vim.o.undofile true)
 
