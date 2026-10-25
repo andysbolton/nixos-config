@@ -107,11 +107,6 @@ in
     sketchybarBottom
   ]);
 
-  programs.claude-code.settings = {
-    skillOverrides.worktree-session = "off";
-    claudeMdExcludes = [ "**/infra-orchestrator/.claude/skills/worktree-session/SKILL.md" ];
-  };
-
   # Project context for ~/smartwyre (loaded by all work sessions, farm or root).
   home.file."smartwyre/CLAUDE.md" = {
     force = false;

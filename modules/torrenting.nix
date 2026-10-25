@@ -178,6 +178,8 @@ in
     wants = [ "network-online.target" ];
   };
 
+  services.tautulli.enable = true;
+
   systemd.services.unpackerr = {
     description = "unpackerr service";
     bindsTo = [ "wg-proton.service" ];

@@ -61,33 +61,26 @@
         fi
       '';
 
-  programs.claude-code.settings =
-    let
-      statusLineScript = pkgs.writeShellScript "hm-claude-statusline" ''
-        input=$(cat)
-        dir=$(${pkgs.jq}/bin/jq -r '.workspace.current_dir // .cwd' <<<"$input")
-        branch=$(${pkgs.git}/bin/git -C "$dir" branch --show-current 2>/dev/null)
-        case "$dir" in
-          "$HOME") dir="~" ;;
-          "$HOME"/*) dir="~''${dir#"$HOME"}" ;;
-        esac
-        if [ -n "$branch" ]; then
-          printf '%s ⎇ %s\n' "$dir" "$branch"
-        else
-          printf '%s\n' "$dir"
-        fi
-      '';
-    in
-    {
-      model = "opus";
-      effortLevel = "high";
-      modelSettings.claude-opus-5-5.effortLevel = "high";
-      skipWorkflowUsageWarning = true;
-      theme = "dark";
-      editorMode = "vim";
-      statusLine = {
-        type = "command";
-        command = "${statusLineScript}";
-      };
-    };
+  home.packages = [
+    (pkgs.writeShellScriptBin "hm-claude-statusline" ''
+      input=$(cat)
+      dir=$(${pkgs.jq}/bin/jq -r '.workspace.current_dir // .cwd' <<<"$input")
+      branch=$(${pkgs.git}/bin/git -C "$dir" branch --show-current 2>/dev/null)
+      case "$dir" in
+        "$HOME") dir="~" ;;
+        "$HOME"/*) dir="~''${dir#"$HOME"}" ;;
+      esac
+      if [ -n "$branch" ]; then
+        printf '%s ⎇ %s\n' "$dir" "$branch"
+      else
+        printf '%s\n' "$dir"
+      fi
+    '')
+  ];
+
+  # Linked directly, not through the store: Claude Code writes settings.json and only
+  # resolves one symlink level (anthropics/claude-code#15786).
+  home.activation.claudeSettings = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    run ln -sfn ${config.dotfilesPath}/claude/settings.json "$HOME/.claude/settings.json"
+  '';
 }
