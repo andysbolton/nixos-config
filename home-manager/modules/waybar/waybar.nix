@@ -1,6 +1,7 @@
 {
-  pkgs,
+  lib,
   osConfig,
+  pkgs,
   ...
 }:
 with osConfig.theme.css;
@@ -27,8 +28,8 @@ let
   paletteLess = pkgs.writeText "palette.less" ''
     @font-mono: "${osConfig.stylix.fonts.monospace.name}";
     @colors: {
-      ${pkgs.lib.concatStringsSep "\n  " (
-        pkgs.lib.mapAttrsToList (name: color: "${pkgs.lib.toLower name}: ${color};") osConfig.theme.css
+      ${lib.concatStringsSep "\n  " (
+        lib.mapAttrsToList (name: color: "${lib.toLower name}: ${color};") osConfig.theme.css
       )}
     };
   '';
@@ -40,7 +41,7 @@ let
     critical = 95;
   };
 
-  netTools = pkgs.lib.makeBinPath [
+  netTools = lib.makeBinPath [
     pkgs.iw
     pkgs.iproute2
     pkgs.systemd
@@ -127,6 +128,58 @@ let
         jq -nc --arg text "$text" --arg tooltip "$tooltip" --arg class "$class" \
           '{text: $text, tooltip: $tooltip, class: $class}'
       '';
+  addDivider =
+    module:
+    module
+    // {
+      format = "${colorWrap DIVIDER "│"} ${module.format}";
+    }
+    // lib.optionalAttrs (module ? format-disconnected) {
+      format-disconnected = "${colorWrap DIVIDER "│"} ${module.format-disconnected}";
+    };
+
+  stats = [
+    {
+      name = "memory";
+      states = loadStates;
+      format = "${colorWrap LABEL "≡ mem"} {percentage:2}%";
+      tooltip-format = "{used:0.1f}G / {total:0.1f}G";
+      interval = 1;
+    }
+    {
+      name = "cpu";
+      states = loadStates;
+      format = "${colorWrap LABEL "▣ cpu"} {usage:2}%";
+      tooltip = false;
+      interval = 1;
+    }
+    {
+      name = "disk";
+      states = loadStates;
+      format = "${colorWrap LABEL "◙ disk"} {percentage_used:2}%";
+      tooltip-format = "{used} / {total}";
+    }
+    {
+      name = "temperature";
+      "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
+      interval = 1;
+      "critical-threshold" = 80;
+      format = "${colorWrap LABEL "☼ temp"} {temperatureC:2}°C";
+    }
+    {
+      name = "network#traffic";
+      interval = 1;
+      format = "${colorWrap LABEL "≈ net"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
+      format-disconnected = "${colorWrap LABEL "≈ net"} offline";
+      tooltip-format = "{ifname}";
+    }
+  ];
+
+  statsByName =
+    stats
+    |> lib.imap0 (i: stat: if i == 0 then stat else addDivider stat)
+    |> map (stat: lib.nameValuePair stat.name (removeAttrs stat [ "name" ]))
+    |> lib.listToAttrs;
 in
 {
   programs.waybar = {
@@ -153,8 +206,7 @@ in
 
         modules-right = [
           "custom/network"
-          "battery"
-          "group/audio"
+          "group/hardware"
           "pulseaudio/slider"
         ];
 
@@ -207,6 +259,7 @@ in
 
         "river/mode" = {
           format = "{}";
+          max-length = 25;
         };
 
         battery = {
@@ -251,9 +304,10 @@ in
           };
         };
 
-        "group/audio" = {
+        "group/hardware" = {
           orientation = "horizontal";
           modules = [
+            "battery"
             "bluetooth"
             "pulseaudio"
           ];
@@ -274,12 +328,10 @@ in
 
         pulseaudio = {
           "scroll-step" = 1;
-          format = "${colorWrap OK "{icon}"} {volume}%{format_source}";
-          "format-bluetooth" = "${colorWrap OK "{icon}"} {volume}%{format_source}";
-          "format-bluetooth-muted" = " {icon}{format_source}";
-          "format-muted" = " {format_source}";
-          "format-source" = " ${colorWrap OK ""} {volume}%";
-          "format-source-muted" = " ";
+          format = "${colorWrap OK "{icon}"} {volume}%";
+          "format-bluetooth" = "${colorWrap OK "{icon}"} {volume}%";
+          "format-bluetooth-muted" = " {icon}";
+          "format-muted" = "";
           "format-icons" = {
             headphone = "";
             phone = "";
@@ -300,118 +352,60 @@ in
           orientation = "horizontal";
         };
       }
-      {
-        name = "bottom-bar";
-        layer = "top";
-        position = "bottom";
-        spacing = 0;
 
-        modules-left = [ "group/stats" ];
+      (
+        {
+          name = "bottom-bar";
+          layer = "top";
+          position = "bottom";
+          spacing = 0;
 
-        modules-right = [
-          "custom/system"
-          "custom/primary"
-        ];
+          modules-left = [ "group/stats" ];
 
-        "group/stats" = {
-          orientation = "horizontal";
-          modules = [
-            "network#traffic"
-            "disk"
-            "memory"
-            "cpu"
-            "temperature"
-            # "custom/gpu-utilization"
-            # "custom/gpu-temperature"
+          modules-right = [
+            "custom/system"
+            "custom/primary"
           ];
-        };
 
-        "network#traffic" = {
-          interval = 1;
-          format = "${colorWrap LABEL "≈ net"} ↑{bandwidthUpBytes} ↓{bandwidthDownBytes}";
-          format-disconnected = "${colorWrap LABEL "≈ net"} offline";
-          tooltip-format = "{ifname}";
-          # Rates change width every second; reserve room so the pill doesn't jitter.
-          # min-length = 28;
-        };
+          "group/stats" = {
+            orientation = "horizontal";
+            modules = lib.map (s: s.name) stats;
+          };
 
-        disk = {
-          states = loadStates;
-          format = "${colorWrap DIVIDER "│"} ${colorWrap LABEL "◙ disk"} {percentage_used}%";
-          tooltip-format = "{used} / {total}";
-        };
+          "custom/system-label" = {
+            format = "System: ";
+          };
 
-        cpu = {
-          states = loadStates;
-          format = "${colorWrap DIVIDER "│"} ${colorWrap LABEL "▣ cpu"} {usage}%";
-          tooltip = false;
-          interval = 1;
-        };
+          "custom/system" = {
+            interval = 1;
+            exec = pkgs.writeShellScript "clipboard-system-check" ''
+              ${clipLatest} "$HOME/.cache/cliphist/system-db"
+            '';
+            max-length = 30;
+            min-length = 30;
+            format = "${colorWrap RED "♥"}  {}";
+            align = 0;
+            escape = true;
+          };
 
-        memory = {
-          states = loadStates;
-          format = "${colorWrap DIVIDER "│"} ${colorWrap LABEL "≡ mem"} {percentage}%";
-          tooltip-format = "{used:0.1f}G / {total:0.1f}G";
-          interval = 1;
-        };
+          "custom/primary" = {
+            interval = 1;
+            exec = pkgs.writeShellScript "clipboard-primary-check" ''
+              ${clipLatest} "$HOME/.cache/cliphist/primary-db"
+            '';
+            max-length = 30;
+            min-length = 30;
+            align = 0;
+            format = "█ ${colorWrap TEXT "{}"}";
+            escape = true;
+          };
+        }
+        // statsByName
+      )
 
-        temperature = {
-          "hwmon-path" = "/sys/devices/platform/nct6687.2592/hwmon/hwmon3/temp1_input";
-          interval = 1;
-          "critical-threshold" = 80;
-          format = "${colorWrap DIVIDER "│"} ${colorWrap LABEL "☼ temp"} {temperatureC}°C";
-        };
-
-        # "custom/gpu-utilization" = {
-        #   exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader";
-        #   format = "⚙ {}";
-        #   interval = 1;
-        # };
-        #
-        # "custom/gpu-temperature" = {
-        #   exec = "/run/current-system/sw/bin/nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader";
-        #   format = "⚙{icon} {text}°C";
-        #   interval = 1;
-        #   "critical-threshold" = 80;
-        #   "format-icons" = [
-        #     ""
-        #     ""
-        #     ""
-        #     ""
-        #   ];
-        # };
-
-        "custom/system-label" = {
-          format = "System: ";
-        };
-
-        "custom/system" = {
-          interval = 1;
-          exec = pkgs.writeShellScript "clipboard-system-check" ''
-            ${clipLatest} "$HOME/.cache/cliphist/system-db"
-          '';
-          max-length = 30;
-          min-length = 30;
-          format = "${colorWrap RED "♥"}  {}";
-          align = 0;
-          escape = true;
-        };
-
-        "custom/primary" = {
-          interval = 1;
-          exec = pkgs.writeShellScript "clipboard-primary-check" ''
-            ${clipLatest} "$HOME/.cache/cliphist/primary-db"
-          '';
-          max-length = 30;
-          min-length = 30;
-          align = 0;
-          format = "█ ${colorWrap TEXT "{}"}";
-          escape = true;
-        };
-      }
     ];
     # Read as text so it merges after Stylix's waybar CSS (import from derivation).
-    style = pkgs.lib.mkAfter (
+    style = lib.mkAfter (
       builtins.readFile (
         pkgs.runCommand "waybar-style.css" { nativeBuildInputs = [ pkgs.lessc ]; } ''
           cp ${./style.less} style.less

@@ -108,8 +108,8 @@ in
     lf # terminal file manager
     libnatpmp # NAT-PMP client library and tools
     lsd # modern ls replacement
-    lua
-    luaPackages.fennel
+    luajit
+    luajitPackages.fennel
     lynx # terminal web browser
     mdcat
     nh # helper CLI for Nix/Home Manager workflows

@@ -34,8 +34,7 @@ return {
 
       vim.keymap.set("t", "<C-r>", function()
         local key = vim.fn.getcharstr()
-        print(vim.fn.keytrans(key):lower())
-        if vim.fn.keytrans(key):lower() == "<C-r>" then
+        if vim.fn.keytrans(key):lower() == "<c-r>" then
           return "<C-r><C-r>" -- pass through to fish reverse-search
         end
         return [[<C-\><C-n>"]] .. key .. "pi"
