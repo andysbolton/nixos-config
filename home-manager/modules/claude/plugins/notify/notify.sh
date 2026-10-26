@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Headless SDK sessions (e.g. claude-mem's worker) aren't waiting on a human.
+[ -n "${CLAUDE_AGENT_SDK_VERSION:-}" ] && exit 0
 input=$(cat)
 sid=$(jq -r .session_id <<<"$input")
 cwd=$(jq -r .cwd <<<"$input")

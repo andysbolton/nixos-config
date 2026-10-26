@@ -35,6 +35,7 @@
       efi.canTouchEfiVariables = true;
     };
   };
+
   stylix.targets.limine.enable = true;
 
   users.users.andy.extraGroups = [

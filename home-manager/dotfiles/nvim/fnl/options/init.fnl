@@ -18,8 +18,28 @@
           :copy {:+ (osc52.copy "+") :* (osc52.copy "*")}
           :paste {:+ (osc52.paste "+") :* (osc52.paste "*")}})))
 
+;; Open file:// URIs in this nvim instead of xdg-open.
+(let [system-open vim.ui.open]
+  (set vim.ui.open (fn [path opt]
+                     (let [(uri line) (path:match "^(file://[^#]*)#?L?(%d*)$")]
+                       (if uri
+                           (do
+                             (when (not= (. (vim.api.nvim_win_get_config 0)
+                                            :relative)
+                                         "")
+                               (vim.api.nvim_win_close 0 false))
+                             (vim.cmd.edit (vim.fn.fnameescape (vim.uri_to_fname uri)))
+                             (when (not= line "")
+                               (vim.api.nvim_win_set_cursor 0
+                                                            [(tonumber line) 0]))
+                             nil)
+                           (system-open path opt))))))
+
 ;; Enable break indent
 (set vim.o.breakindent true)
+
+(set vim.o.guicursor
+     (.. vim.o.guicursor ",a:blinkwait700-blinkoff400-blinkon250"))
 
 ;; Save undo history
 (set vim.o.undofile true)

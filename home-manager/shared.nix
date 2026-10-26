@@ -55,7 +55,25 @@ in
       nvim.source = config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/nvim";
       "opencode/config.json".source =
         config.lib.file.mkOutOfStoreSymlink "${config.dotfilesPath}/opencode/config.json";
-      "starship.toml".source = ./dotfiles/starship.toml;
+      # Battery levels mirror waybar's battery states.
+      "starship.toml".source = (pkgs.formats.toml { }).generate "starship.toml" (
+        lib.recursiveUpdate (fromTOML (builtins.readFile ./dotfiles/starship.toml)) {
+          battery.display = with osConfig.theme.css; [
+            {
+              threshold = 10;
+              style = "bold ${ERROR}";
+            }
+            {
+              threshold = 20;
+              style = "bold ${ATTENTION}";
+            }
+            {
+              threshold = 60;
+              style = "bold ${WARN}";
+            }
+          ];
+        }
+      );
     };
     # fennel-ls docset: hover docs + completion for the vim/nvim API.
     # Pinned via the flake input; `nix flake update fennel-ls-nvim-docs` to bump.
@@ -84,13 +102,14 @@ in
     iperf
     jo
     jq
+    kakoune
     killall
     lazygit
     lf # terminal file manager
     libnatpmp # NAT-PMP client library and tools
     lsd # modern ls replacement
-    lua
-    luaPackages.fennel
+    luajit
+    luajitPackages.fennel
     lynx # terminal web browser
     mdcat
     nh # helper CLI for Nix/Home Manager workflows
@@ -195,8 +214,7 @@ in
       plugins = [ pkgs.tmuxPlugins.yank ];
       extraConfig = ''
         set -as terminal-features ",*:RGB"
-        set -g copy-mode-match-style 'bg=yellow,fg=black'
-        set -g copy-mode-current-match-style 'bg=red,fg=white'
+        set -g copy-mode-match-style 'bg=yellow,fg=black' set -g copy-mode-current-match-style 'bg=red,fg=white'
 
         set -g set-clipboard on
         bind -T copy-mode-vi v send -X begin-selection
@@ -333,23 +351,29 @@ in
     '';
   };
 
-  stylix.enable = true;
-  stylix.autoEnable = false;
-
-  stylix.targets.btop.enable = true;
-  stylix.targets.dunst.enable = true;
-  stylix.targets.firefox.enable = true;
-  stylix.targets.font-packages.enable = true;
-  stylix.targets.fontconfig.enable = true;
-  stylix.targets.fish.enable = osConfig.theme.native.fish == null;
-  stylix.targets.neovim.enable = osConfig.theme.native.nvim == null;
-  stylix.targets.foot.enable = true;
-  stylix.targets.rofi.enable = true;
-  stylix.targets.tmux.enable = true;
-  stylix.targets.waybar.addCss = false;
-  stylix.targets.waybar.enable = true;
-  stylix.targets.wezterm.enable = true;
-
-  stylix.targets.firefox.profileNames = [ "home" ];
-  stylix.targets.firefox.colorTheme.enable = true;
+  stylix = {
+    enable = true;
+    autoEnable = false;
+    targets = {
+      btop.enable = true;
+      dunst.enable = true;
+      firefox = {
+        colorTheme.enable = true;
+        enable = true;
+        profileNames = [ "home" ];
+      };
+      fish.enable = osConfig.theme.native.fish == null;
+      font-packages.enable = true;
+      fontconfig.enable = true;
+      foot.enable = true;
+      neovim.enable = osConfig.theme.native.nvim == null;
+      rofi.enable = true;
+      tmux.enable = true;
+      waybar = {
+        addCss = false;
+        enable = true;
+      };
+      wezterm.enable = true;
+    };
+  };
 }

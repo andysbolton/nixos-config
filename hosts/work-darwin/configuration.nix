@@ -28,6 +28,7 @@ in
     experimental-features = [
       "flakes"
       "nix-command"
+      "pipe-operators"
     ];
     trusted-users = [
       "@admin"

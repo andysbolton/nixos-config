@@ -53,7 +53,9 @@ colors: rec {
     EDGE = COMMENT;
     TEXT = FOREGROUND;
     TEXT_ALT = DARK_FOREGROUND;
-    FOCUS = BLUE;
+    LABEL = DARK_FOREGROUND;
+    DIVIDER = BLUE;
+    FOCUS = CYAN;
     UNFOCUSED = COMMENT;
     FILL = COMMENT;
     TRACK = SELECTION;
@@ -61,7 +63,7 @@ colors: rec {
     TOGGLE_OFF = BLUE;
     WARN = YELLOW;
     ATTENTION = ORANGE;
-    ERROR = RED;
+    ERROR = BROWN;
     OK = GREEN;
   };
 

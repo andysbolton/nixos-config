@@ -25,19 +25,20 @@ case "${PERCENTAGE}" in
 *) ICON="" ;;
 esac
 
-if [ "$PERCENTAGE" -lt 10 ]; then
-    COLOR=$RED
-elif [ "$PERCENTAGE" -lt 25 ]; then
-    COLOR=$ORANGE
-elif [ "$PERCENTAGE" -lt 50 ]; then
-    COLOR=$YELLOW
+# Same thresholds as waybar's battery states.
+if [ "$PERCENTAGE" -le 10 ]; then
+    ICON_COLOR=$ERROR LABEL_COLOR=$ERROR
+elif [ "$PERCENTAGE" -le 20 ]; then
+    ICON_COLOR=$ATTENTION LABEL_COLOR=$ATTENTION
+elif [ "$PERCENTAGE" -le 60 ]; then
+    ICON_COLOR=$WARN LABEL_COLOR=$WARN
 else
-    COLOR=$GREEN
+    ICON_COLOR=$OK LABEL_COLOR=$FOREGROUND
 fi
 
 "$BAR_NAME" --set "$NAME" \
-    icon="$ICON" icon.color="$COLOR" \
-    label="$PERCENTAGE%"
+    icon="$ICON" icon.color="$ICON_COLOR" \
+    label="$PERCENTAGE%" label.color="$LABEL_COLOR"
 
 if [ "$CHARGING" != "" ]; then
     "$BAR_NAME" --set battery.plug drawing=on

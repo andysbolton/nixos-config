@@ -40,6 +40,12 @@
     ]
     ++ lib.optional pkgs.stdenv.hostPlatform.isDarwin (mkPlugin ./plugins/workspace-guard);
 
+  # Provided so claude-mem doesn't download its own binaries.
+  home.packages = [
+    pkgs.bun
+    pkgs.uv
+  ];
+
   home.activation.claudeLspRecommendations =
     let
       neverPlugins = map (name: "${name}-lsp@claude-plugins-official") (
@@ -81,9 +87,23 @@
     {
       model = "opus";
       effortLevel = "high";
-      modelSettings.claude-opus-5-5.effortLevel = "high";
+      modelSettings.claude-opus-5-5.effortLevel = "medium";
       skipWorkflowUsageWarning = true;
       theme = "dark";
+      editorMode = "vim";
+      # Not programs.claude-code.plugins/marketplaces: claude-mem runs `bun install`
+      # in its plugin root, and HM's known_marketplaces.json symlink is read-only.
+      extraKnownMarketplaces.thedotmack.source = {
+        source = "directory";
+        path = "${pkgs.fetchFromGitHub {
+          owner = "thedotmack";
+          repo = "claude-mem";
+          tag = "v15.2.0";
+          hash = "sha256-K7kN0sulwKKDEZwhOZjNbb50fbCxtsTGkUyzRn7qnGA=";
+        }}";
+      };
+      enabledPlugins."claude-mem@thedotmack" = true;
+      env.CLAUDE_MEM_TELEMETRY = "0";
       statusLine = {
         type = "command";
         command = "${statusLineScript}";

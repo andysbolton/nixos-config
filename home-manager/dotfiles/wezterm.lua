@@ -15,6 +15,7 @@ end
 config.term = "xterm-256color"
 config.unicode_version = 14
 config.adjust_window_size_when_changing_font_size = false
+config.warn_about_missing_glyphs = false
 
 if not is_mac() then
 	config.enable_wayland = true
@@ -25,6 +26,7 @@ config.front_end = "WebGpu"
 config.default_prog = { "fish" }
 
 config.line_height = 1.1
+config.animation_fps = 60
 config.use_dead_keys = false
 config.colors = {
 	cursor_fg = "black",
