@@ -25,12 +25,6 @@ let
       runtimeInputs = [ pkgs.pngpaste ];
       bashOptions = [ ];
       text = ''
-        log=/tmp/lan-mouse.err.log
-        off=$(stat -f%z "$log" 2>/dev/null || echo 0)
-
-        # hammerspoon://work restores the remap taps and skhd together.
-        trap 'open "hammerspoon://work"' EXIT
-
         # Forward the clipboard to portable: an image if one is present, else text.
         (
           remote="env (systemctl --user show-environment | grep ^WAYLAND_DISPLAY=)"
@@ -44,9 +38,17 @@ let
         ) &
 
         # hammerspoon://linux stops the remap taps and boots out skhd together.
-        open "hammerspoon://linux" || exit 0
+        open "hammerspoon://linux"
+      '';
+    }
+  );
 
-        tail -c "+$((off + 1))" -F "$log" | { grep -m1 -E "releasing capture"; pkill -P $$ -x tail; }
+  # hammerspoon://work restores the remap taps and skhd together.
+  darwinLeaveHook = lib.getExe (
+    pkgs.writeShellApplication {
+      name = "lan-mouse-darwin-leave-hook";
+      text = ''
+        open "hammerspoon://work"
       '';
     }
   );
@@ -60,8 +62,6 @@ let
       ];
       bashOptions = [ ];
       text = ''
-        cursor=$(journalctl --user -u lan-mouse.service -n1 --show-cursor -o cat 2>/dev/null | sed -n 's/^-- cursor: *//p')
-
         # Forward the clipboard to work: an image if one is present, else text.
         (
           if wl-paste -l | grep -q '^image/png$'; then
@@ -74,12 +74,17 @@ let
           fi
         ) &
 
-        trap 'riverctl enter-mode normal' EXIT
-        trap 'exit' INT TERM
         riverctl enter-mode passthrough
+      '';
+    }
+  );
 
-        if [ -n "$cursor" ]; then set -- --after-cursor "$cursor"; else set -- -n0; fi
-        journalctl --user -u lan-mouse.service "$@" -f -o cat | { grep -m1 -E "releasing capture"; pkill -P $$ -x journalctl; }
+  linuxLeaveHook = lib.getExe (
+    pkgs.writeShellApplication {
+      name = "lan-mouse-linux-leave-hook";
+      runtimeInputs = [ pkgs.river-classic ];
+      text = ''
+        riverctl enter-mode normal
       '';
     }
   );
@@ -143,6 +148,7 @@ let
         activate_on_startup = true;
         ips = [ "100.127.37.90" ];
         enter_hook = darwinEnterHook;
+        leave_hook = darwinLeaveHook;
       }
       # {
       #   position = "right";
@@ -150,6 +156,7 @@ let
       #   activate_on_startup = true;
       #   ips = [ "100.69.169.2" ];
       #   enter_hook = darwinEnterHook;
+      #   leave_hook = darwinLeaveHook;
       # }
     ];
     portable = [
@@ -159,6 +166,7 @@ let
         activate_on_startup = true;
         ips = [ "100.93.122.89" ];
         enter_hook = linuxEnterHook;
+        leave_hook = linuxLeaveHook;
       }
     ];
   };
