@@ -58,7 +58,6 @@ for did in $(yabai -m query --displays | jq '.[].index'); do
   front_app=(
     display="$did"
     "${label_only[@]}"
-    "${block[@]}"
     label.color="$CYAN"
     script="$PLUGIN_DIR/front_app.sh"
   )
@@ -93,9 +92,6 @@ battery_plug=(
 "$BAR_NAME" --add item battery.plug right \
   --set battery.plug "${battery_plug[@]}"
 
-"$BAR_NAME" --add bracket battery_group battery battery.plug \
-  --set battery_group "${block[@]}"
-
 "$BAR_NAME" --add item battery_spacer right \
   --set battery_spacer width="$GAP" background.drawing=off \
   icon.drawing=off label.drawing=off
@@ -126,9 +122,6 @@ set_volume=(
   --set set_volume "${set_volume[@]}" \
   "${icon_with_label[@]}" \
   --subscribe set_volume volume_change mouse.clicked
-
-"$BAR_NAME" --add bracket volume_group volume set_volume \
-  --set volume_group "${block[@]}"
 
 "$BAR_NAME" --add item volume_spacer right \
   --set volume_spacer width="$GAP" background.drawing=off \

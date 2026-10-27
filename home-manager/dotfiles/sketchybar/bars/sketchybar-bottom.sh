@@ -11,51 +11,58 @@ stat=(
   icon.padding_right=10
 )
 
+metric=(
+  "${stat[@]}"
+  icon.font="CaskaydiaCove Nerd Font:Bold:14.0"
+  icon.padding_left=0
+  label.padding_right=0
+)
+
 divider=(
   icon="│"
   icon.color="$DIVIDER"
+  icon.font="CaskaydiaCove Nerd Font:Bold:14.0"
   label.drawing=off
-  icon.padding_left=0
-  icon.padding_right=0
+  padding_left=0
+  padding_right=0
+  icon.padding_left="$PAD"
+  icon.padding_right="$PAD"
 )
 
 add_divider() {
   "$BAR_NAME" --add item "stats.div.$1" left --set "stats.div.$1" "${divider[@]}"
 }
 
-"$BAR_NAME" --add item network left \
-  --set network icon="≈ net" width=190 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
-  "${stat[@]}"
+"$BAR_NAME" --add item memory left \
+  --set memory icon="≡ mem" width=84 update_freq=3 script="$PLUGIN_DIR/stats/ram.sh" \
+  "${metric[@]}"
 
 add_divider 1
 
-"$BAR_NAME" --add item disk left \
-  --set disk icon="◙ disk" width=94 update_freq=60 script="$PLUGIN_DIR/stats/disk.sh" \
-  "${stat[@]}"
+"$BAR_NAME" --add item cpu left \
+  --set cpu icon="▣ cpu" width=84 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
+  "${metric[@]}"
 
 add_divider 2
 
-"$BAR_NAME" --add item memory left \
-  --set memory icon="≡ mem" width=86 update_freq=3 script="$PLUGIN_DIR/stats/ram.sh" \
-  "${stat[@]}"
+"$BAR_NAME" --add item disk left \
+  --set disk icon="◙ disk" width=93 update_freq=60 script="$PLUGIN_DIR/stats/disk.sh" \
+  "${metric[@]}"
 
 add_divider 3
 
-"$BAR_NAME" --add item cpu left \
-  --set cpu icon="▣ cpu" width=86 update_freq=3 script="$PLUGIN_DIR/stats/cpu.sh" \
-  "${stat[@]}"
+"$BAR_NAME" --add item gpu left \
+  --set gpu icon="▤ gpu" width=84 \
+  "${metric[@]}"
 
 add_divider 4
 
-"$BAR_NAME" --add item gpu left \
-  --set gpu icon="▤ gpu" width=86 \
-  "${stat[@]}"
+"$BAR_NAME" --add item network left \
+  --set network icon="≈ net" width=190 update_freq=1 script="$PLUGIN_DIR/stats/network.sh" \
+  "${metric[@]}"
 
 pkill -f "macmon pipe"
 "$PLUGIN_DIR/stats/macmon.sh" &
-
-"$BAR_NAME" --add bracket stats network disk memory cpu gpu stats.div.1 stats.div.2 stats.div.3 stats.div.4 \
-  --set stats "${block[@]}"
 
 # Center
 

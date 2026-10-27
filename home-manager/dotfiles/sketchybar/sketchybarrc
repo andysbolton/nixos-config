@@ -14,8 +14,8 @@ LABEL_FONT="CaskaydiaCove Nerd Font:Bold:14.0"
 bar=(
   height=$HEIGHT
   display=all
-  padding_left=50
-  padding_right=50
+  padding_left=30
+  padding_right=30
 )
 
 default=(

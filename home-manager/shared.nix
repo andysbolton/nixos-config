@@ -156,7 +156,7 @@ in
       extraPackages = with pkgs; [
         # Runtimes / build tooling needed by various servers & plugins
         cargo
-        luaPackages.luarocks
+        luajitPackages.luarocks
         nodejs_24
         tree-sitter
 

@@ -82,6 +82,11 @@ in
 
   home.file.".hammerspoon/init.lua".source = mkSymLink "${config.dotfilesPath}/hammerspoon/init.lua";
 
+  # nixpkgs luarocks detects arm64 as macosx-x86_64, so it misses prebuilt binary rocks.
+  home.file.".luarocks/config-5.1.lua".text = ''
+    arch = "macosx-aarch64"
+  '';
+
   home.packages = [
     azureCli
     scripts.ask-claude
