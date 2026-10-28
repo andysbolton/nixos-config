@@ -15,6 +15,7 @@ let
         commands:
           dry_run: False
           tag_update: True
+          tag_nohardlinks: True
           skip_qb_version_check: True
 
         qbt:
@@ -29,6 +30,11 @@ let
 
         directory:
           root_dir: "${downloadPath}"
+
+        nohardlinks:
+          radarr:
+          sonarr:
+          Uncategorized:
 
         recyclebin:
           enabled: False
