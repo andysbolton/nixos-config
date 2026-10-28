@@ -402,7 +402,6 @@ in
         }
         // statsByName
       )
-
     ];
     # Read as text so it merges after Stylix's waybar CSS (import from derivation).
     style = lib.mkAfter (

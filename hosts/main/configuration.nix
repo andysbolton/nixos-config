@@ -13,6 +13,7 @@
     ../../modules/desktop.nix
     ../../modules/nvidia4070.nix
     ../../modules/arrs.nix
+    ../../modules/recyclarr.nix
     ../../modules/tailnet-bridge.nix
     ../../modules/torrenting.nix
     ../../modules/steam.nix
@@ -112,6 +113,8 @@
     radarr.enable = true;
     sonarr.enable = true;
   };
+
+  modules.recyclarr.enable = true;
 
   modules.monitoring.enable = true;
 
