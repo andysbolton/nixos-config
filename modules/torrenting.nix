@@ -34,6 +34,7 @@ let
         nohardlinks:
           radarr:
           sonarr:
+          Uncategorized:
 
         recyclebin:
           enabled: False
