@@ -82,6 +82,7 @@
       group = "media";
       mode = "0440";
     };
+    secrets."sonarr_api_key" = { };
   };
 
   networking.firewall.allowedUDPPorts = [

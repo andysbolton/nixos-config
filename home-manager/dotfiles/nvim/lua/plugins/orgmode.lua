@@ -1,5 +1,5 @@
 return {
-  "nvim-neorg/neorg",
+  "nvim-orgmode/orgmode",
   setup = function()
     require("orgmode").setup {
       org_agenda_files = "~/orgfiles/**/*",
