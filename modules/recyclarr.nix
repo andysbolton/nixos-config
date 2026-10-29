@@ -49,8 +49,9 @@ let
           min_format_score = -1000;
           reset_unmatched_scores.enabled = true;
           upgrade = {
-            allowed = false;
+            allowed = true;
             until_quality = "HD 1080p";
+            until_score = 0;
           };
           qualities = [
             {
