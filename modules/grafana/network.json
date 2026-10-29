@@ -1,0 +1,84 @@
+{
+  "uid": "network",
+  "title": "Network",
+  "schemaVersion": 39,
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "iface",
+        "label": "Interface",
+        "type": "query",
+        "query": "label_values(node_network_receive_bytes_total, device)",
+        "regex": "/^(en|eth|wl).*/",
+        "refresh": 2,
+        "multi": true,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Throughput",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 9 },
+      "fieldConfig": { "defaults": { "unit": "bps", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (device) (rate(node_network_receive_bytes_total{device=~\"$iface\"}[$__rate_interval])) * 8",
+          "legendFormat": "{{device}} down"
+        },
+        {
+          "refId": "B",
+          "expr": "sum by (device) (rate(node_network_transmit_bytes_total{device=~\"$iface\"}[$__rate_interval])) * 8",
+          "legendFormat": "{{device}} up"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Throughput (5m average)",
+      "gridPos": { "x": 0, "y": 9, "w": 24, "h": 9 },
+      "fieldConfig": { "defaults": { "unit": "bps", "custom": { "fillOpacity": 10 } } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(node_network_receive_bytes_total{device=~\"$iface\"}[5m])) * 8",
+          "legendFormat": "down"
+        },
+        {
+          "refId": "B",
+          "expr": "sum(rate(node_network_transmit_bytes_total{device=~\"$iface\"}[5m])) * 8",
+          "legendFormat": "up"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Downloaded (24h)",
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 5 },
+      "fieldConfig": { "defaults": { "unit": "decbytes" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(node_network_receive_bytes_total{device=~\"$iface\"}[24h]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Uploaded (24h)",
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 5 },
+      "fieldConfig": { "defaults": { "unit": "decbytes" } },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(node_network_transmit_bytes_total{device=~\"$iface\"}[24h]))"
+        }
+      ]
+    }
+  ]
+}

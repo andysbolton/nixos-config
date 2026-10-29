@@ -48,6 +48,12 @@
             isDefault = true;
           }
         ];
+        dashboards.settings.providers = [
+          {
+            name = "nix";
+            options.path = ./grafana;
+          }
+        ];
       };
     };
   };
