@@ -104,8 +104,12 @@ in
       LegalNotice.Accepted = true;
 
       BitTorrent.Session = {
-        QueueingSystemEnabled = false;
+        QueueingSystemEnabled = true;
+        MaxActiveDownloads = 3;
+        MaxActiveTorrents = -1;
+        MaxActiveUploads = -1;
         DefaultSavePath = downloadPath;
+        GlobalDLSpeedLimit = 61035; # KiB/s
         GlobalUPSpeedLimit = 500; # KiB/s
         ShareLimitAction = "Stop";
       };
