@@ -23,8 +23,12 @@
         "name": "iface",
         "label": "Interface",
         "type": "query",
-        "query": "label_values(node_network_receive_bytes_total, device)",
-        "regex": "/^(en|eth|wl).*/",
+        "query": {
+          "qryType": 1,
+          "query": "label_values(node_network_receive_bytes_total, device)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "regex": "/^(?:en|eth|wl).*/",
         "refresh": 2,
         "multi": true,
         "includeAll": true,
@@ -35,7 +39,9 @@
         "datasource": {
           "type": "prometheus",
           "uid": "${datasource}"
-        }
+        },
+        "allValue": "(en|eth|wl).*",
+        "definition": "label_values(node_network_receive_bytes_total, device)"
       }
     ]
   },
