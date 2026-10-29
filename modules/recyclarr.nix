@@ -48,7 +48,10 @@ let
           name = profile;
           min_format_score = -1000;
           reset_unmatched_scores.enabled = true;
-          upgrade.allowed = false;
+          upgrade = {
+            allowed = false;
+            until_quality = "HD 1080p";
+          };
           qualities = [
             {
               name = "HD 1080p";
