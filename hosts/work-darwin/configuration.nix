@@ -121,7 +121,11 @@ in
     in
     {
       tailscale.enable = true;
+
       eternal-terminal.enable = true;
+      environment.sessionVariables = {
+        ET_NO_TELEMETRY = "1";
+      };
 
       skhd = {
         enable = true;
