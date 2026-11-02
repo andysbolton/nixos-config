@@ -29,6 +29,12 @@
       description = "Name of the network namespace to use with the VPN.";
     };
 
+    fwmark = lib.mkOption {
+      type = lib.types.nullOr lib.types.ints.positive;
+      default = null;
+      description = "fwmark that WireGuard sets on its encrypted packets.";
+    };
+
     wgConfPath = lib.mkOption {
       type = lib.types.path;
       description = "Path to the WireGuard configuration file.";
@@ -91,6 +97,9 @@
               ${config.modules.vpn.wgConfPath} > "$conf"
             ${iproute2}/bin/ip netns exec ${config.modules.vpn.netns} \
               ${wireguard-tools}/bin/wg setconf wg0 "$conf"
+            ${lib.optionalString (config.modules.vpn.fwmark != null)
+              "${iproute2}/bin/ip netns exec ${config.modules.vpn.netns} ${wireguard-tools}/bin/wg set wg0 fwmark ${toString config.modules.vpn.fwmark}"
+            }
             # Bring up loopback, as this will allow accessing the localhost application UI
             # (assuming the localhost application and the browser are both in the same netns)
             ${iproute2}/bin/ip --netns ${config.modules.vpn.netns} link set lo up

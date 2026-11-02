@@ -28,7 +28,7 @@
           "query": "label_values(node_network_receive_bytes_total, device)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
-        "regex": "/^(?:en|eth|wl).*/",
+        "regex": "/^(?:en|eth).*/",
         "refresh": 2,
         "multi": true,
         "includeAll": true,
@@ -40,7 +40,7 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "allValue": "(en|eth|wl).*",
+        "allValue": "(en|eth).*",
         "definition": "label_values(node_network_receive_bytes_total, device)"
       }
     ]
@@ -48,11 +48,11 @@
   "panels": [
     {
       "type": "timeseries",
-      "title": "Throughput",
+      "title": "Download",
       "gridPos": {
         "x": 0,
         "y": 0,
-        "w": 24,
+        "w": 12,
         "h": 9
       },
       "fieldConfig": {
@@ -61,7 +61,53 @@
           "custom": {
             "fillOpacity": 10
           }
-        }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -70,9 +116,14 @@
           "legendFormat": "{{device}} down"
         },
         {
-          "refId": "B",
-          "expr": "sum by (device) (rate(node_network_transmit_bytes_total{device=~\"$iface\"}[$__rate_interval])) * 8",
-          "legendFormat": "{{device}} up"
+          "refId": "C",
+          "expr": "qbittorrent_global_download_rate_limit_bytes * 8",
+          "legendFormat": "qBittorrent down limit"
+        },
+        {
+          "refId": "E",
+          "expr": "qbittorrent_global_download_speed_bytes * 8",
+          "legendFormat": "qBittorrent down"
         }
       ],
       "datasource": {
@@ -82,11 +133,11 @@
     },
     {
       "type": "timeseries",
-      "title": "Throughput (5m average)",
+      "title": "Upload",
       "gridPos": {
-        "x": 0,
-        "y": 9,
-        "w": 24,
+        "x": 12,
+        "y": 0,
+        "w": 12,
         "h": 9
       },
       "fieldConfig": {
@@ -95,7 +146,158 @@
           "custom": {
             "fillOpacity": 10
           }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "F"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "refId": "B",
+          "expr": "sum by (device) (rate(node_network_transmit_bytes_total{device=~\"$iface\"}[$__rate_interval])) * 8",
+          "legendFormat": "{{device}} up"
+        },
+        {
+          "refId": "D",
+          "expr": "qbittorrent_global_upload_rate_limit_bytes * 8",
+          "legendFormat": "qBittorrent up limit"
+        },
+        {
+          "refId": "E",
+          "expr": "qbittorrent_global_upload_speed_bytes * 8",
+          "legendFormat": "qBittorrent up"
+        },
+        {
+          "refId": "F",
+          "expr": "rate(systemd_service_ip_egress_bytes{name=\"plex.service\"}[$__rate_interval]) * 8",
+          "legendFormat": "Plex up"
         }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Download (5m average)",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 10
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          }
+        ]
       },
       "targets": [
         {
@@ -104,9 +306,119 @@
           "legendFormat": "down"
         },
         {
+          "refId": "C",
+          "expr": "qbittorrent_global_download_rate_limit_bytes * 8",
+          "legendFormat": "qBittorrent down limit"
+        },
+        {
+          "refId": "E",
+          "expr": "avg_over_time(qbittorrent_global_download_speed_bytes[5m]) * 8",
+          "legendFormat": "qBittorrent down"
+        }
+      ],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Upload (5m average)",
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 12,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bps",
+          "custom": {
+            "fillOpacity": 10
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    10,
+                    10
+                  ]
+                }
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "purple"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "F"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
           "refId": "B",
           "expr": "sum(rate(node_network_transmit_bytes_total{device=~\"$iface\"}[5m])) * 8",
           "legendFormat": "up"
+        },
+        {
+          "refId": "D",
+          "expr": "qbittorrent_global_upload_rate_limit_bytes * 8",
+          "legendFormat": "qBittorrent up limit"
+        },
+        {
+          "refId": "E",
+          "expr": "avg_over_time(qbittorrent_global_upload_speed_bytes[5m]) * 8",
+          "legendFormat": "qBittorrent up"
+        },
+        {
+          "refId": "F",
+          "expr": "rate(systemd_service_ip_egress_bytes{name=\"plex.service\"}[5m]) * 8",
+          "legendFormat": "Plex up"
         }
       ],
       "datasource": {

@@ -122,29 +122,34 @@ in
     };
   };
 
-  services = {
-    swayidle = {
-      enable = true;
-      systemdTargets = [ "graphical-session.target" ];
-      timeouts = [
-        {
-          timeout = 1740;
-          command = "${pkgs.dunst}/bin/dunstify --urgency=normal 'Locking session in 1 minute'";
-        }
-        {
-          timeout = 1800;
-          command = "${pkgs.wlopm}/bin/wlopm --off '*'";
-          resumeCommand = "${pkgs.wlopm}/bin/wlopm --on '*'";
-        }
-      ];
-    };
-    udiskie = {
-      enable = true;
-      settings = {
-        program_options = {
-          file_manager = "${pkgs.thunar}/bin/thunar";
+  services =
+    let
+      timeout = 60 * 30;
+      warning = 60;
+    in
+    {
+      swayidle = {
+        enable = true;
+        systemdTargets = [ "graphical-session.target" ];
+        timeouts = [
+          {
+            timeout = timeout - warning;
+            command = "${pkgs.dunst}/bin/dunstify --urgency=normal 'Locking session in ${toString warning} seconds'";
+          }
+          {
+            timeout = timeout;
+            command = "${pkgs.wlopm}/bin/wlopm --off '*'";
+            resumeCommand = "${pkgs.wlopm}/bin/wlopm --on '*'";
+          }
+        ];
+      };
+      udiskie = {
+        enable = true;
+        settings = {
+          program_options = {
+            file_manager = "${pkgs.thunar}/bin/thunar";
+          };
         };
       };
     };
-  };
 }
