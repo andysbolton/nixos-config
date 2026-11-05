@@ -22,9 +22,21 @@ return {
           target = "~/org/training.org",
           template = "* %<%Y-%m-%d %a>  :B:\n%?",
         },
+        n = {
+          description = "Note",
+          target = "~/org/refile.org",
+          template = "* %?\n  %u",
+        },
       },
     }
 
     vim.lsp.enable "org"
+
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = "org",
+      callback = function(ev)
+        vim.keymap.set("n", "<Leader>o-", "o- [ ] ", { buffer = ev.buf, desc = "Add checkbox" })
+      end,
+    })
   end,
 }
