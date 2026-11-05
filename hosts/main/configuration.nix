@@ -13,12 +13,14 @@
     ../../modules/desktop.nix
     ../../modules/nvidia4070.nix
     ../../modules/arrs.nix
+    ../../modules/recyclarr.nix
     ../../modules/tailnet-bridge.nix
     ../../modules/torrenting.nix
     ../../modules/steam.nix
     ../../modules/vpn.nix
     ../../modules/wireless.nix
     ../../modules/monitoring.nix
+    ../../modules/uplink-shaping.nix
     inputs.sops-nix.nixosModules.sops
     # inputs.wayland-pipewire-idle-inhibit.nixosModules.default
   ];
@@ -76,11 +78,8 @@
       mode = "0440";
     };
     secrets."proton-vpn.conf" = { };
-    secrets."radarr_api_key" = {
-      owner = "unpackerr";
-      group = "media";
-      mode = "0440";
-    };
+    secrets."radarr_api_key" = { };
+    secrets."sonarr_api_key" = { };
   };
 
   networking.firewall.allowedUDPPorts = [
@@ -113,34 +112,45 @@
     sonarr.enable = true;
   };
 
+  modules.recyclarr.enable = true;
+
   modules.monitoring.enable = true;
+
+  modules.uplinkShaping = {
+    enable = true;
+    interface = "enp12s0";
+    bandwidth = "34mbit"; # ~92% of measured 36.9 Mb/s upload at paren'ts house.
+  };
 
   modules.vpn = {
     enable = true;
     dns = "10.2.0.1";
     ip = "10.2.0.2/32";
     netns = "vpn";
+    fwmark = 1; # Bulk tin in uplink shaping
     wgConfPath = config.sops.secrets."proton-vpn.conf".path;
   };
 
-  services.sunshine = {
-    enable = true;
-    openFirewall = true;
-    settings = {
-      capture = "wlr";
-      encoder = "nvenc";
-    };
-    applications.apps = [
-      {
-        name = "Desktop";
-      }
-      {
-        name = "Steam Big Picture";
-        cmd = "${config.programs.steam.package}/bin/steam steam://open/bigpicture";
-        "auto-detach" = "true";
-      }
-    ];
-  };
+  # Disabled for now due to the cursed Oct. 7th and Oct. 18th cycle that created an orphaned graphical-session.target.
+
+  # services.sunshine = {
+  #   enable = true;
+  #   openFirewall = true;
+  #   settings = {
+  #     capture = "wlr";
+  #     encoder = "nvenc";
+  #   };
+  #   applications.apps = [
+  #     {
+  #       name = "Desktop";
+  #     }
+  #     {
+  #       name = "Steam Big Picture";
+  #       cmd = "${config.programs.steam.package}/bin/steam steam://open/bigpicture";
+  #       "auto-detach" = "true";
+  #     }
+  #   ];
+  # };
 
   services.printing.enable = true;
   # Arkscan/Zebra usually works with standard CUPS drivers,

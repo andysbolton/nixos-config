@@ -214,7 +214,8 @@ in
       plugins = [ pkgs.tmuxPlugins.yank ];
       extraConfig = ''
         set -as terminal-features ",*:RGB"
-        set -g copy-mode-match-style 'bg=yellow,fg=black' set -g copy-mode-current-match-style 'bg=red,fg=white'
+        set -g copy-mode-match-style 'bg=yellow,fg=black'
+        set -g copy-mode-current-match-style 'bg=red,fg=white'
 
         set -g set-clipboard on
         bind -T copy-mode-vi v send -X begin-selection

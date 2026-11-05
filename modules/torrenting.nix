@@ -7,6 +7,7 @@
 let
   netns = config.modules.vpn.netns;
   qbittorrentWebuiPort = 4292;
+  qbittorrentExporterPort = 8090;
   downloadPath = "/mnt/media/Seeding";
   qbitManageConfig =
     pkgs.writeText "qbit-manage.yml"
@@ -15,6 +16,7 @@ let
         commands:
           dry_run: False
           tag_update: True
+          tag_nohardlinks: True
           skip_qb_version_check: True
 
         qbt:
@@ -29,6 +31,11 @@ let
 
         directory:
           root_dir: "${downloadPath}"
+
+        nohardlinks:
+          radarr:
+          sonarr:
+          Uncategorized:
 
         recyclebin:
           enabled: False
@@ -98,8 +105,12 @@ in
       LegalNotice.Accepted = true;
 
       BitTorrent.Session = {
-        QueueingSystemEnabled = false;
+        QueueingSystemEnabled = true;
+        MaxActiveDownloads = 15;
+        MaxActiveTorrents = -1;
+        MaxActiveUploads = -1;
         DefaultSavePath = downloadPath;
+        GlobalDLSpeedLimit = 61035; # KiB/s
         GlobalUPSpeedLimit = 500; # KiB/s
         ShareLimitAction = "Stop";
       };
@@ -176,6 +187,7 @@ in
   systemd.services.plex = {
     after = [ "network-online.target" ];
     wants = [ "network-online.target" ];
+    serviceConfig.IPAccounting = true;
   };
 
   services.tautulli.enable = true;
@@ -206,26 +218,21 @@ in
           TZ = "America/Mountain";
         };
 
-        # Sonarr configuration (0-indexed for Unpackerr)
-        # sonarrVars = {
-        #   UN_SONARR_0_URL = cfg.sonarr.url;
-        #   UN_SONARR_0_PATHS_0 = cfg.sonarr.path;
-        #   UN_SONARR_0_PROTOCOLS = cfg.sonarr.protocols;
-        #   UN_SONARR_0_TIMEOUT = cfg.sonarr.timeout;
-        #   UN_SONARR_0_DELETE_ORIG = lib.boolToString cfg.sonarr.deleteOrig;
-        #   UN_SONARR_0_DELETE_DELAY = cfg.sonarr.deleteDelay;
-        #   UN_SONARR_0_SYNCTHING = "false";
-        # };
+        sonarrVars = {
+          UN_SONARR_0_URL = "http://localhost:8989/";
+          UN_SONARR_0_API_KEY = "filepath:%d/sonarr_api_key";
+          UN_SONARR_0_PATHS_0 = downloadPath;
+          UN_SONARR_0_PROTOCOLS = "torrent";
+        };
 
-        # Radarr configuration
         radarrVars = {
           UN_RADARR_0_URL = "http://localhost:7878/";
-          UN_RADARR_0_API_KEY = "filepath:${config.sops.secrets."radarr_api_key".path}";
+          UN_RADARR_0_API_KEY = "filepath:%d/radarr_api_key";
           UN_RADARR_0_PATHS_0 = downloadPath;
           UN_RADARR_0_PROTOCOLS = "torrent";
         };
       in
-      globalVars // radarrVars;
+      globalVars // radarrVars // sonarrVars;
 
     serviceConfig = {
       Type = "simple";
@@ -233,6 +240,10 @@ in
       Group = "media";
       TimeoutStopSec = "5min";
       NetworkNamespacePath = "/var/run/netns/${netns}";
+      LoadCredential = [
+        "radarr_api_key:${config.sops.secrets."radarr_api_key".path}"
+        "sonarr_api_key:${config.sops.secrets."sonarr_api_key".path}"
+      ];
       ExecStart = "${pkgs.unpackerr}/bin/unpackerr";
     };
   };
@@ -241,6 +252,34 @@ in
     inherit netns;
     port = qbittorrentWebuiPort;
   };
+
+  systemd.services.qbittorrent-exporter = lib.mkIf config.modules.monitoring.enable {
+    after = [ "qbittorrent-bridge.service" ];
+    wants = [ "qbittorrent-bridge.service" ];
+    wantedBy = [ "multi-user.target" ];
+    environment = {
+      QBITTORRENT_BASE_URL = "http://127.0.0.1:${toString qbittorrentWebuiPort}";
+      QBITTORRENT_COOKIE_NAME = "QBT_SID_${toString qbittorrentWebuiPort}";
+      EXPORTER_HOST = "127.0.0.1";
+      EXPORTER_PORT = toString qbittorrentExporterPort;
+    };
+    script = ''
+      export QBITTORRENT_USERNAME="$QBIT_USER" QBITTORRENT_PASSWORD="$QBIT_PASS"
+      exec ${pkgs.prometheus-qbittorrent-exporter}/bin/qbit-exp -e
+    '';
+    serviceConfig = {
+      DynamicUser = true;
+      EnvironmentFile = config.sops.secrets."qbit-manage.env".path;
+      Restart = "on-failure";
+    };
+  };
+
+  services.prometheus.scrapeConfigs = lib.mkIf config.modules.monitoring.enable [
+    {
+      job_name = "qbittorrent";
+      static_configs = [ { targets = [ "127.0.0.1:${toString qbittorrentExporterPort}" ]; } ];
+    }
+  ];
 
   systemd.services."proton-port-forwarding" = lib.mkIf config.modules.vpn.enable {
     description = "Acquire incoming port from protonvpn natpmp and update qBittorrent.";
@@ -270,6 +309,5 @@ in
       Type = "simple";
       Restart = "on-failure";
     };
-
   };
 }

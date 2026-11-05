@@ -1,4 +1,9 @@
-{ lib, pkgs, config, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 {
   options.modules.monitoring = {
     enable = lib.mkEnableOption "local Prometheus + Grafana stack for hardware sensor history.";
@@ -11,15 +16,28 @@
       listenAddress = "127.0.0.1";
     };
 
+    services.prometheus.exporters.systemd = {
+      enable = true;
+      listenAddress = "127.0.0.1";
+      extraFlags = [ "--systemd.collector.enable-ip-accounting" ];
+    };
+
     services.prometheus = {
       enable = true;
       listenAddress = "127.0.0.1";
       retentionTime = "90d";
+      globalConfig.scrape_interval = "1m";
       scrapeConfigs = [
         {
           job_name = "node";
           static_configs = [
             { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ]; }
+          ];
+        }
+        {
+          job_name = "systemd";
+          static_configs = [
+            { targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.systemd.port}" ]; }
           ];
         }
       ];
@@ -46,6 +64,13 @@
             type = "prometheus";
             url = "http://127.0.0.1:${toString config.services.prometheus.port}";
             isDefault = true;
+            jsonData.timeInterval = config.services.prometheus.globalConfig.scrape_interval;
+          }
+        ];
+        dashboards.settings.providers = [
+          {
+            name = "nix";
+            options.path = ./grafana;
           }
         ];
       };
