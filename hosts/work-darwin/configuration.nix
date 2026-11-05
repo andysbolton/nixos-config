@@ -194,13 +194,14 @@ in
 
             cmd - q : yabai -m window --close
 
-            ${lib.pipe spaces [
-              (lib.filterAttrs (name: value: value ? key))
-              (lib.mapAttrsToList (
+            ${
+              spaces
+              |> lib.filterAttrs (name: value: value ? key)
+              |> lib.mapAttrsToList (
                 name: value: "cmd + alt - ${value.key} : yabai -m space --focus ${toString value.space}"
-              ))
-              (lib.concatStringsSep "\n\n")
-            ]}
+              )
+              |> lib.concatStringsSep "\n\n"
+            }
 
             # jump to the jetkvm-kiosk native-fullscreen space (there's only ever one)
             cmd + alt - j : set i (yabai -m query --spaces | jq -r 'map(select(."is-native-fullscreen"))[0].index // empty'); test -n "$i"; and yabai -m space --focus "$i"
@@ -235,6 +236,15 @@ in
                 count=$((count + 1))
               done
             done
+
+            ${
+              spaces
+              |> lib.mapAttrsToList (
+                name: value:
+                ''yabai -m rule --add label="space-${name}" app="^${name}$" display=${toString value.display} space=${toString value.space}''
+              )
+              |> lib.concatStringsSep "\n"
+            }
           '';
         in
         {
@@ -277,14 +287,6 @@ in
                   mouse_drop_action swap
 
               yabai -m rule --add app="^System Settings$" manage=off
-              ${lib.pipe spaces [
-                (lib.filterAttrs (name: value: value ? key))
-                (lib.mapAttrsToList (
-                  name: value:
-                  ''yabai -m rule --add app="^${name}$" display=${toString value.display} space=${toString value.space}''
-                ))
-                (lib.concatStringsSep "\n")
-              ]}
 
               yabai -m rule --add app="^WezTerm\$" title="^(launcher|search-nix-pkgs)$" manage=off
 
@@ -304,6 +306,7 @@ in
                   ${ensureDisplays}
                   ${sketchybar} --reload
                   ${sketchybar_bottom} --reload
+                  yabai -m rule --apply
                 '
               done
 
