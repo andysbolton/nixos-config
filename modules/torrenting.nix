@@ -106,7 +106,7 @@ in
 
       BitTorrent.Session = {
         QueueingSystemEnabled = true;
-        MaxActiveDownloads = 15;
+        MaxActiveDownloads = 20;
         MaxActiveTorrents = -1;
         MaxActiveUploads = -1;
         DefaultSavePath = downloadPath;

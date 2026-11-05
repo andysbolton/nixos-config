@@ -7,15 +7,13 @@ local t, p, k = hs.eventtap.event.types, hs.eventtap.event.properties, hs.keycod
 -- App sets (bundle IDs), from the old karabiner.edn :applications
 local BROWSERS = { ["org.mozilla.firefox"] = true, ["org.nixos.firefox"] = true }
 local FINDER = { ["com.apple.finder"] = true }
-local TEAMS = { ["com.microsoft.teams2"] = true }
 local NO_REMAP = {
 	["com.apple.Terminal"] = true,
 	["com.github.wez.wezterm"] = true,
-	["com.microsoft.teams2"] = true,
 	["dev.vencord.vesktop"] = true,
 }
-local TERMS = { ["com.apple.Terminal"] = true, ["com.github.wez.wezterm"] = true, ["dev.vencord.vesktop"] = true } -- no-remap minus Teams (for Ctrl+Z)
-local EDIT = { c = 1, v = 1, x = 1, a = 1, s = 1, t = 1, f = 1, r = 1 } -- Ctrl+key -> Cmd+key
+local KEEP_CTRL = { h = 1, m = 1, q = 1 } -- Cmd+H/M/Q hide/minimize/quit on macOS
+local NATIVE_CTRL = { ["com.gather.GatherV2"] = { a = 1, c = 1, v = 1, x = 1 } } -- apps whose menus bind these to Ctrl
 
 local HOME, END = k.home, k["end"]
 local LEFT, RIGHT, UP, DOWN = k.left, k.right, k.up, k.down
@@ -90,21 +88,18 @@ keyTap = hs.eventtap.new({ t.keyDown, t.keyUp }, function(e)
 		return false
 	end -- everything below is a Ctrl chord
 	local name = k[code]
-	if name == "l" and BROWSERS[bid] then
-		return to(e, { cmd = true })
-	end -- address bar
-	if name == "k" and TEAMS[bid] then
-		return to(e, { cmd = true })
-	end -- Teams link
+	if NATIVE_CTRL[bid] and NATIVE_CTRL[bid][name] then
+		return false
+	end
 	if name == "y" and not NO_REMAP[bid] then
 		return to(e, { cmd = true, shift = true }, "z")
 	end -- redo
-	if name == "z" and not TERMS[bid] then
+	if name == "z" and not NO_REMAP[bid] then
 		return to(e, { cmd = true, shift = S })
-	end -- undo (Teams ok)
-	if EDIT[name] and not NO_REMAP[bid] then
-		return to(e, { cmd = true, shift = S })
-	end -- copy/paste/...
+	end -- undo
+	if name and name:match("^%l$") and not KEEP_CTRL[name] and not NO_REMAP[bid] then
+		return to(e, { cmd = true })
+	end -- Ctrl+letter -> Cmd+letter
 	return false
 end)
 
