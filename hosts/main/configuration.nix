@@ -19,7 +19,7 @@
     ../../modules/steam.nix
     ../../modules/vpn.nix
     ../../modules/wireless.nix
-    ../../modules/monitoring.nix
+    ../../modules/monitoring
     ../../modules/uplink-shaping.nix
     inputs.sops-nix.nixosModules.sops
     # inputs.wayland-pipewire-idle-inhibit.nixosModules.default
