@@ -34,6 +34,7 @@ in
   ++ (with pkgs; [
     arp-scan
     cliphist
+    doctl # digital ocean CLI
     grim # screenshot tool
     imv # command-line image viewer
     iw

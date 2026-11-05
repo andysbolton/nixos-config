@@ -21,6 +21,7 @@ in
     ./modules/claude/claude.nix
     ./modules/fish.nix
     ./modules/lan-mouse.nix
+    ./modules/syncthing.nix
   ];
 
   home.stateVersion = "25.05";
