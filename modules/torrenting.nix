@@ -106,9 +106,13 @@ in
 
       BitTorrent.Session = {
         QueueingSystemEnabled = true;
-        MaxActiveDownloads = 20;
-        MaxActiveTorrents = -1;
-        MaxActiveUploads = -1;
+        MaxActiveDownloads = 10;
+        MaxActiveUploads = 10;
+        MaxActiveTorrents = 60;
+        IgnoreSlowTorrentsForQueueing = true;
+        SlowTorrentsDownloadRate = 10; # KiB/s
+        SlowTorrentsUploadRate = 10; # KiB/s
+        SlowTorrentsInactivityTimer = 60;
         DefaultSavePath = downloadPath;
         GlobalDLSpeedLimit = 61035; # KiB/s
         GlobalUPSpeedLimit = 500; # KiB/s
