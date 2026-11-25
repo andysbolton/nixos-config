@@ -175,11 +175,41 @@ return {
     end,
   },
   {
-    "supermaven-inc/supermaven-nvim",
+    "milanglacier/minuet-ai.nvim",
     event = "InsertEnter",
     config = function()
-      require("supermaven-nvim").setup {
-        ignore_filetypes = { ["neo-tree-popup"] = true },
+      local api_key
+      require("minuet").setup {
+        provider = "codestral",
+        provider_options = {
+          codestral = {
+            -- Called on every request, so read the key file once.
+            api_key = function()
+              if not api_key then
+                local file = io.open(vim.fn.expand "~/.config/minuet/codestral-key")
+                api_key = file and vim.trim(file:read "*a") or ""
+                if file then file:close() end
+              end
+              return api_key
+            end,
+            optional = {
+              max_tokens = 256,
+              stop = { "\n\n" },
+            },
+          },
+        },
+        virtualtext = {
+          auto_trigger_ft = { "*" },
+          auto_trigger_ignore_ft = { "neo-tree-popup" },
+          keymap = {
+            accept = "<A-A>",
+            accept_line = "<A-a>",
+            accept_n_lines = "<A-z>",
+            prev = "<A-[>",
+            next = "<A-]>",
+            dismiss = "<A-e>",
+          },
+        },
       }
     end,
   },
