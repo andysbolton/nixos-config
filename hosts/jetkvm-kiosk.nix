@@ -6,6 +6,7 @@ in
   imports = [
     "${modulesPath}/profiles/minimal.nix"
     "${modulesPath}/profiles/qemu-guest.nix"
+    "${modulesPath}/virtualisation/disk-image.nix"
   ];
 
   disabledModules = [ "${modulesPath}/profiles/all-hardware.nix" ];

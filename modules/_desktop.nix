@@ -1,19 +1,28 @@
 {
-  pkgs,
-  lib,
   config,
+  lib,
+  pkgs,
+  inputs,
   ...
 }:
 {
-  imports = [ ./monitors.nix ];
+  imports = [
+    ./_monitors.nix
+    inputs.self.modules.nixos.base
+  ];
 
-  time.timeZone = "America/New_York";
+  boot.plymouth.enable = true;
+
+  time.timeZone = "America/Denver";
 
   i18n.defaultLocale = "en_US.UTF-8";
   console = {
     keyMap = "us";
   };
 
+  stylix.targets.plymouth.colors.enable = true;
+  stylix.targets.limine.enable = true;
+  boot.loader.limine.style.wallpapers = [ config.theme.wallpaper ];
   services.pipewire = {
     enable = true;
     pulse.enable = true;
@@ -40,11 +49,6 @@
 
   services.weechat.enable = true;
 
-  users.users.andy = {
-    isNormalUser = true;
-    shell = pkgs.fish;
-  };
-
   # Real hosts keep andy's password in /etc/shadow; a build-vm guest starts empty.
   virtualisation.vmVariant.users.users = {
     andy.initialPassword = "vm";
@@ -59,10 +63,6 @@
       export WLR_RENDERER=pixman
       export WLR_RENDERER_ALLOW_SOFTWARE=1
     '';
-
-  programs.fish = {
-    enable = true;
-  };
 
   nix.settings.experimental-features = [
     "nix-command"
@@ -145,30 +145,16 @@
     TTYVTDisallocate = true;
   };
 
-  services.openssh.enable = true;
-  services.eternal-terminal.enable = true;
-
   programs._1password.enable = true;
   programs._1password-gui = {
     enable = true;
     polkitPolicyOwners = lib.attrNames (lib.filterAttrs (_: u: u.isNormalUser) config.users.users);
   };
 
-  users.groups.ssh-keys = { };
   users.users.andy.extraGroups = [
-    "ssh-keys"
     "1password"
     "audio"
   ];
-  systemd.tmpfiles.rules = [
-    "f /etc/ssh/ssh_host_ed25519_key 0640 root ssh-keys -"
-  ];
-  services.tailscale.enable = true;
-
-  systemd.services.tailscaled = {
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-  };
 
   services.resolved.enable = true;
 
@@ -182,7 +168,6 @@
       workstation = true;
     };
   };
-  networking.firewall.trustedInterfaces = [ "tailscale0" ];
   services.dbus.enable = true;
   services.blueman.enable = true;
   services.udisks2.enable = true;

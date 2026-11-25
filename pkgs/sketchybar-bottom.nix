@@ -3,7 +3,7 @@
   jq,
   lib,
   macmon,
-  pkgs-unstable,
+  pkgs,
   pngpaste,
   sketchybar,
   writeShellScriptBin,
@@ -15,7 +15,7 @@ writeShellScriptBin "sketchybar-bottom" ''
       jq
       ifstat-legacy
       macmon
-      pkgs-unstable.yabai
+      pkgs.unstable.yabai
       pngpaste
     ]
   }:${placeholder "out"}/bin:$PATH

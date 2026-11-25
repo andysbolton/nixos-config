@@ -1,5 +1,5 @@
 let
-  flake = builtins.getFlake "git+file:///home/andy/nixos-config";
+  flake = builtins.getFlake (toString ./.);
   os = flake.nixosConfigurations.portable;
 in
 {

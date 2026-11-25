@@ -30,41 +30,49 @@ in
 
     generateCompletions = true;
 
-    shellInit = ''
-      fish_vi_key_bindings
-      set fish_cursor_default block blink
-      set fish_cursor_insert line blink
-      set fish_greeting ""
+    shellInit =
+      # fish
+      ''
+        fish_vi_key_bindings
+        set fish_cursor_default block blink
+        set fish_cursor_insert line blink
+        set fish_greeting ""
 
-      # Path additions
-      fish_add_path ~/smartwyre/infra-orchestrator/scripts/util
-      fish_add_path ~/bin
+        # Path additions
+        fish_add_path ~/smartwyre/infra-orchestrator/scripts/util
+        fish_add_path ~/bin
 
-      # Key bindings
-      bind \cS 'history-pager'
-      bind -M insert \cF forward-token
+        # Key bindings
+        bind \cS 'history-pager'
+        bind -M insert \cF forward-token
 
-      # Initialize login shell
-      if status is-login
-        cd ~/
-      end
-    '';
+        bind -M normal yy fish_clipboard_copy
 
-    interactiveShellInit = ''
-      batman --export-env | source
-      # kmscon supports truecolor but sets COLORTERM=kmscon, which apps don't recognise.
-      if test "$COLORTERM" = kmscon
-        set -gx COLORTERM truecolor
-      end
-      ${pkgs.lib.optionalString (
-        osConfig.theme.native.fish != null
-      ) "fish_config theme choose ${osConfig.theme.native.fish}"}
+        bind -M visual -m default y fish_clipboard_copy
 
-      starship init fish | source
-      enable_transience
+        # Initialize login shell
+        if status is-login
+          cd ~/
+        end
+      '';
 
-      fzf_configure_bindings --history=ctrl-r,ctrl-r
-    '';
+    interactiveShellInit =
+      # fish
+      ''
+        batman --export-env | source
+        # kmscon supports truecolor but sets COLORTERM=kmscon, which apps don't recognise.
+        if test "$COLORTERM" = kmscon
+          set -gx COLORTERM truecolor
+        end
+        ${pkgs.lib.optionalString (
+          osConfig.theme.native.fish != null
+        ) "fish_config theme choose ${osConfig.theme.native.fish}"}
+
+        starship init fish | source
+        enable_transience
+
+        fzf_configure_bindings --history=ctrl-r,ctrl-r
+      '';
 
     plugins = [
       {
@@ -79,6 +87,14 @@ in
           set -g fish_sequence_key_delay_ms 200
 
           bind -M insert -m default j,k cancel repaint-mode
+        '';
+      };
+
+      amt-pxe = {
+        argumentNames = [ "host" ];
+        body = ''
+          uvx --from amt amtctrl $host pxeboot
+          and uvx --from amt amtctrl $host reboot
         '';
       };
 

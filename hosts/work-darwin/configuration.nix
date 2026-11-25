@@ -1,18 +1,21 @@
 {
-  pkgs,
-  pkgs-unstable,
-  lib,
   config,
+  inputs,
+  lib,
+  pkgs,
   ...
 }:
 let
-  scripts = pkgs.callPackage ../../pkgs/scripts { inherit (pkgs-unstable) yabai; };
+  scripts = pkgs.callPackage ../../pkgs/scripts { inherit (pkgs.unstable) yabai; };
 in
 {
   imports = [
-    ../../modules/theme.nix
-    ../../modules/optnix.nix
+    ../../modules/_theme.nix
+    ../../modules/_optnix.nix
+    inputs.self.modules.darwin.nixpkgs
   ];
+
+  nixpkgs.hostPlatform.system = "aarch64-darwin";
 
   networking.hostName = "work";
 
@@ -57,10 +60,10 @@ in
 
   programs.fish = {
     enable = true;
-    package = pkgs-unstable.fish;
+    package = pkgs.unstable.fish;
   };
 
-  environment.shells = [ pkgs-unstable.fish ];
+  environment.shells = [ pkgs.unstable.fish ];
 
   documentation.man.enable = true;
 
@@ -213,7 +216,7 @@ in
         let
           sketchybar = "${pkgs.sketchybar}/bin/sketchybar";
           sketchybar_bottom = "${
-            pkgs.callPackage ../../pkgs/sketchybar-bottom.nix { inherit pkgs-unstable; }
+            pkgs.callPackage ../../pkgs/sketchybar-bottom.nix { }
           }/bin/sketchybar-bottom";
           ensureDisplays = pkgs.writeShellScript "ensure-displays" ''
             spaces_per_display=9
@@ -251,7 +254,7 @@ in
         {
           enable = true;
           enableScriptingAddition = true;
-          package = pkgs-unstable.yabai;
+          package = pkgs.unstable.yabai;
           extraConfig =
             # bash
             ''

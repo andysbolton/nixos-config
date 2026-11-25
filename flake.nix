@@ -40,6 +40,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    import-tree.url = "github:denful/import-tree";
+
     flake-parts.url = "github:hercules-ci/flake-parts";
 
     optnix = {
@@ -76,198 +78,149 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    deploy-rs = {
+      url = "github:serokell/deploy-rs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
+
     # firefox-addons = {
     #   url = "gitlab:rycee/nur-expressions?dir=pkgs/firefox-addons";
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
     # nur.url = "github:nix-community/nur";
-
-    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
   };
 
   outputs =
     {
       claude-code,
       disko,
+      flake-parts,
       home-manager,
+      import-tree,
       nix-darwin,
       nix-homebrew,
       nixpkgs,
-      nixpkgs-unstable,
-      nixpkgs-darwin,
-      nixpkgs-unstable-darwin,
       opnix,
       stylix,
       ...
     }@inputs:
-    let
-      overlays = [
-        (final: prev: {
-          _1password-gui =
-            if prev.stdenv.hostPlatform.isDarwin then
-              prev._1password-gui.overrideAttrs (old: {
-                src = old.src.overrideAttrs {
-                  outputHash = "sha256-WrWbGzBK65tVNl9Dc3OnJURiPpfbNLOYUJcVT0ETaAs=";
-                };
-              })
-            else
-              prev._1password-gui;
-          gatherv2 = prev.callPackage ./pkgs/gatherv2.nix { };
-          tokyonight-extras = prev.callPackage ./pkgs/tokyonight-extras.nix { };
-        })
-        claude-code.overlays.default
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      imports = [
+        flake-parts.flakeModules.modules
+        (import-tree ./modules)
       ];
 
-      # macOS 27 offsets + scripting-addition load fix; drop once upstream lands them.
-      unstableOverlays = [
-        (final: prev: {
-          yabai = prev.yabai.overrideAttrs (old: {
-            version = "7.1.26";
-            src = prev.fetchFromGitHub {
-              owner = "VenusCrazy";
-              repo = "yabai";
-              rev = "21a461726cfa84052cae48165f1a46c3b70839fa";
-              hash = "sha256-mr84vr7yXrZe4UBUayaXwmdlozREpmsDWeOmLEz2dPQ=";
+      systems = [
+        "x86_64-linux"
+        "aarch64-darwin"
+      ];
+
+      flake = {
+        nixosConfigurations.main =
+          let
+            extraSpecialArgs = {
+              inherit inputs;
             };
-            patches = (old.patches or [ ]) ++ [ ./pkgs/yabai-osax-seal-order.patch ];
+          in
+          nixpkgs.lib.nixosSystem {
+            specialArgs = extraSpecialArgs;
+            modules = [
+              ./hosts/main/configuration.nix
+              disko.nixosModules.disko
+              home-manager.nixosModules.home-manager
+              inputs.optnix.nixosModules.optnix
+              stylix.nixosModules.stylix
+              {
+                home-manager.users.andy = ./home-manager/linux.nix;
+                home-manager.extraSpecialArgs = extraSpecialArgs;
+                home-manager.useGlobalPkgs = true;
+                home-manager.useUserPackages = false;
+                home-manager.sharedModules = [
+                  opnix.homeManagerModules.default
+                  stylix.homeModules.stylix
+                ];
+              }
+            ];
+          };
 
-            # macOS 27 dyld refuses to dlopen a Mach-O without LC_UUID, which
-            # nixpkgs strips for reproducibility; the scripting addition is
-            # dlopen'd into Dock, so it must keep its UUID.
-            postPatch = (old.postPatch or "") + ''
-              substituteInPlace makefile --replace-fail " -Wl,-no_uuid" ""
-            '';
-          });
-        })
-      ];
+        nixosConfigurations.portable =
+          let
+            extraSpecialArgs = {
+              inherit inputs;
+            };
+          in
+          nixpkgs.lib.nixosSystem {
+            specialArgs = extraSpecialArgs;
+            modules = [
+              ./hosts/portable/configuration.nix
+              disko.nixosModules.disko
+              home-manager.nixosModules.home-manager
+              inputs.optnix.nixosModules.optnix
+              stylix.nixosModules.stylix
+              {
+                home-manager.users.andy = ./home-manager/linux.nix;
+                home-manager.extraSpecialArgs = extraSpecialArgs;
+                home-manager.useGlobalPkgs = true;
+                home-manager.useUserPackages = false;
+                home-manager.sharedModules = [
+                  opnix.homeManagerModules.default
+                  stylix.homeModules.stylix
+                ];
+              }
+            ];
+          };
 
-      isDarwin = system: nixpkgs.lib.hasSuffix "-darwin" system;
-
-      mkPkgs =
-        system:
-        import (if isDarwin system then nixpkgs-darwin else nixpkgs) {
-          inherit system overlays;
-          config.allowUnfree = true;
-        };
-
-      mkUnstablePkgs =
-        system:
-        import (if isDarwin system then nixpkgs-unstable-darwin else nixpkgs-unstable) {
-          inherit system;
-          overlays = unstableOverlays;
-          config.allowUnfree = true;
-        };
-
-      mkKiosk =
-        system:
-        nixpkgs.lib.nixosSystem {
-          inherit system;
+        nixosConfigurations.jetkvm-kiosk-aarch64 = nixpkgs.lib.nixosSystem {
+          system = "aarch64-linux";
           modules = [ ./hosts/jetkvm-kiosk.nix ];
         };
-    in
-    {
-      nixosConfigurations.main =
-        let
+
+        nixosConfigurations.jetkvm-kiosk-x86_64 = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          pkgs = mkPkgs system;
-          extraSpecialArgs = {
-            inherit inputs;
-            pkgs-unstable = mkUnstablePkgs system;
-          };
-        in
-        nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
-          specialArgs = extraSpecialArgs;
-          modules = [
-            ./hosts/main/configuration.nix
-            disko.nixosModules.disko
-            home-manager.nixosModules.home-manager
-            inputs.optnix.nixosModules.optnix
-            stylix.nixosModules.stylix
-            {
-              home-manager.users.andy = ./home-manager/linux.nix;
-              home-manager.extraSpecialArgs = extraSpecialArgs;
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = false;
-              home-manager.sharedModules = [
-                opnix.homeManagerModules.default
-                stylix.homeModules.stylix
-              ];
-            }
-          ];
+          modules = [ ./hosts/jetkvm-kiosk.nix ];
         };
 
-      nixosConfigurations.portable =
-        let
+        nixosConfigurations.netboot = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          pkgs = mkPkgs system;
-          extraSpecialArgs = {
-            inherit inputs;
-            pkgs-unstable = mkUnstablePkgs system;
-          };
-        in
-        nixpkgs.lib.nixosSystem {
-          inherit system pkgs;
-          specialArgs = extraSpecialArgs;
-          modules = [
-            ./hosts/portable/configuration.nix
-            disko.nixosModules.disko
-            home-manager.nixosModules.home-manager
-            inputs.optnix.nixosModules.optnix
-            stylix.nixosModules.stylix
-            {
-              home-manager.users.andy = ./home-manager/linux.nix;
-              home-manager.extraSpecialArgs = extraSpecialArgs;
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = false;
-              home-manager.sharedModules = [
-                opnix.homeManagerModules.default
-                stylix.homeModules.stylix
-              ];
-            }
-          ];
+          specialArgs = { inherit inputs; };
+          modules = [ ./hosts/netboot.nix ];
         };
 
-      nixosConfigurations.jetkvm-kiosk-aarch64 = mkKiosk "aarch64-linux";
-      nixosConfigurations.jetkvm-kiosk-x86_64 = mkKiosk "x86_64-linux";
-
-      darwinConfigurations.work-darwin =
-        let
-          system = "aarch64-darwin";
-          pkgs = mkPkgs system;
-          extraSpecialArgs = {
-            inherit inputs;
-            pkgs-unstable = mkUnstablePkgs system;
+        darwinConfigurations.work-darwin =
+          let
+            extraSpecialArgs = {
+              inherit inputs;
+            };
+          in
+          nix-darwin.lib.darwinSystem {
+            specialArgs = extraSpecialArgs;
+            modules = [
+              ./hosts/work-darwin/configuration.nix
+              home-manager.darwinModules.home-manager
+              inputs.optnix.darwinModules.optnix
+              stylix.darwinModules.stylix
+              {
+                home-manager.users.andybolton = ./home-manager/darwin.nix;
+                home-manager.extraSpecialArgs = extraSpecialArgs;
+                home-manager.useGlobalPkgs = true;
+                home-manager.useUserPackages = false;
+                home-manager.sharedModules = [
+                  opnix.homeManagerModules.default
+                  stylix.homeModules.stylix
+                ];
+              }
+              nix-homebrew.darwinModules.nix-homebrew
+              {
+                nix-homebrew = {
+                  enable = true;
+                  enableRosetta = false;
+                  user = "andybolton";
+                };
+              }
+            ];
           };
-        in
-        nix-darwin.lib.darwinSystem {
-          inherit system pkgs;
-          specialArgs = extraSpecialArgs;
-          modules = [
-            ./hosts/work-darwin/configuration.nix
-            home-manager.darwinModules.home-manager
-            inputs.optnix.darwinModules.optnix
-            stylix.darwinModules.stylix
-            {
-              home-manager.users.andybolton = ./home-manager/darwin.nix;
-              home-manager.extraSpecialArgs = extraSpecialArgs;
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = false;
-              home-manager.sharedModules = [
-                opnix.homeManagerModules.default
-                stylix.homeModules.stylix
-              ];
-            }
-            nix-homebrew.darwinModules.nix-homebrew
-            {
-              nix-homebrew = {
-                enable = true;
-                enableRosetta = false;
-                user = "andybolton";
-              };
-            }
-          ];
-        };
-
+      };
     };
 }

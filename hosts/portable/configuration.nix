@@ -8,12 +8,12 @@
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
-    ../../modules/theme.nix
-    ../../modules/optnix.nix
-    ../../modules/desktop.nix
-    ../../modules/steam.nix
-    ../../modules/vpn.nix
-    ../../modules/wireless.nix
+    ../../modules/_theme.nix
+    ../../modules/_optnix.nix
+    ../../modules/_desktop.nix
+    ../../modules/_steam.nix
+    ../../modules/_vpn.nix
+    ../../modules/_wireless.nix
     inputs.sops-nix.nixosModules.sops
   ];
 
@@ -22,21 +22,9 @@
     HDMI-A-1.rightOf = "eDP-1";
   };
 
-  boot = {
-    # i915 taking over the framebuffer resets the console font, so set the font after it loads.
-    initrd.kernelModules = [ "i915" ];
-    initrd.systemd.services.systemd-vconsole-setup.after = [ "systemd-modules-load.service" ];
-    loader = {
-      limine = {
-        enable = true;
-        maxGenerations = 10;
-        style.wallpapers = [ config.theme.wallpaper ];
-      };
-      efi.canTouchEfiVariables = true;
-    };
-  };
-
-  stylix.targets.limine.enable = true;
+  # i915 taking over the framebuffer resets the console font, so set the font after it loads.
+  boot.initrd.kernelModules = [ "i915" ];
+  boot.initrd.systemd.services.systemd-vconsole-setup.after = [ "systemd-modules-load.service" ];
 
   users.users.andy.extraGroups = [
     "wheel"
@@ -78,7 +66,7 @@
         ssid = "LDWP_5G";
         pskRaw = "ext:psk_dougie";
       }
-      # gl
+      # gl (router)
       {
         ssid = "GL-MT3000-4f3-5G";
         pskRaw = "ext:psk_gl";
@@ -89,11 +77,18 @@
       {
         ssid = "Amtrak_WiFi";
       }
+      {
+        ssid = "RIC"; # RVA airport
+      }
+      {
+        ssid = "- DEN Airport Free WiFi";
+      }
     ];
   };
 
   environment.systemPackages = with pkgs; [
     moonlight-qt
+    nixos-anywhere
     waypipe
     (writeShellScriptBin "stream-main" ''
       exec ${moonlight-qt}/bin/moonlight stream \
@@ -152,12 +147,10 @@
     };
   };
 
+  services.meshcentral.enable = true;
+
   networking = {
     hostName = "portable";
-    firewall = {
-      allowedUDPPorts = [ config.services.tailscale.port ];
-      trustedInterfaces = [ "tailscale0" ];
-    };
   };
 
   system.stateVersion = "26.05";

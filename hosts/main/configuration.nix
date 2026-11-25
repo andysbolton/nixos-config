@@ -8,26 +8,22 @@
   imports = [
     ./hardware-configuration.nix
     ./disko.nix
-    ../../modules/theme.nix
-    ../../modules/optnix.nix
-    ../../modules/desktop.nix
-    ../../modules/nvidia4070.nix
-    ../../modules/arrs.nix
-    ../../modules/recyclarr.nix
-    ../../modules/tailnet-bridge.nix
-    ../../modules/torrenting.nix
-    ../../modules/steam.nix
-    ../../modules/vpn.nix
-    ../../modules/wireless.nix
-    ../../modules/monitoring
-    ../../modules/uplink-shaping.nix
+    ../../modules/_theme.nix
+    ../../modules/_optnix.nix
+    ../../modules/_desktop.nix
+    ../../modules/_nvidia4070.nix
+    ../../modules/_arrs.nix
+    ../../modules/_recyclarr.nix
+    ../../modules/_tailnet-bridge.nix
+    ../../modules/_torrenting.nix
+    ../../modules/_steam.nix
+    ../../modules/_vpn.nix
+    ../../modules/_wireless.nix
+    ../../modules/_monitoring
+    ../../modules/_uplink-shaping.nix
     inputs.sops-nix.nixosModules.sops
     # inputs.wayland-pipewire-idle-inhibit.nixosModules.default
   ];
-
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
 
   boot.kernelPackages = pkgs.linuxPackages_zen;
   boot.extraModulePackages = [
