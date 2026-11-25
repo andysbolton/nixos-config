@@ -1,85 +1,117 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "$EUID" -ne 0 ]; then
-  echo "This script must be run as root (sudo ./install.sh)"
-  exit 1
-fi
-
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
-HOST="${1:-}"
+host_dir=""
+host=""
+sops=false
+target=""
 
-if [ -z "$HOST" ]; then
-  mapfile -t hosts < <(ls -1 "$repo_dir/hosts/")
-  PS3="Select host to install: "
-  select HOST in "${hosts[@]}"; do
-    [ -n "$HOST" ] && break
-  done
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --target)
+    if [ -z "${2:-}" ]; then
+      echo "--target needs a value, e.g. --target 192.168.1.155" >&2
+      exit 1
+    fi
+    target="$2"
+    shift 2
+    ;;
+  --dir)
+    if [ -z "${2:-}" ]; then
+      echo "--dir needs a value." >&2
+      exit 1
+    fi
+    host_dir="$(basename "$2")"
+    shift 2
+    ;;
+  --sops)
+    sops=true
+    shift 1
+    ;;
+  *)
+    host="$1"
+    shift
+    ;;
+  esac
+done
+
+if [ -z "$host_dir" ]; then
+  host_dir="$host"
 fi
 
-if [ ! -d "$repo_dir/hosts/$HOST" ]; then
-  echo "Unknown host: $HOST"
+if [ -n "$target" ]; then
+  mode=remote
+  if [ "$EUID" -eq 0 ]; then
+    echo "Remote mode runs on your own machine; don't run it as root" >&2
+    exit 1
+  fi
+else
+  mode=local
+  if [ "$EUID" -ne 0 ]; then
+    echo "Local mode must be run as root (sudo ./install.sh)" >&2
+    exit 1
+  fi
+fi
+
+if [ -z "$host" ] || ! [ -d "$repo_dir/hosts/$host_dir" ]; then
+  echo "Unknown host. Check out the hosts/ folder for options." >&2
   exit 1
 fi
 
-echo "Generating hardware configuration..."
-nixos-generate-config --no-filesystems --show-hardware-config \
-  >"$repo_dir/hosts/$HOST/hardware-configuration.nix"
+function local_install() {
+  echo "Generating hardware configuration..."
+  nixos-generate-config --no-filesystems --show-hardware-config \
+    >"$repo_dir/hosts/$host_dir/hardware-configuration.nix"
 
-echo "Partitioning and mounting disk..."
-nix --experimental-features "nix-command flakes" \
-  run "github:nix-community/disko#disko" -- \
-  --mode disko \
-  --flake "$repo_dir#$HOST"
+  chown -R "$SUDO_USER": "$repo_dir/hosts/$host_dir"
+  sudo -u "$SUDO_USER" git -C "$repo_dir" add "$repo_dir/hosts/$host_dir/"
 
-SOPS_FILE="$repo_dir/secrets/$HOST.yaml"
-SOPS_YAML="$repo_dir/.sops.yaml"
+  echo "Partitioning and mounting disk..."
+  nix --experimental-features "nix-command flakes pipe-operators" \
+    run "github:nix-community/disko#disko" -- \
+    --mode disko \
+    --flake "$repo_dir#$host"
 
-PERSONAL_AGE=$(grep -oE 'age1[0-9a-z]+' "$SOPS_YAML" | head -1)
-if [ -z "$PERSONAL_AGE" ]; then
-  echo "ERROR: no age key found in $SOPS_YAML"
-  exit 1
+  cp -a "$stage"/. /mnt
+
+  echo "Installing NixOS..."
+  nixos-install \
+    --root /mnt \
+    --flake "$repo_dir#$host" \
+    --no-root-password
+}
+
+function remote_install() {
+  nixos-anywhere \
+    --generate-hardware-config nixos-generate-config "$repo_dir"/hosts/"$host_dir"/hardware-configuration.nix \
+    --extra-files "$stage" \
+    --flake "$repo_dir#$host" root@"$target"
+
+  git add "$repo_dir/hosts/$host_dir"
+}
+
+echo "Installing '$host' ($mode${target:+ to $target})"
+
+stage=$(mktemp -d)
+trap 'rm -rf "$stage"' EXIT
+chmod 755 "$stage"
+
+if [ "$sops" = true ]; then
+  echo "Pre-generating SSH host key..."
+
+  ssh_dir=$stage/etc/ssh
+  keys_dir="$repo_dir/hosts/$host_dir/keys"
+
+  install -d -m 755 "$ssh_dir"
+  ssh-keygen -q -t ed25519 -f "$ssh_dir/ssh_host_ed25519_key" -N "" -C "" </dev/null
+  mkdir -p "$keys_dir"
+  nix --experimental-features "nix-command flakes" run nixpkgs#ssh-to-age -- <"$ssh_dir/ssh_host_ed25519_key.pub" >"$keys_dir/age.pub"
 fi
 
-echo "Pre-generating SSH host key..."
-mkdir -p /mnt/etc/ssh
-ssh-keygen -q -t ed25519 -f /mnt/etc/ssh/ssh_host_ed25519_key -N "" -C "" </dev/null
-
-HOST_AGE=$(nix-shell -p ssh-to-age --run "ssh-to-age < /mnt/etc/ssh/ssh_host_ed25519_key.pub")
-
-cat >>"$SOPS_YAML" <<EOF
-  - path_regex: secrets/${HOST}\.yaml\$
-    key_groups:
-      - age:
-          - $PERSONAL_AGE
-          - $HOST_AGE
-EOF
-
-read -rsp "WiFi PSK: " WIFI_PSK
-echo
-
-printf 'wireless.conf: "psk=%s"\n' "$WIFI_PSK" \
-  | nix-shell -p sops --run \
-      "sops --age '$PERSONAL_AGE,$HOST_AGE' --encrypt --input-type yaml --output-type yaml --filename-override '$SOPS_FILE' /dev/stdin" \
-  >"$SOPS_FILE"
-echo "Created $SOPS_FILE"
-sudo -u "$SUDO_USER" git -C "$repo_dir" add "$SOPS_YAML" "$SOPS_FILE"
-
-sudo -u "$SUDO_USER" git -C "$repo_dir" add "$repo_dir/hosts/$HOST/hardware-configuration.nix"
-
-echo "Installing NixOS..."
-nixos-install \
-  --root /mnt \
-  --flake "$repo_dir#$HOST" \
-  --no-root-password
-
-nixos-enter --command "echo 'Set password for andy:' && passwd andy"
-
-cp -r "$repo_dir" /mnt/home/andy/nixos-config
-nixos-enter --command "chown -R andy:users /home/andy/nixos-config"
-
-echo
-echo "Installation complete. Remember to commit the staged files on reboot."
-echo "To provision 1Password secrets, run after reboot:"
-echo "  mkdir -p ~/.config/opnix && op signin && op item get service-account --field password --reveal > ~/.config/opnix/token && chmod 600 ~/.config/opnix/token"
+if [ "$mode" == "remote" ]; then
+  remote_install
+else
+  local_install
+fi

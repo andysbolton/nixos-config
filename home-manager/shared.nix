@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  pkgs-unstable,
   inputs,
   osConfig,
   ...
@@ -22,6 +21,8 @@ in
     ./modules/fish.nix
     ./modules/lan-mouse.nix
     ./modules/syncthing.nix
+    inputs.self.modules.homeManager.sops-config
+    inputs.self.modules.homeManager.fleet-ssh
   ];
 
   home.stateVersion = "25.05";
@@ -31,7 +32,7 @@ in
   home.activation.authorizedKeys =
     let
       keysFile = pkgs.writeText "authorized_keys" ''
-        ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK3wN9/LQcWF0pun3XaCnRfNnIiMbJlCxG2tZl3n9I3c andy-ed25519
+        ${builtins.readFile ../keys/andy-ed25519.pub}
       '';
     in
     lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -89,6 +90,7 @@ in
     bat-extras.core
     delta # syntax-highlighting pager for git diff output
     dig # DNS lookup tool
+    deploy-rs
     docker-compose
     dotnetSdks
     entr # run commands on file change
@@ -118,8 +120,8 @@ in
     nixfmt
     nodejs_24 # Node.js runtime — npx for MCP servers & general tooling
     ookla-speedtest
-    pkgs-unstable.gh
-    pkgs-unstable.opencode
+    unstable.gh
+    unstable.opencode
     postgresql
     procs # modern ps replacement
     python314
@@ -268,28 +270,24 @@ in
         TCPKeepAlive yes
       '';
       settings = {
-        "*" = { };
-        main = {
-          hostname = "main.tail4b1b78.ts.net";
+        "*" = {
           user = "andy";
           identityfile = "~/.ssh/id_ed25519";
         };
+        main = {
+          hostname = "main.tail4b1b78.ts.net";
+        };
         portable = {
           hostname = "portable.tail4b1b78.ts.net";
-          user = "andy";
-          identityfile = "~/.ssh/id_ed25519";
         };
         work = {
           hostname = "work.tail4b1b78.ts.net";
           user = "andybolton";
-          identityfile = "~/.ssh/id_ed25519";
         };
         jetkvm = {
           hostname = "jetkvm.tail4b1b78.ts.net";
           user = "root";
-          identityfile = "~/.ssh/id_ed25519";
         };
-
       };
     };
     onepassword-secrets = {
@@ -325,6 +323,11 @@ in
         sshConfig = {
           reference = "op://nix/SSH Config/notesPlain";
           path = ".ssh/config.local";
+          mode = "0600";
+        };
+        codestralKey = {
+          reference = "op://nix/codestral/credential";
+          path = ".config/minuet/codestral-key";
           mode = "0600";
         };
       };

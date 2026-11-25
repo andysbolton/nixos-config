@@ -1,4 +1,4 @@
-{ config, pkgs-unstable, ... }:
+{ config, pkgs, ... }:
 {
   # Load nvidia driver for Xorg and Wayland
   services.xserver.videoDrivers = [ "nvidia" ];
@@ -14,7 +14,7 @@
       powerManagement.finegrained = false;
       open = true;
       nvidiaSettings = true;
-      package = (pkgs-unstable.linuxPackagesFor config.boot.kernelPackages.kernel).nvidiaPackages.latest;
+      package = (pkgs.unstable.linuxPackagesFor config.boot.kernelPackages.kernel).nvidiaPackages.latest;
     };
 
     bluetooth = {

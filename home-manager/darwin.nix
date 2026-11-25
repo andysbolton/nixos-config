@@ -2,12 +2,11 @@
   config,
   lib,
   pkgs,
-  pkgs-unstable,
   osConfig,
   ...
 }:
 let
-  sketchybarBottom = pkgs.callPackage ../pkgs/sketchybar-bottom.nix { inherit pkgs-unstable; };
+  sketchybarBottom = pkgs.callPackage ../pkgs/sketchybar-bottom.nix { };
 
   azureCli = pkgs.azure-cli.withExtensions (
     with pkgs.azure-cli-extensions;
@@ -21,7 +20,7 @@ let
   );
 
   scripts = pkgs.callPackage ../pkgs/scripts {
-    inherit (pkgs-unstable) yabai;
+    inherit (pkgs.unstable) yabai;
     inherit azureCli;
   };
 
@@ -206,7 +205,7 @@ in
     enable = true;
     includeSystemPath = true;
     extraPackages = [
-      pkgs-unstable.yabai
+      pkgs.unstable.yabai
       pkgs.entr
       pkgs.ifstat-legacy
       pkgs.jq

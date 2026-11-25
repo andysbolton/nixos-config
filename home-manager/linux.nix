@@ -43,7 +43,9 @@ in
     mangohud
     moor # pager
     mpv # command-line media player
+    nix-diff
     nmap
+    nvd # diff nix store paths
     pinta # image editor
     reaper
     shotwell # image viewer
@@ -73,7 +75,7 @@ in
 
   home.sessionVariables = {
     PODMAN_COMPOSE_WARNING_LOGS = "false";
-    SOPS_AGE_SSH_PRIVATE_KEY_FILE = "/etc/ssh/ssh_host_ed25519_key";
+    SOPS_AGE_SSH_PRIVATE_KEY_FILE = "${config.home.homeDirectory}/.ssh/id_ed25519";
   };
 
   systemd.user.sessionVariables = {

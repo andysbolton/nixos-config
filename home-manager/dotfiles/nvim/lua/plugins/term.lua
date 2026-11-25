@@ -26,9 +26,9 @@ return {
       vim.api.nvim_create_autocmd("TermOpen", {
         pattern = "*",
         callback = function(args)
-          vim.opt_local.timeoutlen = 200
           vim.keymap.set("t", "<M-j>", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
           vim.keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
+          vim.keymap.set("t", "jkjk", [[<C-\><C-n>]], { buffer = args.buf, silent = true })
         end,
       })
 
